@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* Override default text color */
+@layer base {
+  body {
+    @apply text-white;
+  }
+}

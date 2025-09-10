@@ -1,0 +1,28 @@
+{
+  "name": "search",
+  "version": "1.0.0",
+  "description": "search microservice for neurovault",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "tsup src/index.ts --watch --onSuccess \"node dist/index.cjs\"",
+    "build": "tsup",
+    "lint": "eslint src/ --max-warnings 0"
+  },
+  "devDependencies": {
+    "@neurovault/eslint-config": "*",
+    "@neurovault/typescript-config": "*",
+    "@neurovault/utils": "*",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@qdrant/js-client-rest": "^1.15.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0"
+  }
+}
