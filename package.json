@@ -1,5 +1,5 @@
 {
-  "name": "Neurovault",
+  "name": "neurovault",
   "private": true,
   "scripts": {
     "build": "turbo run build",
@@ -20,5 +20,10 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
 }
