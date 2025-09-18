@@ -104,6 +104,7 @@ export const getFolderTree = async (req: Request, res: Response) => {
   if (!parentId) {
     // Top-level → wrap in "root"
     return res.json({
+      _id: "1",
       name: "root",
       type: "folder",
       children: formattedChildren,

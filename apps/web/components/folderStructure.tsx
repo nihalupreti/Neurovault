@@ -1,9 +1,8 @@
 "use client";
 
 import { ChevronDown, ChevronRight, File, Folder } from "lucide-react";
-import { FC, useEffect, useState } from "react";
 
-import axios from "axios";
+import { useState } from "react";
 
 type TFiles = {
   _id: string;
@@ -19,13 +18,13 @@ type EntryProps = {
   onFileSelect: (fileId: string) => void; // callback for file clicks
 };
 
-const FolderStructure: FC<EntryProps> = ({
+export default function FolderStructure({
   entry,
   depth,
   onExpand,
   onFileSelect,
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+}: EntryProps) {
+  const [isExpanded, setIsExpanded] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClick = async () => {
@@ -93,71 +92,6 @@ const FolderStructure: FC<EntryProps> = ({
           ))}
         </div>
       )}
-    </div>
-  );
-};
-
-type FolderTreeProps = {
-  onFileSelect: (fileId: string) => void;
-};
-
-export default function FolderTree({ onFileSelect }: FolderTreeProps) {
-  const [root, setRoot] = useState<TFiles | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchRoot() {
-      try {
-        setLoading(true);
-        const res = await axios.get("http://localhost:3002/api/folder");
-        setRoot(res.data);
-      } catch (err) {
-        console.error("Failed to fetch root folder", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchRoot();
-  }, []);
-
-  const handleExpand = async (id: string) => {
-    if (!root) return;
-
-    try {
-      const res = await axios.get(
-        `http://localhost:3002/api/folder?parentId=${id}`
-      );
-      const newChildren: TFiles[] = res.data.children || [];
-
-      const updateNode = (node: TFiles): TFiles => {
-        if (node._id === id) return { ...node, children: newChildren };
-        if (node.children)
-          return { ...node, children: node.children.map(updateNode) };
-        return node;
-      };
-
-      setRoot(updateNode(root));
-    } catch (err) {
-      console.error("Failed to fetch children", err);
-    }
-  };
-
-  if (loading) return <div>Loading folder structure...</div>;
-  if (!root) return <div>No folder structure found</div>;
-
-  return (
-    <div>
-      <div className="py-4 border-b border-gray-200 rounded-t-lg">
-        <h3 className="text-lg font-semibold">Folder Structure</h3>
-      </div>
-      <div className="p-4">
-        <FolderStructure
-          entry={root}
-          depth={0}
-          onExpand={handleExpand}
-          onFileSelect={onFileSelect}
-        />
-      </div>
     </div>
   );
 }

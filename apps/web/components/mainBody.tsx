@@ -1,6 +1,6 @@
 "use client";
 
-import FolderTree from "@/components/folderStructure";
+import FolderTree from "./folderTree";
 import MarkdownViewer from "@/components/markdownViewer";
 import TableOfContents from "@/components/toc";
 import axios from "axios";
@@ -25,7 +25,7 @@ export default function MainBody() {
   return (
     <div className="flex px-70">
       {/* Sidebar */}
-      <aside className="w-1/5 sticky top-24 h-screen">
+      <aside className="w-1/5 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
         <FolderTree onFileSelect={handleFileClick} />
       </aside>
 
@@ -35,7 +35,7 @@ export default function MainBody() {
       </main>
 
       {/* Navigation */}
-      <aside className="w-1/5 p-4 sticky top-24 h-screen overflow-y-auto">
+      <aside className="w-1/5 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
         <h1 className="font-mono uppercase font-medium text-gray-500">
           On this page
         </h1>
