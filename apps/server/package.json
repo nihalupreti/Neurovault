@@ -1,0 +1,34 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "neurovault monolith server",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "dev": "tsup --watch --onSuccess \"node dist/index.cjs\"",
+    "build": "tsup",
+    "lint": "eslint src/ --max-warnings 0"
+  },
+  "devDependencies": {
+    "@neurovault/eslint-config": "*",
+    "@neurovault/typescript-config": "*",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/mongoose": "^5.11.96",
+    "@types/multer": "^2.0.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.72",
+    "@langchain/textsplitters": "^0.1.0",
+    "@neurovault/config": "*",
+    "@neurovault/utils": "*",
+    "@qdrant/js-client-rest": "^1.15.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^5.1.0",
+    "mongoose": "^8.18.1",
+    "multer": "^2.0.2"
+  }
+}

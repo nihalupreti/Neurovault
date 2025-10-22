@@ -36,7 +36,8 @@ export default function UploadModal({ isOpen, onClose, target }: ModalProps) {
     const files = e.target.files;
     if (!files) return;
 
-    const endpoint = target === "file" ? "/upload/file" : "/upload/folder";
+    const endpoint =
+      target === "file" ? "/file/upload/file" : "/file/upload/folder";
 
     const formData = new FormData();
 

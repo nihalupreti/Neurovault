@@ -1,5 +1,6 @@
 import "./globals.css";
 
+import { HighlightProvider } from "@/contexts/HighlightContext";
 import type { Metadata } from "next";
 import { QueryClientProvider } from "@tanstack/react-query";
 import localFont from "next/font/local";
@@ -30,7 +31,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} bg-gray-900`}
       >
         <QueryClientProvider client={queryClient}>
-          {children}
+          <HighlightProvider>{children}</HighlightProvider>
         </QueryClientProvider>
       </body>
     </html>

@@ -5,9 +5,14 @@ import { useEffect, useRef, useState } from "react";
 import SearchModal from "./searchModal";
 import { createPortal } from "react-dom";
 
-export default function SearchBar() {
+export default function SearchBar(onResultClick) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -61,13 +66,15 @@ export default function SearchBar() {
         </div>
       </form>
 
-      {createPortal(
-        <SearchModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />,
-        document.body
-      )}
+      {isMounted &&
+        createPortal(
+          <SearchModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onResultClick={onResultClick}
+          />,
+          document.body
+        )}
     </>
   );
 }

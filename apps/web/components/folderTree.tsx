@@ -26,14 +26,14 @@ export default function FolderTree({ onFileSelect }: FolderTreeProps) {
     data: root,
   } = useQuery({
     queryKey: ["folder-tree", "root"],
-    queryFn: () => getData({ endPoint: "/folder" }),
+    queryFn: () => getData({ endPoint: "/file/folder" }),
     staleTime: Infinity,
   });
 
   // Expand children on demand
   const handleExpand = async (id: string) => {
     try {
-      const res = await getData({ endPoint: `/folder?parentId=${id}` });
+      const res = await getData({ endPoint: `/file/folder?parentId=${id}` });
       const newChildren: TFiles[] = res.children || [];
 
       queryClient.setQueryData(["folder-tree", "root"], (oldRoot: TFiles) => {
