@@ -15,7 +15,7 @@ type EntryProps = {
   entry: TFiles;
   depth: number;
   onExpand: (id: string) => void;
-  onFileSelect: (fileId: string) => void; // callback for file clicks
+  onFileSelect: (fileId: string) => void;
 };
 
 export default function FolderStructure({

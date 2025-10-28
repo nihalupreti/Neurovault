@@ -21,9 +21,7 @@
     "apps/*",
     "packages/*"
   ],
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^5.1.0",
-    "multer": "^2.0.2"
+  "optionalDependencies": {
+    "@esbuild/win32-x64": "0.25.9"
   }
 }

@@ -1,0 +1,11 @@
+{
+  "name": "@neurovault/config",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "types": "index.ts",
+  "private": true,
+  "dependencies": {
+    "@qdrant/js-client-rest": "^1.15.1",
+    "mongoose": "^8.18.1"
+  }
+}

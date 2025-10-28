@@ -1,49 +1,70 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import FolderTree from "./folderTree";
 import MarkdownViewer from "@/components/markdownViewer";
 import TableOfContents from "@/components/toc";
 import axios from "axios";
 import { extractHeadings } from "@/utils/extractHeadings";
-import { useState } from "react";
+import { useHighlight } from "@/contexts/HighlightContext";
 
 export default function MainBody() {
   const [markdown, setMarkdown] = useState("");
+  const { highlightText, currentFileId, clearHighlight } = useHighlight();
 
-  // Callback to handle file clicks in FolderTree
   const handleFileClick = async (fileId: string) => {
     try {
       const res = await axios.get(
-        `http://localhost:3002/api/file?id=${fileId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/file/?id=${fileId}`
       );
       setMarkdown(res.data);
+      clearHighlight(); // clears highlight when manually clicking files
     } catch (err) {
       console.error("Failed to fetch markdown:", err);
     }
   };
 
+  useEffect(() => {
+    if (currentFileId && highlightText) {
+      const loadFile = async () => {
+        try {
+          const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/file/?id=${currentFileId}`
+          );
+          setMarkdown(res.data);
+        } catch (err) {
+          console.error("Failed to fetch markdown:", err);
+        }
+      };
+      loadFile();
+    }
+  }, [currentFileId, highlightText]);
+
   return (
-    <div className="flex px-70">
-      {/* Sidebar */}
-      <aside className="w-1/5 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
-        <FolderTree onFileSelect={handleFileClick} />
-      </aside>
+    <>
+      <div className="flex px-70">
+        {/* Sidebar */}
+        <aside className="w-1/5 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
+          <FolderTree onFileSelect={handleFileClick} />
+        </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 p-4 max-w-3xl mx-auto prose prose-invert prose-neutral text-justify">
-        <MarkdownViewer markdown={markdown} />
-      </main>
+        {/* Main Content */}
+        <main className="flex-1 p-4 max-w-3xl mx-auto prose prose-invert prose-neutral text-justify">
+          <MarkdownViewer markdown={markdown} highlightText={highlightText} />
+        </main>
 
-      {/* Navigation */}
-      <aside className="w-1/5 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
-        <h1 className="font-mono uppercase font-medium text-gray-500">
-          On this page
-        </h1>
+        {/* Navigation */}
+        <aside className="w-1/5 sticky top-24 h-[calc(100vh-6rem)] overflow-y-auto">
+          <h1 className="font-mono uppercase font-medium text-gray-500">
+            On this page
+          </h1>
 
-        <nav className="border-l border-gray-700 text-sm text-gray-400 mt-4">
-          <TableOfContents headings={extractHeadings(markdown)} />
-        </nav>
-      </aside>
-    </div>
+          <nav className="border-l border-gray-700 text-sm text-gray-400 mt-4">
+            <TableOfContents headings={extractHeadings(markdown)} />
+          </nav>
+        </aside>
+      </div>
+    </>
   );
 }

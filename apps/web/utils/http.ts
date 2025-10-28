@@ -41,8 +41,7 @@ export async function uploadFiles({
 
 export async function getData({ endPoint }: { endPoint: string }) {
   const response = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}${endPoint}`,
-    { withCredentials: true }
+    `${process.env.NEXT_PUBLIC_API_URL}${endPoint}`
   );
   return response.data;
 }
