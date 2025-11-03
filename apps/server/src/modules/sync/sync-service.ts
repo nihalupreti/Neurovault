@@ -7,6 +7,7 @@ import {
   type FileWrite,
 } from "./git-storage.js";
 import { runIndexPipeline } from "./index-pipeline.js";
+import { notifyVaultChanged } from "./ws-manager.js";
 import { Vault, ConflictRecord } from "./models.js";
 import type { VaultDoc } from "./models.js";
 
@@ -122,6 +123,7 @@ export async function pushChanges(
           commitSha = await applyChanges(dir, nonConflicting);
         }
 
+        notifyVaultChanged(vault._id.toString(), commitSha);
         return { commitSha, conflicts };
       }
     }
@@ -140,6 +142,7 @@ export async function pushChanges(
       exclude
     ).catch((err) => console.error("Index pipeline error:", err));
 
+    notifyVaultChanged(vault._id.toString(), commitSha);
     return { commitSha };
   });
 }
