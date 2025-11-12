@@ -9,9 +9,11 @@
     "start": "node dist/index.cjs"
   },
   "dependencies": {
-    "chokidar": "^4.0.0"
+    "chokidar": "^4.0.0",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
+    "@types/ws": "^8.18.1",
     "tsup": "^8.5.0",
     "typescript": "^5.9.0"
   }
