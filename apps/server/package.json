@@ -38,6 +38,7 @@
     "micromatch": "^4.0.8",
     "mongoose": "^8.18.1",
     "multer": "^2.0.2",
+    "neo4j-driver": "^6.0.1",
     "node-diff3": "^3.2.0",
     "openai": "^6.34.0",
     "uuid": "^10.0.0",
