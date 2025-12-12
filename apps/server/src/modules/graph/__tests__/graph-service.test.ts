@@ -10,6 +10,9 @@ vi.mock("@neurovault/config", () => ({
     session: vi.fn().mockReturnValue({
       run: mockRun,
       close: mockClose,
+      executeWrite: vi.fn().mockImplementation(async (fn: any) => {
+        await fn({ run: mockRun });
+      }),
     }),
   }),
 }));
