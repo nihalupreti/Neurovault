@@ -10,22 +10,16 @@ interface SearchTip {
 const searchTips: SearchTip[] = [
   {
     prefix: "!file:",
-    description: "Search for files",
-    example: "!file:shells",
+    description: "Search by filename",
+    example: "!file:newton",
     color: "text-blue-400",
   },
   {
     prefix: "!semantic:",
-    description: "Perform semantic search",
+    description: "Search by meaning",
     example: "!semantic:react hooks example",
     color: "text-green-400",
     isDefault: true,
-  },
-  {
-    prefix: "!tags:",
-    description: "Search within specific tags",
-    example: "!tags:react !semantic:example",
-    color: "text-purple-400",
   },
 ];
 
@@ -55,10 +49,11 @@ export default function SearchTips() {
 
       <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
         <p className="text-blue-300 text-xs">
-          <strong>Pro tip:</strong> You can combine multiple search types, e.g.,
+          <strong>Pro tip:</strong> Combine operators to narrow results, e.g.,
           <code className="mx-1 px-1 py-0.5 bg-blue-500/20 rounded text-blue-300">
-            !tags:react !semantic:hooks example
+            !file:lecture !semantic:derivatives
           </code>
+          searches for &quot;derivatives&quot; only in files matching &quot;lecture&quot;
         </p>
       </div>
     </div>
