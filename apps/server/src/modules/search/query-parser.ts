@@ -1,6 +1,8 @@
 export interface ParsedQuery {
   file?: string;
   semantic?: string;
+  keyword?: string;
+  hybrid?: string;
 }
 
 export function parseSearchQuery(raw: string): ParsedQuery {
@@ -9,7 +11,7 @@ export function parseSearchQuery(raw: string): ParsedQuery {
 
   const hasPrefix = /![\w]+:/.test(trimmed);
   if (!hasPrefix) {
-    return { semantic: trimmed };
+    return { hybrid: trimmed };
   }
 
   const result: ParsedQuery = {};
@@ -34,6 +36,8 @@ export function parseSearchQuery(raw: string): ParsedQuery {
       result.file = value;
     } else if (curr.prefix === "!semantic:" && value) {
       result.semantic = value;
+    } else if (curr.prefix === "!keyword:" && value) {
+      result.keyword = value;
     }
   }
 
