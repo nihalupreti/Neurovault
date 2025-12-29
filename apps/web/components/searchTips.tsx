@@ -15,11 +15,16 @@ const searchTips: SearchTip[] = [
     color: "text-blue-400",
   },
   {
+    prefix: "!keyword:",
+    description: "Exact keyword match",
+    example: "!keyword:useState",
+    color: "text-yellow-400",
+  },
+  {
     prefix: "!semantic:",
-    description: "Search by meaning",
+    description: "Search by meaning only",
     example: "!semantic:react hooks example",
     color: "text-green-400",
-    isDefault: true,
   },
 ];
 
@@ -49,11 +54,9 @@ export default function SearchTips() {
 
       <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
         <p className="text-blue-300 text-xs">
-          <strong>Pro tip:</strong> Combine operators to narrow results, e.g.,
-          <code className="mx-1 px-1 py-0.5 bg-blue-500/20 rounded text-blue-300">
-            !file:lecture !semantic:derivatives
-          </code>
-          searches for &quot;derivatives&quot; only in files matching &quot;lecture&quot;
+          <strong>Pro tip:</strong> Just type naturally for best results — hybrid search
+          combines keyword matching with semantic understanding. Use prefixes to force
+          a specific mode.
         </p>
       </div>
     </div>
