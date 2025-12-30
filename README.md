@@ -6,7 +6,7 @@ Upload notes, and Neurovault automatically chunks them, generates semantic embed
 
 ## Features
 
-- **Semantic Search** — Find notes by meaning, not just keywords. Queries are embedded and matched against a vector database using cosine similarity.
+- **Hybrid Search** — Combines MongoDB full-text keyword search with Qdrant vector similarity, merged via Reciprocal Rank Fusion (RRF). Finds exact terms *and* related concepts in one query. Query DSL with prefix operators: `!keyword:` for exact matches, `!semantic:` for meaning-based, `!file:` for filename, or just type naturally for hybrid.
 - **RAG Q&A with Streaming** — Ask natural language questions. Relevant chunks are retrieved, fed as context to an LLM, and the answer streams back via SSE with inline citations to source files.
 - **Knowledge Graph** — `[[wikilinks]]` are parsed into explicit edges. A background job discovers implicit connections by comparing chunk embeddings across files. Louvain community detection surfaces topic clusters. Full graph traversal API (neighbors, shortest path, clusters, stats).
 - **Provider-Agnostic LLM** — Swap between Google Gemini, OpenAI, or any local model (Ollama, LM Studio, llama.cpp) via environment variables. All providers implement a common `AsyncIterable<string>` streaming interface.
@@ -37,8 +37,8 @@ neurovault/
 | Module | Responsibility |
 |--------|---------------|
 | `files/` | File upload (Multer), folder hierarchy (MongoDB), file retrieval |
-| `chunker/` | Text splitting (LangChain, 800-char chunks), embedding generation, Qdrant upsert |
-| `search/` | Vector similarity search via Qdrant |
+| `chunker/` | Markdown-aware text splitting (LangChain MarkdownTextSplitter, 800-char chunks, 150-char overlap), embedding generation, dual write to Qdrant + MongoDB |
+| `search/` | Hybrid search (text + vector + RRF fusion), query DSL parser, keyword/semantic/file search modes |
 | `qa/` | RAG orchestration — retrieval, prompt assembly, LLM streaming, citation extraction |
 | `graph/` | Wikilink parsing, Neo4j graph storage, similarity job, Louvain clustering, traversal API |
 | `sync/` | Git-backed vault sync, 3-way merge, incremental indexing, WebSocket notifications |
@@ -58,7 +58,7 @@ neurovault/
    ┌────────────────┐  ┌────────────────┐
    │    Chunker     │  │  Graph Hook    │
    │ Split → Embed  │  │ Parse [[links]]│
-   │  → Qdrant      │  │ → Neo4j edges  │
+   │ → Qdrant + Mongo│  │ → Neo4j edges  │
    └────────────────┘  └────────────────┘
                                 │
                       ┌─────────┴─────────┐
@@ -75,8 +75,8 @@ neurovault/
           ▼                       ▼
    ┌─────────────┐       ┌───────────────┐
    │   Search    │       │     Q&A       │
-   │ Embed query │       │ Retrieve top-K│
-   │ → Qdrant    │       │ → LLM stream  │
+   │ Text + Vec  │       │ Retrieve top-K│
+   │ → RRF merge │       │ → LLM stream  │
    │ → Results   │       │ → SSE + cites │
    └─────────────┘       └───────────────┘
 ```
@@ -92,7 +92,7 @@ neurovault/
 | Graph DB | Neo4j (+ GDS plugin for Louvain) |
 | Embeddings | Google Gemini (`gemini-embedding-001`) |
 | LLM | Gemini Flash/Pro or any OpenAI-compatible endpoint |
-| Text Splitting | LangChain RecursiveCharacterTextSplitter |
+| Text Splitting | LangChain MarkdownTextSplitter (header-aware, 150-char overlap) |
 | Build System | Turborepo, tsup, Turbopack |
 | Infrastructure | Nginx reverse proxy, Docker Compose |
 
@@ -128,7 +128,7 @@ docker run -d --name mongo -p 27017:27017 mongo:7
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/your-username/neurovault.git
+git clone https://github.com/nihalupreti/Neurovault.git
 cd neurovault
 npm install
 ```
@@ -178,19 +178,23 @@ This starts both apps via Turborepo:
 1. Open `http://localhost:3000`
 2. Upload markdown files via the **+** button
 3. Wait a few seconds for chunking and embedding to complete
-4. Use **Ctrl+K** to search your notes by meaning
+4. Use **Ctrl+K** to search — hybrid by default, or use `!keyword:`, `!semantic:`, `!file:` prefixes
 5. Click the **chat icon** to ask questions — answers stream with citations
 6. Hit `POST /api/graph/rebuild` to build the knowledge graph
 
 ## API Reference
 
-### Search
+### Search (Hybrid by Default)
 
 ```
-GET /api/search?q=how does gravity work
+GET /api/search?q=how does gravity work          # hybrid: text + vector + RRF
+GET /api/search?q=!keyword:useState               # exact keyword match only
+GET /api/search?q=!semantic:react state management # vector similarity only
+GET /api/search?q=!file:newton                     # filename search
+GET /api/search?q=!file:lecture !semantic:force     # file-filtered semantic
 ```
 
-Returns top matches with similarity scores and source text.
+Bare queries run hybrid search — combines MongoDB full-text and Qdrant vector results via Reciprocal Rank Fusion. Use prefix operators to force a specific mode.
 
 ### Q&A (SSE Stream)
 
@@ -257,9 +261,12 @@ apps/server/src/
     │   ├── dispatcher.ts       # Async chunking dispatch
     │   └── semanticChunker.ts  # Split + embed + Qdrant upsert
     ├── search/
-    │   ├── search-handler.ts
-    │   ├── search-service.ts
-    │   └── search-queries.ts
+    │   ├── query-parser.ts     # DSL parser (!file:, !keyword:, !semantic:)
+    │   ├── rrf.ts              # Reciprocal Rank Fusion
+    │   ├── chunk-text.model.ts # MongoDB text index for keyword search
+    │   ├── search-handler.ts   # Route parsed queries to strategies
+    │   ├── search-service.ts   # Hybrid, keyword, semantic, file search
+    │   └── search-queries.ts   # Qdrant query builders
     ├── qa/
     │   ├── qa-handler.ts       # SSE streaming endpoint
     │   ├── qa-service.ts       # Retrieve → prompt → stream
