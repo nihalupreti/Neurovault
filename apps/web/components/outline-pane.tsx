@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Icon } from "./icons";
 
 interface Heading {
@@ -19,8 +19,8 @@ function extractHeadings(markdown: string): Heading[] {
   for (const line of lines) {
     const match = line.match(/^(#{1,3})\s+(.+)/);
     if (match) {
-      const level = match[1].length;
-      const text = match[2].replace(/[*_`[\]]/g, "");
+      const level = match[1]!.length;
+      const text = match[2]!.replace(/[*_`[\]]/g, "");
       const id = text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/-$/, "");
       headings.push({ id, text, level });
     }
@@ -30,11 +30,11 @@ function extractHeadings(markdown: string): Heading[] {
 
 export function OutlinePane({ content }: OutlinePaneProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const headings = content ? extractHeadings(content) : [];
+  const headings = useMemo(() => content ? extractHeadings(content) : [], [content]);
 
   useEffect(() => {
     if (headings.length > 0 && !activeId) {
-      setActiveId(headings[0].id);
+      setActiveId(headings[0]!.id);
     }
   }, [headings, activeId]);
 

@@ -17,8 +17,8 @@ export default function Home() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [rightMode, setRightMode] = useState<RailMode>("outline");
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
-  const [activeFileName, setActiveFileName] = useState("Select a file");
-  const [activeFolderName, setActiveFolderName] = useState("");
+  const activeFileName = "Select a file";
+  const activeFolderName = "";
   const [leftDrawer, setLeftDrawer] = useState(false);
   const [rightDrawer, setRightDrawer] = useState(false);
 
@@ -58,7 +58,7 @@ export default function Home() {
     }
   }, [mobile]);
 
-  const handleAskVault = useCallback((_query: string) => {
+  const handleAskVault = useCallback(() => {
     setRightMode("chat");
     if (mobile) setRightDrawer(true);
   }, [mobile]);

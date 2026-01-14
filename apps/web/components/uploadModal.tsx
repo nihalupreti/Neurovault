@@ -15,7 +15,7 @@ export default function UploadModal({ isOpen, onClose, target }: ModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending: isLoading } = useMutation({
     mutationFn: uploadFiles,
     onSuccess: () => {
       console.log("Upload successful");
@@ -120,7 +120,7 @@ export default function UploadModal({ isOpen, onClose, target }: ModalProps) {
         <input
           ref={folderInputRef}
           type="file"
-          // @ts-ignore: not in TS defs
+          // @ts-expect-error webkitdirectory not in TS defs
           webkitdirectory=""
           className="hidden"
           onChange={handleFiles}
