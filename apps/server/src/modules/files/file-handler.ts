@@ -82,9 +82,9 @@ export const handleFolderUploads = async (req: Request, res: Response) => {
 export const handleFileRequest = async (req: Request, res: Response) => {
   const fileId = req.query.id;
 
-  const fileDoc = await fileModel.findById(fileId, "serverPath");
+  const fileDoc = await fileModel.findById(fileId, "serverPath public");
 
-  if (!fileDoc) {
+  if (!fileDoc || (req.role === "guest" && !fileDoc.public)) {
     return res.status(404).json({ error: "File not found" });
   }
 
@@ -98,10 +98,31 @@ export const handleFileRequest = async (req: Request, res: Response) => {
   });
 };
 
+export const toggleVisibility = async (req: Request, res: Response) => {
+  if (req.role !== "admin") {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const { id } = req.params;
+  const { public: isPublic } = req.body as { public?: boolean };
+
+  if (typeof isPublic !== "boolean") {
+    return res.status(400).json({ error: "public field must be a boolean" });
+  }
+
+  const file = await fileModel.findByIdAndUpdate(id, { public: isPublic }, { new: true });
+  if (!file) return res.status(404).json({ error: "file not found" });
+
+  return res.json({ _id: file._id, name: file.name, public: file.public });
+};
+
 export const getFolderTree = async (req: Request, res: Response) => {
   const parentId = req.query.parentId || null;
 
-  const children = await fileModel.find({ parentId });
+  const filter: Record<string, unknown> = { parentId };
+  if (req.role === "guest") filter.public = true;
+
+  const children = await fileModel.find(filter);
 
   const formattedChildren = children.map((doc) => ({
     _id: doc._id,

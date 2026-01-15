@@ -11,6 +11,8 @@ import qaRoutes from "./modules/qa/qa-routes.js";
 import graphRoutes from "./modules/graph/graph-routes.js";
 import { initConstraints } from "./modules/graph/graph-service.js";
 import { initWebSocket } from "./modules/sync/ws-manager.js";
+import { identifyRole } from "./modules/auth/identify-role.js";
+import authRoutes from "./modules/auth/auth-routes.js";
 
 dotenv.config();
 connectMongo(process.env.DB_URL!);
@@ -27,7 +29,9 @@ const corsOptions = {
 
 app.use(cors<Request>(corsOptions));
 app.use(express.json({ limit: "50mb" }));
+app.use(identifyRole);
 
+app.use("/api/auth", authRoutes);
 app.use("/api/file", fileRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/sync", syncRoutes);

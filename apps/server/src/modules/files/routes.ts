@@ -3,6 +3,7 @@ import {
   handleFileRequest,
   handleFileUploads,
   handleFolderUploads,
+  toggleVisibility,
 } from "./file-handler.js";
 
 import express from "express";
@@ -14,5 +15,6 @@ router.post("/upload/file", upload.array("files"), handleFileUploads);
 router.post("/upload/folder", upload.array("files"), handleFolderUploads);
 router.get("/", handleFileRequest);
 router.get("/folder", getFolderTree);
+router.patch("/:id/visibility", toggleVisibility);
 
 export default router;

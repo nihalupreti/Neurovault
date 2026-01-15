@@ -20,6 +20,10 @@ const fileMetadataSchema = new mongoose.Schema(
       required: true,
       enum: ["file", "folder"],
     },
+    public: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
