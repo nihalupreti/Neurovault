@@ -6,7 +6,9 @@ import type { ChatMessage as ChatMessageType, Citation } from "@/hooks/useQAStre
 import { ChatBubble } from "./ChatBubble";
 import type { Message } from "./ChatBubble";
 import { ChatComposer } from "./ChatComposer";
+import { RateLimitOverlay } from "./RateLimitOverlay";
 import { Icon } from "../icons";
+import { useAuth } from "@/context/auth-context";
 
 const SUGGESTIONS = [
   "Summarize my reading on this topic",
@@ -14,8 +16,14 @@ const SUGGESTIONS = [
   "Recent thoughts on this?",
 ];
 
+interface RateLimitInfo {
+  contact: { email?: string; linkedin?: string };
+}
+
 export default function ChatPane() {
+  const { isAdmin } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
+  const [rateLimited, setRateLimited] = useState<RateLimitInfo | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { ask, abort, isStreaming } = useQAStream();
 
@@ -27,6 +35,8 @@ export default function ChatPane() {
 
   const handleSend = useCallback(
     (question: string) => {
+      if (rateLimited && !isAdmin) return;
+
       const userMsg: Message = { role: "user", content: question, isStreaming: false };
       const assistantMsg: Message = { role: "assistant", content: "", isStreaming: true };
 
@@ -74,9 +84,18 @@ export default function ChatPane() {
             return updated;
           });
         },
+        onRateLimited: (contact) => {
+          setRateLimited({ contact });
+          setMessages((prev) => {
+            const updated = [...prev];
+            updated.pop();
+            updated.pop();
+            return updated;
+          });
+        },
       });
     },
-    [ask, messages]
+    [ask, messages, rateLimited, isAdmin]
   );
 
   const handleStop = useCallback(() => {
@@ -121,11 +140,17 @@ export default function ChatPane() {
         ))}
       </div>
 
-      <ChatComposer
-        onSend={handleSend}
-        onStop={handleStop}
-        isStreaming={isStreaming}
-      />
+      <div style={{ position: "relative" }}>
+        <ChatComposer
+          onSend={handleSend}
+          onStop={handleStop}
+          isStreaming={isStreaming}
+          disabled={!!rateLimited && !isAdmin}
+        />
+        {rateLimited && !isAdmin && (
+          <RateLimitOverlay contact={rateLimited.contact} />
+        )}
+      </div>
     </div>
   );
 }

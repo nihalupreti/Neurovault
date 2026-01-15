@@ -19,6 +19,7 @@ interface StreamCallbacks {
   onCitations: (citations: Citation[]) => void;
   onDone: () => void;
   onError: (message: string) => void;
+  onRateLimited?: (contact: { email?: string; linkedin?: string }) => void;
 }
 
 export function useQAStream() {
@@ -45,15 +46,27 @@ export function useQAStream() {
       setIsStreaming(true);
 
       try {
+        const secret = typeof window !== "undefined" ? localStorage.getItem("nv_admin_secret") : null;
+
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/qa/ask`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/qa/ask`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...(secret ? { Authorization: `Bearer ${secret}` } : {}),
+            },
             body: JSON.stringify({ question, history, limit }),
             signal: controller.signal,
           }
         );
+
+        if (response.status === 429) {
+          const errorData = await response.json();
+          callbacks.onRateLimited?.(errorData.contact || {});
+          setIsStreaming(false);
+          return;
+        }
 
         if (!response.ok || !response.body) {
           callbacks.onError("Failed to connect to QA service");

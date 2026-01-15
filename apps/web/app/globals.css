@@ -819,3 +819,28 @@ kbd {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--bg-3); border-radius: 8px; border: 2px solid var(--bg-0); }
 ::-webkit-scrollbar-thumb:hover { background: var(--rule); }
+
+/* Auth */
+.nv-login-modal { width: 320px; padding: 24px; }
+.nv-login-modal .nv-modal-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-weight: 500; color: var(--ink); }
+.nv-login-modal form { display: flex; flex-direction: column; gap: 10px; }
+.nv-login-modal input { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--rule); background: var(--bg-1); color: var(--ink); font-size: 0.875rem; outline: none; }
+.nv-login-modal input:focus { border-color: var(--accent); }
+.nv-login-modal input.nv-input-error { border-color: oklch(0.65 0.2 25); }
+.nv-login-error { font-size: 0.75rem; color: oklch(0.65 0.2 25); }
+.nv-login-modal button[type="submit"] { padding: 8px 12px; border-radius: 6px; background: var(--accent); color: var(--bg-0); font-weight: 500; cursor: pointer; font-size: 0.85rem; }
+.nv-login-modal button[type="submit"]:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.nv-usage-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; background: var(--bg-2); color: var(--ink-mid); font-variant-numeric: tabular-nums; }
+
+.nv-auth-area { position: relative; }
+.nv-dropdown { position: absolute; top: 100%; right: 0; margin-top: 4px; background: var(--bg-2); border: 1px solid var(--rule); border-radius: 6px; padding: 4px; z-index: 100; min-width: 90px; }
+.nv-dropdown button { padding: 5px 10px; width: 100%; text-align: left; font-size: 0.8rem; border-radius: 4px; color: var(--ink); cursor: pointer; }
+.nv-dropdown button:hover { background: var(--bg-3); }
+
+.nv-rate-limit-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: oklch(0.155 0.005 250 / 0.85); backdrop-filter: blur(6px); border-radius: 8px; z-index: 10; }
+.nv-rate-limit-card { text-align: center; padding: 24px; max-width: 280px; }
+.nv-rate-limit-card h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--ink); }
+.nv-rate-limit-card p { font-size: 0.8rem; color: var(--ink-mid); margin-bottom: 16px; line-height: 1.5; }
+.nv-rate-limit-contact { display: flex; flex-direction: column; gap: 6px; }
+.nv-rate-limit-contact a { font-size: 0.8rem; color: var(--accent); text-decoration: underline; }

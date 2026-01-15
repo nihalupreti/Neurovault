@@ -54,6 +54,10 @@ export function Icon({ name, size = 14, className }: IconProps) {
       return <svg {...props}><path d="M4 5h16l-6 8v6l-4-2v-4z"/></svg>;
     case "ext":
       return <svg {...props}><path d="M14 5h5v5M19 5l-9 9M19 13v6H5V5h6"/></svg>;
+    case "lock":
+      return <svg {...props}><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>;
+    case "unlock":
+      return <svg {...props}><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.8-1.2"/></svg>;
     default:
       return null;
   }

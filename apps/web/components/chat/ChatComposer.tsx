@@ -7,9 +7,10 @@ interface ChatComposerProps {
   onSend: (text: string) => void;
   onStop: () => void;
   isStreaming: boolean;
+  disabled?: boolean;
 }
 
-export function ChatComposer({ onSend, onStop, isStreaming }: ChatComposerProps) {
+export function ChatComposer({ onSend, onStop, isStreaming, disabled }: ChatComposerProps) {
   const [draft, setDraft] = useState("");
   const [mode, setMode] = useState<"hybrid" | "semantic" | "keyword">("hybrid");
 
@@ -35,6 +36,7 @@ export function ChatComposer({ onSend, onStop, isStreaming }: ChatComposerProps)
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={handleKeyDown}
+        disabled={disabled}
       />
       <div className="nv-chat-composer-row">
         <div className="nv-chat-mode">

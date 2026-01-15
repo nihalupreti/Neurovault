@@ -2,12 +2,15 @@
 
 import { QueryClientProvider } from "@tanstack/react-query";
 import { HighlightProvider } from "@/contexts/HighlightContext";
+import { AuthProvider } from "@/context/auth-context";
 import { queryClient } from "@/utils/http";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <HighlightProvider>{children}</HighlightProvider>
+      <AuthProvider>
+        <HighlightProvider>{children}</HighlightProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
