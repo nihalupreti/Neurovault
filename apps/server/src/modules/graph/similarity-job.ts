@@ -53,7 +53,7 @@ export function aggregateChunkSimilarities(
     }));
 }
 
-export async function runSimilarityJob(options?: {
+export async function runSimilarityJob(_options?: {
   full?: boolean;
 }): Promise<{ processed: number; edgesCreated: number }> {
   const threshold = parseFloat(

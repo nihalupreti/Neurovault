@@ -8,7 +8,7 @@ import {
 } from "./git-storage.js";
 import { runIndexPipeline } from "./index-pipeline.js";
 import { notifyVaultChanged } from "./ws-manager.js";
-import { Vault, ConflictRecord } from "./models.js";
+import { ConflictRecord } from "./models.js";
 import type { VaultDoc } from "./models.js";
 
 export interface SyncChange {

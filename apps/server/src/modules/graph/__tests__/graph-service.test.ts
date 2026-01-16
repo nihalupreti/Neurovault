@@ -24,8 +24,6 @@ import {
   upsertSimilarEdges,
   getNeighbors,
   getFullGraph,
-  getFileCluster,
-  getAllClusters,
   getShortestPath,
   getStats,
 } from "../graph-service.js";

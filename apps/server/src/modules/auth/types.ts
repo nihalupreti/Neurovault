@@ -1,5 +1,3 @@
-import type { Request } from "express";
-
 export type Role = "admin" | "guest";
 
 declare global {
