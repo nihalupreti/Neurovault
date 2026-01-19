@@ -1,4 +1,42 @@
 services:
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    container_name: neurovault_server
+    ports:
+      - "3001:3001"
+    env_file:
+      - apps/server/.env
+    depends_on:
+      - mongo
+      - qdrant
+    restart: unless-stopped
+    networks:
+      - neurovault_network
+
+  mongo:
+    image: mongo:7
+    container_name: neurovault_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+    networks:
+      - neurovault_network
+
+  qdrant:
+    image: qdrant/qdrant:v1.12.0
+    container_name: neurovault_qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+    networks:
+      - neurovault_network
+
   nginx:
     image: nginx:alpine
     container_name: neurovault_gateway
@@ -11,8 +49,15 @@ services:
       - ./infra/nginx/api_gateway.conf:/etc/nginx/api_gateway.conf:ro
       - ./infra/nginx/api_json_errors.conf:/etc/nginx/api_json_errors.conf:ro
       - ./infra/nginx/cors.conf:/etc/nginx/cors.conf:ro
+    depends_on:
+      - server
+    restart: unless-stopped
     networks:
       - neurovault_network
+
+volumes:
+  mongo_data:
+  qdrant_data:
 
 networks:
   neurovault_network:
