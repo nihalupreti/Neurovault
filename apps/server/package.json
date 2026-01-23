@@ -28,6 +28,7 @@
   "dependencies": {
     "@langchain/core": "^0.3.72",
     "@langchain/textsplitters": "^0.1.0",
+    "@mozilla/readability": "^0.6.0",
     "@neurovault/config": "*",
     "@neurovault/utils": "*",
     "@qdrant/js-client-rest": "^1.15.1",
@@ -36,6 +37,7 @@
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "isomorphic-git": "^1.37.6",
+    "linkedom": "^0.18.12",
     "micromatch": "^4.0.8",
     "mongoose": "^8.18.1",
     "multer": "^2.0.2",
