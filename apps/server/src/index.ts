@@ -10,6 +10,7 @@ import searchRoutes from "./modules/search/routes.js";
 import syncRoutes from "./modules/sync/routes.js";
 import qaRoutes from "./modules/qa/qa-routes.js";
 import graphRoutes from "./modules/graph/graph-routes.js";
+import captureRoutes from "./modules/capture/capture-routes.js";
 import { initConstraints } from "./modules/graph/graph-service.js";
 import { initWebSocket } from "./modules/sync/ws-manager.js";
 import { identifyRole } from "./modules/auth/identify-role.js";
@@ -53,6 +54,7 @@ app.use("/api/search", searchRoutes);
 app.use("/api/sync", syncRoutes);
 app.use("/api/qa", qaRoutes);
 app.use("/api/graph", graphRoutes);
+app.use("/api/capture", captureRoutes);
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Unhandled error:", err.message);
