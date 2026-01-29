@@ -6,13 +6,18 @@
   "scripts": {
     "dev": "tsup --watch --onSuccess \"node dist/index.cjs\"",
     "build": "tsup",
-    "start": "node dist/index.cjs"
+    "start": "node dist/index.cjs",
+    "lint": "eslint src/ --max-warnings 0",
+    "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "chokidar": "^4.0.0",
-    "ws": "^8.20.0"
+    "ws": "^8.20.0",
+    "@neurovault/shared": "*"
   },
   "devDependencies": {
+    "@neurovault/eslint-config": "*",
+    "@neurovault/typescript-config": "*",
     "@types/ws": "^8.18.1",
     "tsup": "^8.5.0",
     "typescript": "^5.9.0"

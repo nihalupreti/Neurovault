@@ -3,6 +3,7 @@ import { ApiClient } from "./api-client";
 import { LocalQueue } from "./local-queue";
 import { VaultWatcher, type WatcherChange } from "./vault-watcher";
 import { toBase64, sha256, fromBase64 } from "./utils";
+import { SyncError } from "./types";
 import type {
   SyncChange,
   SyncState,
@@ -138,8 +139,8 @@ export class SyncEngine {
 
       this.settings.baseCommit = result.commitSha;
       this.setState("idle");
-    } catch (err: any) {
-      if (err.retryable) {
+    } catch (err: unknown) {
+      if (err instanceof SyncError && err.retryable) {
         for (const change of changes) {
           await this.queue.add(
             change.path,

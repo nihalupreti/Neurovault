@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatArticleNote, formatBookmarkNote, formatRawNote, generateFilename } from "../note-formatter.js";
+import { formatArticleNote, formatBookmarkNote, formatRawNote, generateFilename } from "../capture.note-formatter.js";
 
 describe("formatArticleNote", () => {
   it("generates markdown with frontmatter for article", () => {

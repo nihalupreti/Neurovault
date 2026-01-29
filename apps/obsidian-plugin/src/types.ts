@@ -1,64 +1,15 @@
-export interface SyncChange {
-  path: string;
-  action: "upsert" | "delete";
-  content?: string;
-  clientHash: string;
-}
+import type {
+  SyncChange,
+  PushResult as PushResponse,
+  ConflictInfo,
+  PullChange,
+  PullResult as PullResponse,
+  VaultInfo as VaultResponse,
+  ConflictRecord,
+  VaultStatus as StatusResponse,
+} from "@neurovault/shared/types";
 
-export interface PushResponse {
-  commitSha: string;
-  conflicts?: ConflictInfo[];
-}
-
-export interface ConflictInfo {
-  path: string;
-  serverVersion: string;
-  clientVersion: string;
-  baseVersion: string;
-}
-
-export interface PullChange {
-  path: string;
-  action: "upsert" | "delete";
-  content?: string;
-  contentHash: string;
-}
-
-export interface PullResponse {
-  changes: PullChange[];
-  currentCommit: string;
-  hasMore: boolean;
-}
-
-export interface VaultResponse {
-  _id: string;
-  name: string;
-  gitPath: string;
-  syncConfig: {
-    include: string[];
-    exclude: string[];
-  };
-  lastSyncedCommit: string;
-}
-
-export interface ConflictRecord {
-  _id: string;
-  filePath: string;
-  serverContent: string;
-  clientContent: string;
-  baseContent: string;
-  resolution: string;
-}
-
-export interface StatusResponse {
-  vaultId: string;
-  name: string;
-  lastSyncedCommit: string;
-  fileCount: number;
-  pendingEmbeddings: number;
-  failedEmbeddings: number;
-  unresolvedConflicts: number;
-}
+export type { SyncChange, PushResponse, ConflictInfo, PullChange, PullResponse, VaultResponse, ConflictRecord, StatusResponse };
 
 export interface QueuedChange {
   path: string;

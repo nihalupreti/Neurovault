@@ -1,6 +1,7 @@
 import type { LLMProvider } from "./types.js";
 import { GeminiProvider } from "./gemini-provider.js";
 import { OpenAICompatibleProvider } from "./openai-provider.js";
+import { ProviderConfigError } from "../qa.errors.js";
 
 export function createProvider(): LLMProvider {
   const provider = process.env.LLM_PROVIDER || "gemini";
@@ -13,7 +14,7 @@ export function createProvider(): LLMProvider {
     case "openai-compatible": {
       const apiKey = process.env.LLM_API_KEY;
       if (!apiKey) {
-        throw new Error(
+        throw new ProviderConfigError(
           "LLM_API_KEY required for openai-compatible provider"
         );
       }
@@ -25,7 +26,7 @@ export function createProvider(): LLMProvider {
     }
 
     default:
-      throw new Error(`Unknown LLM_PROVIDER: ${provider}`);
+      throw new ProviderConfigError(`Unknown LLM_PROVIDER: ${provider}`);
   }
 }
 

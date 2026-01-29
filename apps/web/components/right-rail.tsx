@@ -26,22 +26,31 @@ export function RightRail({
 }: RightRailProps) {
   return (
     <aside className="nv-rightrail">
-      <div className="nv-rail-tabs">
+      <div className="nv-rail-tabs" role="tablist">
         <button
           className={`nv-tab ${mode === "outline" ? "is-active" : ""}`}
           onClick={() => onModeChange("outline")}
+          aria-label="Show outline"
+          role="tab"
+          aria-selected={mode === "outline"}
         >
           <Icon name="outline" size={12} /> outline
         </button>
         <button
           className={`nv-tab ${mode === "connections" ? "is-active" : ""}`}
           onClick={() => onModeChange("connections")}
+          aria-label="Show connections"
+          role="tab"
+          aria-selected={mode === "connections"}
         >
           <Icon name="graph" size={12} /> connections
         </button>
         <button
           className={`nv-tab ${mode === "chat" ? "is-active" : ""}`}
           onClick={() => onModeChange("chat")}
+          aria-label="Ask your notes"
+          role="tab"
+          aria-selected={mode === "chat"}
         >
           <Icon name="chat" size={12} /> ask
         </button>

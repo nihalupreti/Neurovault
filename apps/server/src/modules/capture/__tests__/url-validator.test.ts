@@ -1,6 +1,6 @@
 // apps/server/src/modules/capture/__tests__/url-validator.test.ts
 import { describe, it, expect } from "vitest";
-import { validateUrl } from "../url-validator.js";
+import { validateUrl } from "../capture.url-validator.js";
 
 describe("validateUrl", () => {
   it("accepts valid https URL", () => {
