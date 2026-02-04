@@ -9,3 +9,11 @@ export const embeddingProvider = new JinaProvider();
 export function getEmbeddings(text: string, task: EmbeddingTask = 'document'): Promise<number[]> {
   return embeddingProvider.embed(text, task);
 }
+
+export function getEmbeddingsBatch(
+  texts: string[],
+  task: EmbeddingTask = 'document',
+  lateChunking = false
+): Promise<number[][]> {
+  return embeddingProvider.embedBatch(texts, task, lateChunking);
+}

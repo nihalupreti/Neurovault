@@ -75,4 +75,64 @@ describe("JinaProvider", () => {
     mockFetch.mockResolvedValue(makeOkResponse([]));
     await expect(new JinaProvider().embed("hello", "query")).rejects.toThrow("empty embedding");
   });
+
+  it("embedBatch sends late_chunking flag", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () =>
+        Promise.resolve({
+          data: [
+            { embedding: new Array(1024).fill(0.1) },
+            { embedding: new Array(1024).fill(0.2) },
+          ],
+        }),
+      text: () => Promise.resolve(""),
+    });
+
+    await new JinaProvider().embedBatch(["hello", "world"], "document", true);
+    const init = mockFetch.mock.calls[0]![1] as RequestInit;
+    const body = JSON.parse(init.body as string);
+    expect(body.late_chunking).toBe(true);
+    expect(body.input).toEqual(["hello", "world"]);
+  });
+
+  it("embedBatch returns array of embeddings", async () => {
+    const e1 = new Array(1024).fill(0.1);
+    const e2 = new Array(1024).fill(0.2);
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ data: [{ embedding: e1 }, { embedding: e2 }] }),
+      text: () => Promise.resolve(""),
+    });
+
+    const result = await new JinaProvider().embedBatch(["a", "b"], "query", false);
+    expect(result).toHaveLength(2);
+    expect(result[0]).toEqual(e1);
+    expect(result[1]).toEqual(e2);
+  });
+
+  it("embedBatch throws on non-2xx response", async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      status: 429,
+      text: () => Promise.resolve("Rate limited"),
+    });
+    await expect(new JinaProvider().embedBatch(["hello"], "document", true)).rejects.toThrow(
+      "Jina API error 429"
+    );
+  });
+
+  it("embedBatch throws on empty data array", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ data: [] }),
+      text: () => Promise.resolve(""),
+    });
+    await expect(new JinaProvider().embedBatch(["hello"], "document", true)).rejects.toThrow(
+      "empty embeddings"
+    );
+  });
 });
