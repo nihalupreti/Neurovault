@@ -1,10 +1,13 @@
 import { createHash } from "crypto";
-import { MarkdownTextSplitter } from "@langchain/textsplitters";
+import { splitContent } from "../chunker/chunker.pipeline.js";
+import { MarkdownParser } from "../chunker/parsers/markdown.parser.js";
 
 export interface HashedChunk {
   index: number;
   text: string;
   hash: string;
+  headingPath: string[];
+  sectionContent: string;
 }
 
 export interface ChunkRecord {
@@ -19,22 +22,20 @@ export interface DiffResult {
   unchanged: ChunkRecord[];
 }
 
+const markdownParser = new MarkdownParser();
+
 export function hashChunk(text: string): string {
   return createHash("sha256").update(text, "utf-8").digest("hex");
 }
 
-export async function splitAndHash(text: string): Promise<HashedChunk[]> {
-  const splitter = new MarkdownTextSplitter({
-    chunkSize: 800,
-    chunkOverlap: 150,
-  });
-
-  const docs = await splitter.createDocuments([text]);
-
-  return docs.map((doc, i) => ({
-    index: i,
-    text: doc.pageContent,
-    hash: hashChunk(doc.pageContent),
+export function splitAndHash(text: string): HashedChunk[] {
+  const chunks = splitContent(text, markdownParser);
+  return chunks.map((chunk) => ({
+    index: chunk.chunkIndex,
+    text: chunk.text,
+    hash: chunk.contentHash,
+    headingPath: chunk.headingPath,
+    sectionContent: chunk.sectionContent,
   }));
 }
 
