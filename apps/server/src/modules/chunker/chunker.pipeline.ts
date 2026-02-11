@@ -14,7 +14,7 @@ const QDRANT_BATCH_SIZE = 50;
 export function splitContent(
   content: string,
   parser: ContentParser,
-  metadata?: Record<string, string>
+  metadata?: Record<string, string>,
 ): PreparedChunk[] {
   const tree = parser.parse(content, metadata);
   const sections = flattenSections(tree);
@@ -35,7 +35,7 @@ export async function processContent(
   content: string,
   fileId: string,
   parser: ContentParser,
-  metadata?: Record<string, string>
+  metadata?: Record<string, string>,
 ): Promise<number> {
   const chunks = splitContent(content, parser, metadata);
   if (chunks.length === 0) return 0;
@@ -50,7 +50,10 @@ export async function processContent(
     payload: Record<string, unknown>;
   }> = [];
   const allChunkDocs: Array<Record<string, unknown>> = [];
-  const sectionDocs = new Map<string, { sectionId: string; headingPath: string[]; content: string; fileId: string }>();
+  const sectionDocs = new Map<
+    string,
+    { sectionId: string; headingPath: string[]; content: string; fileId: string }
+  >();
 
   for (const batch of batches) {
     const texts = batch.chunks.map((c) => c.text);
@@ -107,6 +110,11 @@ export async function processContent(
 
   await ChunkText.deleteMany({ fileId });
   await SectionContent.deleteMany({ fileId });
+
+  await client.delete(COLLECTION_NAME, {
+    wait: true,
+    filter: { must: [{ key: "fileId", match: { value: fileId } }] },
+  });
 
   for (let i = 0; i < allPoints.length; i += QDRANT_BATCH_SIZE) {
     await client.upsert(COLLECTION_NAME, {
