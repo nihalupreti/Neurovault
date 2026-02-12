@@ -1,0 +1,8 @@
+name = "neurovault-email-worker"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[vars]
+WEBHOOK_URL = "https://api.yourdomain.com/api/capture/email"
+
+# Set WEBHOOK_SECRET via `wrangler secret put WEBHOOK_SECRET`

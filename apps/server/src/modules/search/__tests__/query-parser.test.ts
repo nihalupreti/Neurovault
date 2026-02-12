@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseSearchQuery } from "../query-parser.js";
+import { parseSearchQuery } from "../search.query-parser.js";
 
 describe("parseSearchQuery", () => {
   it("treats bare text as hybrid", () => {

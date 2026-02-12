@@ -1,0 +1,10 @@
+{
+  "extends": "@neurovault/typescript-config/base.json",
+  "compilerOptions": {
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "types": ["@cloudflare/workers-types"],
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts"]
+}

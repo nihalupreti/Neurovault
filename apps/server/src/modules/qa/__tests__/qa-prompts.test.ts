@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildSystemPrompt } from "../qa-prompts.js";
+import { buildSystemPrompt } from "../qa.prompts.js";
 import type { RetrievedChunk } from "../providers/types.js";
 
 describe("buildSystemPrompt", () => {

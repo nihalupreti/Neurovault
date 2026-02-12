@@ -1,7 +1,7 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { useAuth } from "@/context/auth-context";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { useAuth } from "@/contexts/auth-context";
 import { Icon } from "./icons";
 
 interface LoginModalProps {
@@ -14,8 +14,23 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   const [value, setValue] = useState("");
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
-  if (!open) return null;
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) {
+      dialog.showModal();
+    } else if (!open && dialog.open) {
+      dialog.close();
+    }
+  }, [open]);
+
+  const handleClose = () => {
+    setValue("");
+    setError(false);
+    onClose();
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -34,27 +49,32 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   };
 
   return (
-    <div className="nv-modal-backdrop" onClick={onClose}>
-      <div className="nv-modal nv-login-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="nv-modal-header">
-          <Icon name="lock" size={14} />
-          <span>Admin Access</span>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="password"
-            placeholder="Enter secret"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            autoFocus
-            className={error ? "nv-input-error" : ""}
-          />
-          {error && <span className="nv-login-error">Invalid secret</span>}
-          <button type="submit" disabled={loading || !value.trim()}>
-            {loading ? "Verifying…" : "Unlock"}
-          </button>
-        </form>
+    <dialog
+      ref={dialogRef}
+      className="nv-modal nv-login-modal"
+      onClose={handleClose}
+      onClick={(e) => {
+        if (e.target === dialogRef.current) handleClose();
+      }}
+    >
+      <div className="nv-modal-header">
+        <Icon name="lock" size={14} />
+        <span>Admin Access</span>
       </div>
-    </div>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="password"
+          placeholder="Enter secret"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          autoFocus
+          className={error ? "nv-input-error" : ""}
+        />
+        {error && <span className="nv-login-error">Invalid secret</span>}
+        <button type="submit" disabled={loading || !value.trim()}>
+          {loading ? "Verifying…" : "Unlock"}
+        </button>
+      </form>
+    </dialog>
   );
 }

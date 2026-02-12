@@ -58,7 +58,7 @@ export class WsListener {
         if (msg.type === "changes_available") {
           this.callback?.();
         }
-      } catch {}
+      } catch { /* malformed message */ }
     });
 
     this.ws.on("close", () => {

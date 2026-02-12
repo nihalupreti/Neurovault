@@ -26,7 +26,7 @@ import {
   getFullGraph,
   getShortestPath,
   getStats,
-} from "../graph-service.js";
+} from "../graph.service.js";
 
 describe("graph-service CRUD", () => {
   beforeEach(() => {
@@ -58,9 +58,9 @@ describe("graph-service CRUD", () => {
       { targetFileId: "f3", anchor: "Calculus" },
     ]);
     const calls = mockRun.mock.calls;
-    const deleteCall = calls.find(([q]: [string]) => q.includes("DELETE r"));
+    const deleteCall = calls.find((args: string[]) => args[0]?.includes("DELETE r"));
     expect(deleteCall).toBeTruthy();
-    const createCall = calls.find(([q]: [string]) => q.includes("LINKS_TO"));
+    const createCall = calls.find((args: string[]) => args[0]?.includes("LINKS_TO"));
     expect(createCall).toBeTruthy();
   });
 
@@ -74,11 +74,11 @@ describe("graph-service CRUD", () => {
     ]);
     const calls = mockRun.mock.calls;
     const deleteCall = calls.find(
-      ([q]: [string]) => q.includes("SIMILAR") && q.includes("DELETE")
+      (args: string[]) => args[0]?.includes("SIMILAR") && args[0]?.includes("DELETE")
     );
     expect(deleteCall).toBeTruthy();
     const createCall = calls.find(
-      ([q]: [string]) => q.includes("SIMILAR") && q.includes("CREATE")
+      (args: string[]) => args[0]?.includes("SIMILAR") && args[0]?.includes("CREATE")
     );
     expect(createCall).toBeTruthy();
   });

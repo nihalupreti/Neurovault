@@ -5,7 +5,13 @@ const { mockChatStream } = vi.hoisted(() => ({
 }));
 
 vi.mock("@neurovault/utils/embeddings", () => ({
-  getEmbeddings: vi.fn().mockResolvedValue(new Array(3072).fill(0)),
+  getEmbeddings: vi.fn().mockResolvedValue(new Array(1024).fill(0)),
+  getEmbeddingsBatch: vi.fn().mockResolvedValue([new Array(1024).fill(0)]),
+  embeddingProvider: { dimensions: 1024 },
+}));
+
+vi.mock("../../chunker/chunker.section.model.js", () => ({
+  default: { findOne: vi.fn().mockReturnValue({ lean: vi.fn().mockResolvedValue(null) }) },
 }));
 
 vi.mock("@neurovault/config", () => ({
@@ -33,7 +39,7 @@ vi.mock("../providers/index.js", () => ({
   }),
 }));
 
-import { askQuestion } from "../qa-service.js";
+import { askQuestion } from "../qa.service.js";
 
 describe("askQuestion", () => {
   beforeEach(() => {

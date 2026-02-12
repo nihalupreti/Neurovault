@@ -1,6 +1,4 @@
 import { createHash } from "crypto";
-import fs from "fs";
-import path from "path";
 
 export interface QueuedChange {
   path: string;

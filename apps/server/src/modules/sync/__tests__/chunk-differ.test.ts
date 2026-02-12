@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { hashChunk, diffChunks, splitAndHash, type ChunkRecord } from "../chunk-differ.js";
+import { hashChunk, diffChunks, splitAndHash, type ChunkRecord } from "../sync.chunk-differ.js";
 
 describe("hashChunk", () => {
   it("produces consistent SHA-256 hex for same input", () => {
@@ -15,21 +15,29 @@ describe("hashChunk", () => {
 });
 
 describe("splitAndHash", () => {
-  it("splits text into chunks and hashes each", async () => {
-    const text = "a".repeat(800) + "\n\n" + "b".repeat(800);
-    const result = await splitAndHash(text);
+  it("splits text into chunks and hashes each", () => {
+    const sentence1 = "a".repeat(1500) + ".";
+    const sentence2 = "b".repeat(1500) + ".";
+    const text = sentence1 + " " + sentence2;
+    const result = splitAndHash(text);
     expect(result.length).toBeGreaterThanOrEqual(2);
     expect(result[0]!.index).toBe(0);
     expect(result[0]!.hash).not.toBe(result[1]!.hash);
   });
 
-  it("produces non-empty chunks", async () => {
+  it("produces non-empty chunks", () => {
     const text = "# Heading\n\nSome paragraph.\n\n## Another\n\nMore text here.";
-    const result = await splitAndHash(text);
+    const result = splitAndHash(text);
     expect(result.length).toBeGreaterThanOrEqual(1);
     for (const chunk of result) {
       expect(chunk.text.trim().length).toBeGreaterThan(0);
     }
+  });
+
+  it("includes headingPath from parsed structure", () => {
+    const text = "# Title\n\nContent here.";
+    const result = splitAndHash(text);
+    expect(result[0]!.headingPath).toEqual(["Title"]);
   });
 });
 
