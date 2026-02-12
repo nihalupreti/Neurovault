@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "./icons";
 import { useSearch } from "@/hooks/useSearch";
 import type { SearchMode } from "@/hooks/useSearch";
@@ -19,30 +19,28 @@ export function CommandPalette({
   onAskVault,
 }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
-  const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open && !dialog.open) {
-      dialog.showModal();
-      setQuery("");
-    } else if (!open && dialog.open) {
-      dialog.close();
-    }
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (open) setQuery("");
   }, [open]);
 
   const { results, mode, cleanQuery, isLoading, searchTime } = useSearch(query);
 
+  if (!open) return null;
+
   return (
-    <dialog
-      ref={dialogRef}
-      className="nv-modal-root nv-modal"
-      onClose={onClose}
-      onClick={(e) => {
-        if (e.target === dialogRef.current) onClose();
-      }}
-    >
+    <div className="nv-modal-root">
+      <div className="nv-modal-backdrop" onClick={onClose} />
+      <div className="nv-modal">
         <div className="nv-modal-input">
           <Icon name="search" size={14} />
           <input
@@ -128,7 +126,8 @@ export function CommandPalette({
           <span className="nv-modal-foot-spacer" />
           <span>hybrid retrieval &middot; RRF &middot; k=10</span>
         </div>
-    </dialog>
+      </div>
+    </div>
   );
 }
 

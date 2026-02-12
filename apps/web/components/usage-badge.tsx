@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import api from "@/api/axios-instance";
+import axios from "axios";
 import { ENDPOINTS } from "@/api/endpoints";
-import { useAuth } from "@/contexts/auth-context";
+import { useAuth } from "@/context/auth-context";
 
 export function UsageBadge() {
   const { isAdmin } = useAuth();
@@ -11,7 +11,7 @@ export function UsageBadge() {
   const { data } = useQuery({
     queryKey: ["usage"],
     queryFn: async () => {
-      const { data } = await api.get(ENDPOINTS.auth.usage);
+      const { data } = await axios.get(ENDPOINTS.auth.usage);
       return data as { today: { guest: number; global: number }; limits: { globalDaily: number } };
     },
     enabled: isAdmin,

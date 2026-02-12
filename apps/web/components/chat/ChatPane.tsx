@@ -8,9 +8,7 @@ import type { Message } from "./ChatBubble";
 import { ChatComposer } from "./ChatComposer";
 import { RateLimitOverlay } from "./RateLimitOverlay";
 import { Icon } from "../icons";
-import { useAuth } from "@/contexts/auth-context";
-
-const MAX_HISTORY_MESSAGES = 6;
+import { useAuth } from "@/context/auth-context";
 
 const SUGGESTIONS = [
   "Summarize my reading on this topic",
@@ -46,7 +44,7 @@ export default function ChatPane() {
 
       const history: ChatMessageType[] = messages
         .filter((m) => !m.isStreaming)
-        .slice(-MAX_HISTORY_MESSAGES)
+        .slice(-6)
         .map((m) => ({ role: m.role, content: m.content }));
 
       ask(question, history, {

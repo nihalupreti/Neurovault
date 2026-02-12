@@ -1,13 +1,18 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-import { ENDPOINTS } from "@/api/endpoints";
-import type {
-  ChatMessage as SharedChatMessage,
-  Citation,
-} from "@neurovault/shared/types";
 
-type ChatMessage = SharedChatMessage | { role: "system"; content: string };
+interface ChatMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+interface Citation {
+  sourceIndex: number;
+  fileId: string;
+  fileName: string;
+  excerpt: string;
+}
 
 interface StreamCallbacks {
   onToken: (content: string) => void;
@@ -44,7 +49,7 @@ export function useQAStream() {
         const secret = typeof window !== "undefined" ? localStorage.getItem("nv_admin_secret") : null;
 
         const response = await fetch(
-          ENDPOINTS.qa.ask,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/qa/ask`,
           {
             method: "POST",
             headers: {
@@ -110,8 +115,8 @@ export function useQAStream() {
             }
           }
         }
-      } catch (err: unknown) {
-        if (err instanceof Error && err.name !== "AbortError") {
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
           callbacks.onError("Connection lost");
         }
       } finally {

@@ -9,7 +9,7 @@ import {
   readFileAtCommit,
   getHeadSha,
   getChangedFiles,
-} from "../sync.git-storage.js";
+} from "../git-storage.js";
 
 let tmpDir: string;
 

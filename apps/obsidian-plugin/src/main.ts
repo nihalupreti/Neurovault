@@ -107,8 +107,8 @@ export default class NeurovaultPlugin extends Plugin {
           new Notice(
             `Files: ${status.fileCount} | Pending: ${status.pendingEmbeddings} | Conflicts: ${status.unresolvedConflicts}`
           );
-        } catch (err: unknown) {
-          new Notice(`Status check failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+        } catch (err: any) {
+          new Notice(`Status check failed: ${err.message}`);
         }
       },
     });
@@ -124,8 +124,8 @@ export default class NeurovaultPlugin extends Plugin {
           } else {
             new Notice(`${conflicts.length} unresolved conflict(s)`);
           }
-        } catch (err: unknown) {
-          new Notice(`Failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+        } catch (err: any) {
+          new Notice(`Failed: ${err.message}`);
         }
       },
     });

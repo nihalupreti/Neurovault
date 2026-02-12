@@ -1,11 +1,14 @@
 {
-  "extends": "@neurovault/typescript-config/base.json",
   "compilerOptions": {
+    "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
     "declaration": false,
-    "declarationMap": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
     "outDir": "dist",
     "sourceMap": true,
     "types": ["node"]
