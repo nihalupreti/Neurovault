@@ -5,14 +5,14 @@ const { mockCreate, mockFindByIdAndUpdate } = vi.hoisted(() => ({
   mockFindByIdAndUpdate: vi.fn(),
 }));
 
-vi.mock("../../files/files.model.js", () => ({
+vi.mock("../../files/fileMetadata.model.js", () => ({
   default: {
     create: mockCreate,
     findByIdAndUpdate: mockFindByIdAndUpdate,
   },
 }));
 
-vi.mock("../../files/files.events.js", () => ({
+vi.mock("../../files/file-events.js", () => ({
   emitFileUploaded: vi.fn(),
 }));
 
@@ -23,7 +23,7 @@ vi.mock("fs/promises", () => ({
 
 import express from "express";
 import request from "supertest";
-import captureRoutes from "../capture.routes.js";
+import captureRoutes from "../capture-routes.js";
 
 function createApp(role: "admin" | "guest") {
   const app = express();

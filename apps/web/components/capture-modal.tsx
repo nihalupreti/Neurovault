@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "@/api/axios-instance";
+import axios from "axios";
 import { ENDPOINTS } from "@/api/endpoints";
 
 interface CaptureModalProps {
@@ -13,34 +13,20 @@ interface CaptureModalProps {
 export function CaptureModal({ open, onClose }: CaptureModalProps) {
   const [content, setContent] = useState("");
   const queryClient = useQueryClient();
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (open && !dialog.open) {
-      dialog.showModal();
-    } else if (!open && dialog.open) {
-      dialog.close();
-    }
-  }, [open]);
 
   const mutation = useMutation({
     mutationFn: async (body: { content: string }) => {
-      const res = await api.post(ENDPOINTS.capture.create, body);
+      const res = await axios.post(ENDPOINTS.capture.create, body);
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["folderTree"] });
+      queryClient.invalidateQueries({ queryKey: ["folder-tree"] });
       setContent("");
       onClose();
     },
   });
 
-  const handleClose = () => {
-    setContent("");
-    onClose();
-  };
+  if (!open) return null;
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -49,6 +35,9 @@ export function CaptureModal({ open, onClose }: CaptureModalProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Escape") {
+      onClose();
+    }
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
@@ -56,36 +45,31 @@ export function CaptureModal({ open, onClose }: CaptureModalProps) {
   };
 
   return (
-    <dialog
-      ref={dialogRef}
-      className="nv-modal"
-      onClose={handleClose}
-      onClick={(e) => {
-        if (e.target === dialogRef.current) handleClose();
-      }}
-    >
-      <div className="nv-modal-header">
-        <span>Quick Capture</span>
-      </div>
-      <form onSubmit={handleSubmit}>
-        <textarea
-          className="nv-modal-input"
-          placeholder="Paste a URL, or type a note..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          onKeyDown={handleKeyDown}
-          autoFocus
-          rows={3}
-        />
-        <div className="nv-modal-foot">
-          <span className="nv-modal-eyebrow">
-            {/^https?:\/\//i.test(content.trim()) ? "link detected" : ""}
-          </span>
-          <button type="submit" disabled={mutation.isPending || !content.trim()}>
-            {mutation.isPending ? "Saving..." : "Capture"}
-          </button>
+    <div className="nv-modal-backdrop" onClick={onClose}>
+      <div className="nv-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="nv-modal-header">
+          <span>Quick Capture</span>
         </div>
-      </form>
-    </dialog>
+        <form onSubmit={handleSubmit}>
+          <textarea
+            className="nv-modal-input"
+            placeholder="Paste a URL, or type a note..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            rows={3}
+          />
+          <div className="nv-modal-foot">
+            <span className="nv-modal-eyebrow">
+              {/^https?:\/\//i.test(content.trim()) ? "link detected" : ""}
+            </span>
+            <button type="submit" disabled={mutation.isPending || !content.trim()}>
+              {mutation.isPending ? "Saving..." : "Capture"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { reciprocalRankFusion } from "../search.rrf.js";
+import { reciprocalRankFusion } from "../rrf.js";
 
 interface RRFItem {
   id: string;

@@ -34,18 +34,4 @@ export const ENDPOINTS = {
   capture: {
     create: `${BASE}/api/capture`,
   },
-  books: {
-    list: `${BASE}/api/books`,
-    get: (id: string) => `${BASE}/api/books/${id}`,
-    chapter: (id: string, num: number) => `${BASE}/api/books/${id}/chapters/${num}`,
-    import: `${BASE}/api/books/import`,
-    delete: (id: string) => `${BASE}/api/books/${id}`,
-  },
-  reader: {
-    progress: (bookId: string) => `${BASE}/api/reader/${bookId}/progress`,
-    annotations: (bookId: string) => `${BASE}/api/reader/${bookId}/annotations`,
-    annotation: (bookId: string, id: string) => `${BASE}/api/reader/${bookId}/annotations/${id}`,
-    related: (bookId: string, anchor: string) => `${BASE}/api/reader/${bookId}/related/${anchor}`,
-    exportObsidian: (bookId: string) => `${BASE}/api/reader/${bookId}/export/obsidian`,
-  },
 } as const;

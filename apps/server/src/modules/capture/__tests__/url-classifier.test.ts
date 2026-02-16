@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { classifyUrl, UrlType } from "../capture.url-classifier.js";
+import { classifyUrl, UrlType } from "../url-classifier.js";
 
 describe("classifyUrl", () => {
   it("classifies youtube.com/watch as bookmark", () => {

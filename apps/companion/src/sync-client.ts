@@ -1,11 +1,34 @@
-import type {
-  SyncChange,
-  PushResult as PushResponse,
-  PullChange,
-  PullResult as PullResponse,
-} from "@neurovault/shared/types";
+import { log } from "./config.js";
 
-export type { SyncChange, PushResponse, PullChange, PullResponse };
+export interface SyncChange {
+  path: string;
+  action: "upsert" | "delete";
+  content?: string;
+  clientHash: string;
+}
+
+export interface PushResponse {
+  commitSha: string;
+  conflicts?: {
+    path: string;
+    serverVersion: string;
+    clientVersion: string;
+    baseVersion: string;
+  }[];
+}
+
+export interface PullChange {
+  path: string;
+  action: "upsert" | "delete";
+  content?: string;
+  contentHash: string;
+}
+
+export interface PullResponse {
+  changes: PullChange[];
+  currentCommit: string;
+  hasMore: boolean;
+}
 
 export class SyncClient {
   constructor(

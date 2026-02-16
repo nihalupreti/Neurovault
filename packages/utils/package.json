@@ -4,8 +4,7 @@
   "type": "module",
   "private": true,
   "exports": {
-    "./embeddings": "./embeddings/index.ts",
-    "./embeddings/jina.provider": "./embeddings/jina.provider.ts"
+    "./embeddings": "./embeddings.ts"
   },
   "dependencies": {
     "dotenv": "^16.0.3"

@@ -17,8 +17,6 @@ COPY --from=builder /app/apps/server/dist ./dist
 COPY --from=builder /app/apps/server/package.json ./package.json
 COPY --from=builder /app/node_modules ./node_modules
 
-RUN npm prune --omit=dev
-
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
   CMD wget --no-verbose --tries=1 --spider http://localhost:3001/api/health || exit 1
 

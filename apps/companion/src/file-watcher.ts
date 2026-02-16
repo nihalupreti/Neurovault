@@ -1,5 +1,8 @@
 import { watch, type FSWatcher } from "chokidar";
+import fs from "fs";
 import path from "path";
+import { createHash } from "crypto";
+import { log } from "./config.js";
 
 export interface FileChange {
   relativePath: string;

@@ -1,1 +1,1 @@
-export { default as qaRoutes } from "./qa.routes.js";
+export { default as qaRoutes } from "./qa-routes.js";

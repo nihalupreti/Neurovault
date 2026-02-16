@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Header } from "@/components/header";
 import { VaultRail } from "@/components/vault-rail";
@@ -11,27 +10,23 @@ import type { RailMode } from "@/components/right-rail";
 import { CommandPalette } from "@/components/command-palette";
 import { LeftDrawer, RightDrawer, Fab } from "@/components/mobile-drawers";
 import { useMobile } from "@/hooks/useMobile";
-import { getFile } from "@/api/client";
+import { getFile, getGraphStats } from "@/api/client";
 
 export default function Home() {
-  return (
-    <Suspense fallback={<div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "var(--ink-faint)", fontFamily: "var(--mono)", fontSize: 12 }}>Loading...</div>}>
-      <HomeContent />
-    </Suspense>
-  );
-}
-
-function HomeContent() {
   const mobile = useMobile();
-  const searchParams = useSearchParams();
-  const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
   const [rightMode, setRightMode] = useState<RailMode>("outline");
-  const activeFileId = searchParams.get("file");
+  const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const activeFileName = "Select a file";
   const activeFolderName = "";
   const [leftDrawer, setLeftDrawer] = useState(false);
   const [rightDrawer, setRightDrawer] = useState(false);
+
+  const { data: stats } = useQuery({
+    queryKey: ["graphStats"],
+    queryFn: getGraphStats,
+    staleTime: 60_000,
+  });
 
   const { data: fileContent } = useQuery({
     queryKey: ["file", activeFileId],
@@ -51,10 +46,8 @@ function HomeContent() {
   }, []);
 
   const handleSelectFile = useCallback((id: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("file", id);
-    router.replace(`?${params.toString()}`, { scroll: false });
-  }, [searchParams, router]);
+    setActiveFileId(id);
+  }, []);
 
   const handleChatToggle = useCallback(() => {
     if (mobile) {
@@ -78,6 +71,7 @@ function HomeContent() {
         chatOpen={rightMode === "chat"}
         onMenu={() => setLeftDrawer(true)}
         mobile={mobile}
+        noteCount={stats?.nodeCount ?? 0}
       />
 
       <div className="nv-shell">

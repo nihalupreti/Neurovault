@@ -69,8 +69,8 @@ export class NeurovaultSettingTab extends PluginSettingTab {
               await this.plugin.saveSettings();
               new Notice("Vault registered successfully!");
               this.display();
-            } catch (err: unknown) {
-              new Notice(`Registration failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+            } catch (err: any) {
+              new Notice(`Registration failed: ${err.message}`);
             }
           })
         );

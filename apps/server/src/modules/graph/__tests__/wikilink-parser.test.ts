@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseWikilinks } from "../graph.wikilink-parser.js";
+import { parseWikilinks } from "../wikilink-parser.js";
 
 describe("parseWikilinks", () => {
   it("extracts simple wikilinks", () => {
