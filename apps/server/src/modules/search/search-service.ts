@@ -30,6 +30,7 @@ export const searchKeyword = async (query: string, fileIds?: string[]) => {
     payload: {
       text: doc.text,
       fileId: doc.fileId,
+      fileName: "",
       chunk_index: doc.chunkIndex,
     },
   }));

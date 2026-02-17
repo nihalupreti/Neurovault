@@ -53,7 +53,7 @@ export const handleFolderUploads = async (req: Request, res: Response) => {
           });
           await emitFileUploaded(fileDoc.serverPath, fileDoc._id);
         } else {
-          let folderDoc = await fileModel.findOne({
+          let folderDoc: any = await fileModel.findOne({
             name: nodeName,
             parentId,
             type: "folder",
@@ -67,7 +67,7 @@ export const handleFolderUploads = async (req: Request, res: Response) => {
             });
           }
 
-          parentId = folderDoc._id;
+          parentId = String(folderDoc._id);
         }
       }
     }

@@ -34,7 +34,7 @@ export class GeminiProvider implements LLMProvider {
     });
 
     for await (const chunk of stream) {
-      const text = chunk.text();
+      const text = chunk.text;
       if (text) yield text;
     }
   }

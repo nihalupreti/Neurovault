@@ -3,7 +3,7 @@ interface RRFItem {
   payload: any;
 }
 
-interface FusedResult {
+export interface FusedResult {
   id: string;
   score: number;
   payload: any;

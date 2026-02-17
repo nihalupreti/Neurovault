@@ -19,8 +19,8 @@ describe("GeminiProvider", () => {
   it("yields tokens from stream chunks", async () => {
     mockGenerateContentStream.mockResolvedValue({
       async *[Symbol.asyncIterator]() {
-        yield { text: () => "Hello" };
-        yield { text: () => " world" };
+        yield { get text() { return "Hello"; } };
+        yield { get text() { return " world"; } };
       },
     });
 
@@ -39,7 +39,7 @@ describe("GeminiProvider", () => {
   it("passes model and messages to SDK", async () => {
     mockGenerateContentStream.mockResolvedValue({
       async *[Symbol.asyncIterator]() {
-        yield { text: () => "ok" };
+        yield { get text() { return "ok"; } };
       },
     });
 
