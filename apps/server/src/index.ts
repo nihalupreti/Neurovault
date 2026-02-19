@@ -11,6 +11,7 @@ import syncRoutes from "./modules/sync/routes.js";
 import qaRoutes from "./modules/qa/qa-routes.js";
 import graphRoutes from "./modules/graph/graph-routes.js";
 import captureRoutes from "./modules/capture/capture-routes.js";
+import { createEmailWebhookRouter } from "./modules/capture/email-webhook.js";
 import { initConstraints } from "./modules/graph/graph-service.js";
 import { initWebSocket } from "./modules/sync/ws-manager.js";
 import { identifyRole } from "./modules/auth/identify-role.js";
@@ -42,6 +43,13 @@ app.use(
   })
 );
 app.use(express.json({ limit: "50mb" }));
+app.use(
+  "/api/capture/email",
+  createEmailWebhookRouter(
+    process.env.EMAIL_WEBHOOK_SECRET || "",
+    process.env.EMAIL_ALLOWLIST || ""
+  )
+);
 app.use(identifyRole);
 
 app.get("/api/health", (_req, res) => {
