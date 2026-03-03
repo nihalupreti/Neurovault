@@ -34,6 +34,7 @@
     "@neurovault/config": "*",
     "@neurovault/utils": "*",
     "@qdrant/js-client-rest": "^1.15.1",
+    "cheerio": "^1.0.0-rc.12",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^5.1.0",

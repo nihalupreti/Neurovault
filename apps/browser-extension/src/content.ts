@@ -1,3 +1,4 @@
-const selection = window.getSelection();
-const text = selection ? selection.toString() : "";
-text;
+(() => {
+  const selection = window.getSelection();
+  return selection ? selection.toString() : "";
+})();

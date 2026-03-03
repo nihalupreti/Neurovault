@@ -8,6 +8,7 @@ export default defineConfig({
   },
   outDir: "dist",
   format: ["iife"],
+  outExtension: () => ({ js: ".js" }),
   splitting: false,
   sourcemap: false,
   clean: true,
