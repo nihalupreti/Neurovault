@@ -3,10 +3,13 @@ import { askQuestion } from "./qa-service.js";
 import type { ChatMessage } from "./providers/types.js";
 
 export const handleAsk = async (req: Request, res: Response) => {
-  const { question, history, limit } = req.body as {
+  const { question, history, limit, scope, bookId, chapterNumber } = req.body as {
     question?: string;
     history?: ChatMessage[];
     limit?: number;
+    scope?: string;
+    bookId?: string;
+    chapterNumber?: number;
   };
 
   if (!question || typeof question !== "string" || question.trim().length === 0) {
@@ -44,6 +47,9 @@ export const handleAsk = async (req: Request, res: Response) => {
       question: question.trim(),
       history: sanitizedHistory,
       limit: clampedLimit,
+      scope: scope as "chapter" | "book" | "connected" | undefined,
+      bookId,
+      chapterNumber,
     });
 
     for await (const token of stream) {

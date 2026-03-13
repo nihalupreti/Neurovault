@@ -10,6 +10,9 @@ interface AskParams {
   question: string;
   history?: ChatMessage[];
   limit?: number;
+  scope?: "chapter" | "book" | "connected";
+  bookId?: string;
+  chapterNumber?: number;
 }
 
 interface AskResult {
@@ -25,13 +28,63 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
 
   const queryEmbedding = await getEmbeddings(question);
   const client = getQdrantClient();
-  const searchResult = await client.query("neurovault", {
-    query: queryEmbedding,
-    limit,
-    with_payload: true,
-  });
 
-  const chunks: RetrievedChunk[] = (searchResult.points || []).map((p: any) => ({
+  let points: any[];
+
+  if (params.scope === "connected" && params.bookId && params.chapterNumber !== undefined) {
+    const [chapterResult, vaultResult] = await Promise.all([
+      client.query("neurovault", {
+        query: queryEmbedding,
+        limit: Math.ceil(limit / 2),
+        filter: {
+          must: [
+            { key: "bookId", match: { value: params.bookId } },
+            { key: "chapterNumber", match: { value: params.chapterNumber } },
+          ],
+        },
+        with_payload: true,
+      }),
+      client.query("neurovault", {
+        query: queryEmbedding,
+        limit: Math.ceil(limit / 2),
+        filter: {
+          must_not: [{ key: "bookId", match: { value: params.bookId } }],
+        },
+        with_payload: true,
+      }),
+    ]);
+    points = [
+      ...(chapterResult.points || []),
+      ...(vaultResult.points || []),
+    ];
+  } else {
+    let filter: any = undefined;
+
+    if (params.scope && params.bookId) {
+      if (params.scope === "chapter" && params.chapterNumber !== undefined) {
+        filter = {
+          must: [
+            { key: "bookId", match: { value: params.bookId } },
+            { key: "chapterNumber", match: { value: params.chapterNumber } },
+          ],
+        };
+      } else if (params.scope === "book") {
+        filter = {
+          must: [{ key: "bookId", match: { value: params.bookId } }],
+        };
+      }
+    }
+
+    const searchResult = await client.query("neurovault", {
+      query: queryEmbedding,
+      limit,
+      filter,
+      with_payload: true,
+    });
+    points = searchResult.points || [];
+  }
+
+  const chunks: RetrievedChunk[] = points.map((p: any) => ({
     fileId: p.payload?.fileId ?? "",
     fileName: p.payload?.fileName ?? "",
     text: p.payload?.text ?? "",
