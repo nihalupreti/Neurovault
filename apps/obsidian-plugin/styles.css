@@ -1,1 +1,49 @@
 /* Neurovault Sync plugin styles */
+
+.neurovault-conflict-modal {
+  max-width: 800px;
+  width: 90vw;
+}
+
+.nv-conflict-columns {
+  display: flex;
+  gap: 16px;
+  margin: 12px 0;
+}
+
+.nv-conflict-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.nv-conflict-content {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  font-size: 13px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.nv-conflict-buttons {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.nv-conflict-editor {
+  width: 100%;
+  min-height: 200px;
+  font-family: var(--font-monospace);
+  font-size: 13px;
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.nv-conflict-merge-btn {
+  margin-top: 8px;
+}
