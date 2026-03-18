@@ -16,6 +16,8 @@ import { initConstraints } from "./modules/graph/graph-service.js";
 import { initWebSocket } from "./modules/sync/ws-manager.js";
 import { identifyRole } from "./modules/auth/identify-role.js";
 import authRoutes from "./modules/auth/auth-routes.js";
+import bookRoutes from "./modules/books/books.routes.js";
+import readerRoutes from "./modules/reader/reader.routes.js";
 
 dotenv.config();
 
@@ -63,6 +65,8 @@ app.use("/api/sync", syncRoutes);
 app.use("/api/qa", qaRoutes);
 app.use("/api/graph", graphRoutes);
 app.use("/api/capture", captureRoutes);
+app.use("/api/books", bookRoutes);
+app.use("/api/reader", readerRoutes);
 
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Unhandled error:", err.message);
