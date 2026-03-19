@@ -1,5 +1,6 @@
 import { getQdrantClient } from "@neurovault/config";
 import { getEmbeddings } from "@neurovault/utils/embeddings";
+import { v4 as uuidv4 } from "uuid";
 import { BookAnnotation, ReadingProgress } from "./reader.model.js";
 
 const COLLECTION = "neurovault";
@@ -31,7 +32,7 @@ export async function createAnnotation(input: CreateAnnotationInput) {
     wait: true,
     points: [
       {
-        id: Date.now(),
+        id: uuidv4(),
         vector: embedding,
         payload: {
           text: textToEmbed,

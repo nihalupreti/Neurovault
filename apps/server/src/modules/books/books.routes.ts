@@ -9,7 +9,17 @@ import {
 } from "./books.handler.js";
 
 const router = Router();
-const upload = multer({ dest: "uploads/books/" });
+const upload = multer({
+  dest: "uploads/books/",
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype === "text/html" || file.originalname.endsWith(".html") || file.originalname.endsWith(".htm")) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only HTML files are accepted"));
+    }
+  },
+});
 
 router.post("/import", upload.single("book"), handleImport);
 router.get("/", handleListBooks);

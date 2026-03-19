@@ -1,6 +1,7 @@
 import { MarkdownTextSplitter } from "@langchain/textsplitters";
 import { getQdrantClient } from "@neurovault/config";
 import { getEmbeddings } from "@neurovault/utils/embeddings";
+import { v4 as uuidv4 } from "uuid";
 import ChunkText from "../search/chunk-text.model.js";
 
 const COLLECTION = "neurovault";
@@ -29,7 +30,6 @@ export async function chunkAndEmbedBook(input: ChunkInput): Promise<number> {
   });
   const allPoints: any[] = [];
   const allChunkDocs: any[] = [];
-  let idBase = Date.now();
 
   for (const chapter of input.chapters) {
     if (!chapter.plainText.trim()) continue;
@@ -42,10 +42,9 @@ export async function chunkAndEmbedBook(input: ChunkInput): Promise<number> {
       if (!text.trim()) continue;
 
       const embedding = await getEmbeddings(text);
-      const pointId = idBase++;
 
       allPoints.push({
-        id: pointId,
+        id: uuidv4(),
         vector: embedding,
         payload: {
           text,

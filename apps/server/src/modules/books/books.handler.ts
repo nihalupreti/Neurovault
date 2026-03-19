@@ -10,7 +10,6 @@ export const handleImport = async (req: Request, res: Response) => {
     const fs = await import("node:fs/promises");
     const html = await fs.readFile(file.path, "utf-8");
     const result = await importBook(html);
-    await fs.unlink(file.path);
 
     if (result.skipped) {
       return res.json({
@@ -24,6 +23,9 @@ export const handleImport = async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Book import failed:", err);
     res.status(500).json({ error: "Import failed" });
+  } finally {
+    const fs = await import("node:fs/promises");
+    await fs.unlink(file.path).catch(() => {});
   }
 };
 
@@ -36,7 +38,10 @@ export const handleListBooks = async (_req: Request, res: Response) => {
   }
 };
 
-export const handleGetBook = async (req: Request, res: Response) => {
+export const handleGetBook = async (
+  req: Request<{ id: string }>,
+  res: Response,
+) => {
   try {
     const book = await Book.findById(req.params.id).lean();
     if (!book) return res.status(404).json({ error: "Book not found" });
@@ -46,7 +51,10 @@ export const handleGetBook = async (req: Request, res: Response) => {
   }
 };
 
-export const handleGetChapter = async (req: Request, res: Response) => {
+export const handleGetChapter = async (
+  req: Request<{ id: string; num: string }>,
+  res: Response,
+) => {
   try {
     const chapter = await BookChapter.findOne({
       bookId: req.params.id,
@@ -59,7 +67,10 @@ export const handleGetChapter = async (req: Request, res: Response) => {
   }
 };
 
-export const handleDeleteBook = async (req: Request, res: Response) => {
+export const handleDeleteBook = async (
+  req: Request<{ id: string }>,
+  res: Response,
+) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) return res.status(404).json({ error: "Book not found" });
