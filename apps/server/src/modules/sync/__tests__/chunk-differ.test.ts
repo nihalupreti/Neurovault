@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { hashChunk, diffChunks, splitAndHash, type ChunkRecord } from "../chunk-differ.js";
+import { hashChunk, diffChunks, splitAndHash, type ChunkRecord } from "../sync.chunk-differ.js";
 
 describe("hashChunk", () => {
   it("produces consistent SHA-256 hex for same input", () => {

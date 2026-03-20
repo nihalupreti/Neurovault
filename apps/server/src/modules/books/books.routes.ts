@@ -7,6 +7,7 @@ import {
   handleGetChapter,
   handleDeleteBook,
 } from "./books.handler.js";
+import { asHandler } from "../../utils/as-handler.js";
 
 const router = Router();
 const upload = multer({
@@ -21,10 +22,10 @@ const upload = multer({
   },
 });
 
-router.post("/import", upload.single("book"), handleImport);
-router.get("/", handleListBooks);
-router.get("/:id", handleGetBook);
-router.get("/:id/chapters/:num", handleGetChapter);
-router.delete("/:id", handleDeleteBook);
+router.post("/import", upload.single("book"), asHandler(handleImport));
+router.get("/", asHandler(handleListBooks));
+router.get("/:id", asHandler(handleGetBook));
+router.get("/:id/chapters/:num", asHandler(handleGetChapter));
+router.delete("/:id", asHandler(handleDeleteBook));
 
 export default router;

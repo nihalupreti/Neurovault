@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { fetchUrl } from "../url-fetcher.js";
+import { fetchUrl } from "../capture.url-fetcher.js";
 
 describe("fetchUrl", () => {
   it("returns HTML body for a valid URL", async () => {

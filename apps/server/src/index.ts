@@ -1,28 +1,33 @@
-import { Request, Response, NextFunction } from "express";
+import { Request } from "express";
 import { connectMongo } from "@neurovault/config";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import helmet from "helmet";
+import { requestId } from "./middleware/request-id.js";
+import { errorHandler } from "./middleware/error-handler.js";
 import { createServer } from "http";
-import fileRoutes from "./modules/files/routes.js";
-import searchRoutes from "./modules/search/routes.js";
-import syncRoutes from "./modules/sync/routes.js";
-import qaRoutes from "./modules/qa/qa-routes.js";
-import graphRoutes from "./modules/graph/graph-routes.js";
-import captureRoutes from "./modules/capture/capture-routes.js";
-import { createEmailWebhookRouter } from "./modules/capture/email-webhook.js";
-import { initConstraints } from "./modules/graph/graph-service.js";
-import { initWebSocket } from "./modules/sync/ws-manager.js";
-import { identifyRole } from "./modules/auth/identify-role.js";
-import authRoutes from "./modules/auth/auth-routes.js";
+import fileRoutes from "./modules/files/files.routes.js";
+import searchRoutes from "./modules/search/search.routes.js";
+import syncRoutes from "./modules/sync/sync.routes.js";
+import qaRoutes from "./modules/qa/qa.routes.js";
+import graphRoutes from "./modules/graph/graph.routes.js";
+import captureRoutes from "./modules/capture/capture.routes.js";
+import { createEmailWebhookRouter } from "./modules/capture/capture.email-webhook.js";
+import { initConstraints } from "./modules/graph/graph.service.js";
+import { initWebSocket } from "./modules/sync/sync.ws-manager.js";
+import { identifyRole } from "./modules/auth/auth.middleware.js";
+import { apiSuccess } from "./utils/api-response.js";
+import authRoutes from "./modules/auth/auth.routes.js";
 import bookRoutes from "./modules/books/books.routes.js";
 import readerRoutes from "./modules/reader/reader.routes.js";
 
 dotenv.config();
 
-if (!process.env.DB_URL) {
-  console.error("FATAL: DB_URL environment variable is required");
+const REQUIRED_ENV = ["DB_URL", "ADMIN_SECRET"] as const;
+const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
+if (missing.length > 0) {
+  console.error(`FATAL: Missing required env vars: ${missing.join(", ")}`);
   process.exit(1);
 }
 
@@ -32,9 +37,11 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3001;
 
 const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",")
+  ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim()).filter(Boolean)
   : ["http://localhost:3000"];
 
+app.set("trust proxy", 1);
+app.use(requestId);
 app.use(helmet());
 app.use(
   cors<Request>({
@@ -44,7 +51,7 @@ app.use(
     optionsSuccessStatus: 204,
   })
 );
-app.use(express.json({ limit: "50mb" }));
+app.use(express.json({ limit: "1mb" }));
 app.use(
   "/api/capture/email",
   createEmailWebhookRouter(
@@ -55,23 +62,20 @@ app.use(
 app.use(identifyRole);
 
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", uptime: process.uptime() });
+  apiSuccess(res, { status: "ok", uptime: process.uptime() });
 });
 
 app.use("/api/auth", authRoutes);
 app.use("/api/file", fileRoutes);
 app.use("/api/search", searchRoutes);
-app.use("/api/sync", syncRoutes);
+app.use("/api/sync", express.json({ limit: "10mb" }), syncRoutes);
 app.use("/api/qa", qaRoutes);
 app.use("/api/graph", graphRoutes);
 app.use("/api/capture", captureRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/reader", readerRoutes);
 
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error("Unhandled error:", err.message);
-  res.status(500).json({ error: "Internal server error" });
-});
+app.use(errorHandler);
 
 const server = createServer(app);
 initWebSocket(server);

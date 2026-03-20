@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { formatEmailNote } from "../email-formatter.js";
+import { formatEmailNote } from "../capture.email-formatter.js";
 
 describe("formatEmailNote", () => {
   it("generates markdown with full frontmatter", () => {

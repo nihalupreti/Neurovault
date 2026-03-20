@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { buildIndexActions, buildDeleteActions } from "../index-pipeline.js";
-import { hashChunk, type ChunkRecord } from "../chunk-differ.js";
+import { buildIndexActions, buildDeleteActions } from "../sync.index-pipeline.js";
+import { hashChunk, type ChunkRecord } from "../sync.chunk-differ.js";
 
 describe("buildIndexActions", () => {
   it("returns embed actions for new file", async () => {

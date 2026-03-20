@@ -33,7 +33,7 @@ vi.mock("../providers/index.js", () => ({
   }),
 }));
 
-import { askQuestion } from "../qa-service.js";
+import { askQuestion } from "../qa.service.js";
 
 describe("askQuestion", () => {
   beforeEach(() => {

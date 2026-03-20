@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { extractArticle, extractMeta } from "../content-extractor.js";
+import { extractArticle, extractMeta } from "../capture.extractor.js";
 
 const SAMPLE_ARTICLE_HTML = `
 <!DOCTYPE html>

@@ -55,7 +55,7 @@ export async function createAnnotation(input: CreateAnnotationInput) {
     const session = driver.session();
     try {
       const sectionId = `${input.bookId}:${input.sectionAnchor}`;
-      await session.executeWrite(async (tx: any) => {
+      await session.executeWrite(async (tx) => {
         await tx.run(
           `MATCH (s:BookSection {sectionId: $sectionId})
            MATCH (f:File {fileId: $fileId})
@@ -76,11 +76,17 @@ export async function listAnnotations(
   bookId: string,
   chapterNumber?: number,
   type?: string,
+  skip = 0,
+  limit = 20,
 ) {
   const filter: Record<string, unknown> = { bookId };
   if (chapterNumber !== undefined) filter.chapterNumber = chapterNumber;
   if (type) filter.type = type;
-  return BookAnnotation.find(filter).sort({ createdAt: 1 }).lean();
+  const [annotations, total] = await Promise.all([
+    BookAnnotation.find(filter).sort({ createdAt: 1 }).skip(skip).limit(limit).lean(),
+    BookAnnotation.countDocuments(filter),
+  ]);
+  return { annotations, total };
 }
 
 export async function updateAnnotation(

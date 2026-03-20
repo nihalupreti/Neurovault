@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { checkEmailRateLimit, resetForTesting } from "../email-rate-limiter.js";
+import { checkEmailRateLimit, resetForTesting } from "../capture.email-rate-limiter.js";
 
 describe("checkEmailRateLimit", () => {
   beforeEach(() => {

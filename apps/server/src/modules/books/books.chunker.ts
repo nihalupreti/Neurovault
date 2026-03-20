@@ -2,7 +2,7 @@ import { MarkdownTextSplitter } from "@langchain/textsplitters";
 import { getQdrantClient } from "@neurovault/config";
 import { getEmbeddings } from "@neurovault/utils/embeddings";
 import { v4 as uuidv4 } from "uuid";
-import ChunkText from "../search/chunk-text.model.js";
+import ChunkText from "../search/search.chunk-text.model.js";
 
 const COLLECTION = "neurovault";
 
@@ -28,8 +28,12 @@ export async function chunkAndEmbedBook(input: ChunkInput): Promise<number> {
     chunkSize: 800,
     chunkOverlap: 150,
   });
-  const allPoints: any[] = [];
-  const allChunkDocs: any[] = [];
+  const allPoints: Array<{
+    id: string;
+    vector: number[];
+    payload: Record<string, unknown>;
+  }> = [];
+  const allChunkDocs: Array<Record<string, unknown>> = [];
 
   for (const chapter of input.chapters) {
     if (!chapter.plainText.trim()) continue;

@@ -82,7 +82,7 @@ export async function importBook(html: string): Promise<ImportResult> {
 
 export async function deleteBook(bookId: string): Promise<void> {
   const { getQdrantClient } = await import("@neurovault/config");
-  const ChunkText = (await import("../search/chunk-text.model.js")).default;
+  const ChunkText = (await import("../search/search.chunk-text.model.js")).default;
 
   await getQdrantClient().delete("neurovault", {
     filter: { must: [{ key: "bookId", match: { value: bookId } }] },

@@ -4,13 +4,13 @@ const { mockCreate } = vi.hoisted(() => ({
   mockCreate: vi.fn(),
 }));
 
-vi.mock("../../files/fileMetadata.model.js", () => ({
+vi.mock("../../files/files.model.js", () => ({
   default: {
     create: mockCreate,
   },
 }));
 
-vi.mock("../../files/file-events.js", () => ({
+vi.mock("../../files/files.events.js", () => ({
   emitFileUploaded: vi.fn(),
 }));
 
@@ -19,13 +19,13 @@ vi.mock("fs/promises", () => ({
   mkdir: vi.fn().mockResolvedValue(undefined),
 }));
 
-vi.mock("../email-rate-limiter.js", () => ({
+vi.mock("../capture.email-rate-limiter.js", () => ({
   checkEmailRateLimit: vi.fn().mockReturnValue({ allowed: true, remaining: 49 }),
 }));
 
 import express from "express";
 import request from "supertest";
-import { createEmailWebhookRouter } from "../email-webhook.js";
+import { createEmailWebhookRouter } from "../capture.email-webhook.js";
 
 function createApp(secret: string, allowlist: string) {
   const app = express();

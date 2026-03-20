@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { aggregateChunkSimilarities } from "../similarity-job.js";
+import { aggregateChunkSimilarities } from "../graph.similarity-job.js";
 
 describe("aggregateChunkSimilarities", () => {
   it("groups by target fileId and takes max score", () => {

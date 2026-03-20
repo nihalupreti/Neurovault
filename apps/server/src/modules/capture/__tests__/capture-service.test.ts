@@ -6,14 +6,14 @@ const { mockCreate, mockFindByIdAndUpdate } = vi.hoisted(() => ({
   mockFindByIdAndUpdate: vi.fn(),
 }));
 
-vi.mock("../../files/fileMetadata.model.js", () => ({
+vi.mock("../../files/files.model.js", () => ({
   default: {
     create: mockCreate,
     findByIdAndUpdate: mockFindByIdAndUpdate,
   },
 }));
 
-vi.mock("../../files/file-events.js", () => ({
+vi.mock("../../files/files.events.js", () => ({
   emitFileUploaded: vi.fn(),
 }));
 
@@ -22,8 +22,8 @@ vi.mock("fs/promises", () => ({
   mkdir: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { captureContent } from "../capture-service.js";
-import { emitFileUploaded } from "../../files/file-events.js";
+import { captureContent } from "../capture.service.js";
+import { emitFileUploaded } from "../../files/files.events.js";
 
 describe("captureContent", () => {
   beforeEach(() => {

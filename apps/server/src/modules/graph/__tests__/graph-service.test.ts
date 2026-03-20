@@ -26,7 +26,7 @@ import {
   getFullGraph,
   getShortestPath,
   getStats,
-} from "../graph-service.js";
+} from "../graph.service.js";
 
 describe("graph-service CRUD", () => {
   beforeEach(() => {

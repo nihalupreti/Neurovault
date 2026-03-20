@@ -13,7 +13,7 @@ vi.mock("@neurovault/config", () => ({
   getQdrantClient: mockGetQdrantClient,
 }));
 
-vi.mock("../../search/chunk-text.model.js", () => ({
+vi.mock("../../search/search.chunk-text.model.js", () => ({
   default: { deleteMany: mockChunkTextDeleteMany, insertMany: mockChunkTextCreate },
 }));
 
