@@ -4,6 +4,12 @@
   "main": "index.ts",
   "types": "index.ts",
   "private": true,
+  "exports": {
+    ".": "./index.ts",
+    "./mongoose": "./mongoose.ts",
+    "./qdrant": "./qdrant.ts",
+    "./neo4j": "./neo4j.ts"
+  },
   "dependencies": {
     "@qdrant/js-client-rest": "^1.15.1",
     "mongoose": "^8.18.1"
