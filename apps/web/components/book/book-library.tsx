@@ -1,0 +1,131 @@
+"use client";
+
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { listBooks } from "@/api/client";
+import { Icon } from "@/components/icons";
+
+const GLYPHS = ["▤", "❰❱", "⌬", "∞", "◴", "◈", "⬡", "⎔"];
+const HUES = [24, 200, 145, 290, 60, 330, 180, 100];
+
+interface BookLibraryProps {
+  onSelectBook: (bookId: string) => void;
+  onImport: () => void;
+}
+
+export function BookLibrary({ onSelectBook, onImport }: BookLibraryProps) {
+  const [filter, setFilter] = useState("");
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["books"],
+    queryFn: () => listBooks(),
+  });
+
+  const books = data?.data ?? [];
+  const filtered = filter
+    ? books.filter(
+        (b) =>
+          b.title.toLowerCase().includes(filter.toLowerCase()) ||
+          b.topic.toLowerCase().includes(filter.toLowerCase())
+      )
+    : books;
+
+  if (isLoading) {
+    return (
+      <div className="nv-library-wrap">
+        <div className="nv-empty-state">Loading books&hellip;</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="nv-library-wrap">
+        <div className="nv-empty-state">Failed to load books.</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="nv-library-wrap">
+      <button className="nv-import-card" onClick={onImport}>
+        <span className="nv-import-card-icon">
+          <Icon name="plus" size={14} />
+        </span>
+        <span className="nv-import-card-body">
+          <b>import book</b>
+          <span>epub · pdf · html</span>
+        </span>
+      </button>
+
+      {books.length > 0 && (
+        <div className="nv-rail-search">
+          <Icon name="search" size={11} />
+          <input
+            placeholder="filter books…"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          />
+        </div>
+      )}
+
+      {filtered.length === 0 && books.length === 0 && (
+        <div className="nv-empty-state">
+          No books yet. Import one to get started.
+        </div>
+      )}
+
+      {filtered.length === 0 && books.length > 0 && (
+        <div className="nv-empty-state">No books match your filter.</div>
+      )}
+
+      <div className="nv-library">
+        {filtered.map((book, i) => {
+          const glyph = GLYPHS[i % GLYPHS.length];
+          const hue = HUES[i % HUES.length];
+          const chaptersRead = 0;
+          const progress = book.totalChapters > 0 ? chaptersRead / book.totalChapters : 0;
+
+          return (
+            <button
+              key={book._id}
+              className={`nv-lib-row ${progress >= 1 ? "is-done" : ""}`}
+              onClick={() => onSelectBook(book._id)}
+            >
+              <span
+                className="nv-lib-cover"
+                style={{ "--hue": hue } as React.CSSProperties}
+              >
+                {glyph}
+              </span>
+              <span className="nv-lib-meta">
+                <span className="nv-lib-title">{book.title}</span>
+                <span className="nv-lib-author">{book.topic}</span>
+                <span className="nv-lib-progress">
+                  <i
+                    style={{ width: `${Math.round(progress * 100)}%` }}
+                  />
+                </span>
+                <span className="nv-lib-foot">
+                  <b>
+                    {chaptersRead}/{book.totalChapters}
+                  </b>
+                  <span className="nv-dot" />
+                  <span>{book.totalChapters} chapters</span>
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {books.length > 0 && (
+        <div className="nv-rail-foot">
+          <span className="nv-foot-meta">
+            {books.length} book{books.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+      )}
+    </div>
+  );
+}
