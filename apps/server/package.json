@@ -7,17 +7,23 @@
   "scripts": {
     "dev": "tsup --watch --onSuccess \"node dist/index.cjs\"",
     "build": "tsup",
-    "lint": "eslint src/ --max-warnings 0"
+    "lint": "eslint src/ --max-warnings 0",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@neurovault/eslint-config": "*",
     "@neurovault/typescript-config": "*",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/micromatch": "^4.0.10",
     "@types/mongoose": "^5.11.96",
     "@types/multer": "^2.0.0",
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.18.1",
     "tsup": "^8.5.0",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "vitest": "^4.1.5"
   },
   "dependencies": {
     "@langchain/core": "^0.3.72",
@@ -28,7 +34,12 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
     "express": "^5.1.0",
+    "isomorphic-git": "^1.37.6",
+    "micromatch": "^4.0.8",
     "mongoose": "^8.18.1",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "node-diff3": "^3.2.0",
+    "uuid": "^10.0.0",
+    "ws": "^8.20.0"
   }
 }
