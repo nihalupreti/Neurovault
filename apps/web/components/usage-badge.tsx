@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { ENDPOINTS } from "@/api/endpoints";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/contexts/auth-context";
 
 export function UsageBadge() {
   const { isAdmin } = useAuth();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { ENDPOINTS } from "@/api/endpoints";
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -49,7 +50,7 @@ export function useQAStream() {
         const secret = typeof window !== "undefined" ? localStorage.getItem("nv_admin_secret") : null;
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/qa/ask`,
+          ENDPOINTS.qa.ask,
           {
             method: "POST",
             headers: {
@@ -115,8 +116,8 @@ export function useQAStream() {
             }
           }
         }
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name !== "AbortError") {
           callbacks.onError("Connection lost");
         }
       } finally {

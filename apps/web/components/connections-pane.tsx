@@ -3,18 +3,20 @@
 import { useQuery } from "@tanstack/react-query";
 import { getNeighbors, getFileCluster } from "@/api/client";
 
+const MAX_VISIBLE_NODES = 6;
+
 interface ConnectionsPaneProps {
   fileId: string | null;
 }
 
 export function ConnectionsPane({ fileId }: ConnectionsPaneProps) {
-  const { data: neighbors } = useQuery({
+  const { data: neighbors, isError: neighborsError } = useQuery({
     queryKey: ["neighbors", fileId],
     queryFn: () => getNeighbors(fileId!),
     enabled: !!fileId,
   });
 
-  const { data: cluster } = useQuery({
+  const { data: cluster, isError: clusterError } = useQuery({
     queryKey: ["cluster", fileId],
     queryFn: () => getFileCluster(fileId!),
     enabled: !!fileId,
@@ -23,7 +25,17 @@ export function ConnectionsPane({ fileId }: ConnectionsPaneProps) {
   const allNodes = [
     ...(neighbors?.explicit ?? []).map((n) => ({ ...n, type: "explicit" as const })),
     ...(neighbors?.implicit ?? []).map((n) => ({ ...n, type: "implicit" as const })),
-  ].slice(0, 6);
+  ].slice(0, MAX_VISIBLE_NODES);
+
+  if (neighborsError || clusterError) {
+    return (
+      <div className="nv-conn">
+        <div style={{ color: "var(--ink-faint)", fontSize: "12px", padding: "8px" }}>
+          Failed to load
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="nv-conn">

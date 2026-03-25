@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "./icons";
 import { getFolderTree, getGraphStats } from "@/api/client";
@@ -12,12 +12,12 @@ interface VaultRailProps {
 }
 
 export function VaultRail({ activeId, onSelectFile }: VaultRailProps) {
-  const { data: tree } = useQuery({
+  const { data: tree, isError: treeError } = useQuery({
     queryKey: ["folderTree"],
     queryFn: () => getFolderTree(),
   });
 
-  const { data: stats } = useQuery({
+  const { data: stats, isError: statsError } = useQuery({
     queryKey: ["graphStats"],
     queryFn: getGraphStats,
     staleTime: 60_000,
@@ -35,31 +35,43 @@ export function VaultRail({ activeId, onSelectFile }: VaultRailProps) {
         </button>
       </div>
 
-      <div className="nv-rail-stats">
-        <div>
-          <b>{stats?.nodeCount ?? "—"}</b>
-          <span>notes</span>
+      {statsError ? (
+        <div className="nv-rail-stats" style={{ color: "var(--ink-faint)", fontSize: "12px" }}>
+          Failed to load stats
         </div>
-        <div>
-          <b>{stats ? `${(stats.edgeCount / 1000).toFixed(1)}k` : "—"}</b>
-          <span>chunks</span>
+      ) : (
+        <div className="nv-rail-stats">
+          <div>
+            <b>{stats?.nodeCount ?? "—"}</b>
+            <span>notes</span>
+          </div>
+          <div>
+            <b>{stats ? `${(stats.edgeCount / 1000).toFixed(1)}k` : "—"}</b>
+            <span>chunks</span>
+          </div>
+          <div>
+            <b>{stats?.edgeCount ?? "—"}</b>
+            <span>edges</span>
+          </div>
         </div>
-        <div>
-          <b>{stats?.edgeCount ?? "—"}</b>
-          <span>edges</span>
-        </div>
-      </div>
+      )}
 
       <div className="nv-tree">
-        {tree?.children?.map((node) => (
-          <TreeNode
-            key={node._id}
-            node={node}
-            depth={0}
-            activeId={activeId}
-            onSelectFile={onSelectFile}
-          />
-        ))}
+        {treeError ? (
+          <div style={{ color: "var(--ink-faint)", fontSize: "12px", padding: "8px" }}>
+            Failed to load
+          </div>
+        ) : (
+          tree?.children?.map((node) => (
+            <TreeNode
+              key={node._id}
+              node={node}
+              depth={0}
+              activeId={activeId}
+              onSelectFile={onSelectFile}
+            />
+          ))
+        )}
       </div>
 
       <div className="nv-rail-foot">
@@ -73,7 +85,7 @@ export function VaultRail({ activeId, onSelectFile }: VaultRailProps) {
   );
 }
 
-function TreeNode({
+const TreeNode = memo(function TreeNode({
   node,
   depth,
   activeId,
@@ -127,9 +139,10 @@ function TreeNode({
       className={`nv-tree-row nv-tree-file-row ${isActive ? "is-active" : ""}`}
       style={{ paddingLeft: 8 + depth * 14 }}
       onClick={() => onSelectFile(node._id)}
+      aria-label={`Open ${node.name.replace(/\.md$/, "")}`}
     >
       <span className="nv-tree-dot" />
       <span className="nv-tree-label">{node.name.replace(/\.md$/, "")}</span>
     </button>
   );
-}
+});

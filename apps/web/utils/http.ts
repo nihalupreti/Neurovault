@@ -18,30 +18,10 @@ export async function uploadFiles({
   endPoint: string;
   data: FormData;
 }) {
-  const response = await axios.post(
-    `${process.env.NEXT_PUBLIC_API_URL}${endPoint}`,
-    data,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-      withCredentials: true,
-      onUploadProgress: (progressEvent) => {
-        if (progressEvent.total) {
-          const percent = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          console.log(`Upload progress: ${percent}%`);
-        }
-      },
-    }
-  );
-  return response.data;
-}
-
-export async function getData({ endPoint }: { endPoint: string }) {
-  const response = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}${endPoint}`
-  );
+  const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+  const response = await axios.post(`${base}${endPoint}`, data, {
+    headers: { "Content-Type": "multipart/form-data" },
+    withCredentials: true,
+  });
   return response.data;
 }

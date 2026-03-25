@@ -7,6 +7,8 @@ import { getFile } from "@/api/client";
 import { Icon } from "./icons";
 import { useHighlight } from "@/contexts/HighlightContext";
 
+const HIGHLIGHT_MATCH_LENGTH = 40;
+
 interface ReadingViewProps {
   fileId: string | null;
   fileName: string;
@@ -16,7 +18,7 @@ interface ReadingViewProps {
 export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) {
   const { highlightText, currentFileId } = useHighlight();
 
-  const { data: content, isLoading } = useQuery({
+  const { data: content, isLoading, isError } = useQuery({
     queryKey: ["file", fileId],
     queryFn: () => getFile(fileId!),
     enabled: !!fileId,
@@ -44,6 +46,16 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
     );
   }
 
+  if (isError) {
+    return (
+      <main className="nv-reading">
+        <div className="nv-reading-frame">
+          <div style={{ color: "var(--ink-faint)", padding: "60px 0" }}>Failed to load file</div>
+        </div>
+      </main>
+    );
+  }
+
   const shouldHighlight = currentFileId === fileId && highlightText;
 
   return (
@@ -66,7 +78,7 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
                 const text = String(children);
                 const isHighlighted =
                   shouldHighlight &&
-                  text.toLowerCase().includes(highlightText!.toLowerCase().slice(0, 40));
+                  text.toLowerCase().includes(highlightText!.toLowerCase().slice(0, HIGHLIGHT_MATCH_LENGTH));
                 return (
                   <p className={isHighlighted ? "nv-blk-highlight" : undefined}>
                     {children}
@@ -85,22 +97,9 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
                   {children}
                 </a>
               ),
-              code: ({ children, className }) => {
-                if (className) {
-                  return <code>{children}</code>;
-                }
-                return (
-                  <code style={{
-                    fontFamily: "var(--mono)",
-                    fontSize: "0.9em",
-                    background: "var(--bg-1)",
-                    padding: "1px 4px",
-                    borderRadius: "3px",
-                  }}>
-                    {children}
-                  </code>
-                );
-              },
+              code: ({ children, className }) => (
+                <code className={className ?? "nv-inline-code"}>{children}</code>
+              ),
             }}
           >
             {content ?? ""}
