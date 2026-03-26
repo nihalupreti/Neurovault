@@ -23,5 +23,9 @@
   ],
   "optionalDependencies": {
     "@esbuild/win32-x64": "0.25.9"
+  },
+  "dependencies": {
+    "@google/genai": "^1.50.1",
+    "esbuild": "^0.28.0"
   }
 }
