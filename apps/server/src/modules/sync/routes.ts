@@ -13,6 +13,7 @@ import {
   listConflicts,
   resolveConflict,
 } from "./history-handler.js";
+import { reconcileVault } from "./reconciliation.js";
 
 const router = express.Router();
 
@@ -30,5 +31,13 @@ router.get("/:vaultId/conflicts", listConflicts);
 router.post("/:vaultId/conflicts/:id/resolve", resolveConflict);
 
 router.get("/:vaultId/status", getVaultStatus);
+
+router.post("/:vaultId/reconcile", async (req, res) => {
+  const { Vault } = await import("./models.js");
+  const vault = await Vault.findById(req.params.vaultId);
+  if (!vault) return res.status(404).json({ error: "vault not found" });
+  const result = await reconcileVault(req.params.vaultId);
+  res.json(result);
+});
 
 export default router;
