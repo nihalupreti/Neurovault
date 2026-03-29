@@ -7,6 +7,7 @@ import { createServer } from "http";
 import fileRoutes from "./modules/files/routes.js";
 import searchRoutes from "./modules/search/routes.js";
 import syncRoutes from "./modules/sync/routes.js";
+import qaRoutes from "./modules/qa/qa-routes.js";
 import { initWebSocket } from "./modules/sync/ws-manager.js";
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use("/api/file", fileRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/sync", syncRoutes);
+app.use("/api/qa", qaRoutes);
 
 const server = createServer(app);
 initWebSocket(server);
