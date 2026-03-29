@@ -17,6 +17,16 @@ export const handleAsk = async (req: Request, res: Response) => {
     return res.status(400).json({ error: "question must be 1000 chars or less" });
   }
 
+  const validRoles = new Set(["user", "assistant"]);
+  const sanitizedHistory = Array.isArray(history)
+    ? history.filter(
+        (m) =>
+          validRoles.has(m?.role) &&
+          typeof m?.content === "string" &&
+          m.content.length <= 4000
+      )
+    : [];
+
   const clampedLimit =
     limit != null ? Math.max(1, Math.min(20, Math.floor(limit))) : undefined;
 
@@ -32,7 +42,7 @@ export const handleAsk = async (req: Request, res: Response) => {
   try {
     const { stream, citations } = await askQuestion({
       question: question.trim(),
-      history,
+      history: sanitizedHistory,
       limit: clampedLimit,
     });
 

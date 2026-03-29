@@ -4,6 +4,8 @@ import { createProvider } from "./providers/index.js";
 import { buildSystemPrompt } from "./qa-prompts.js";
 import type { ChatMessage, Citation, RetrievedChunk } from "./providers/types.js";
 
+const provider = createProvider();
+
 interface AskParams {
   question: string;
   history?: ChatMessage[];
@@ -62,7 +64,6 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
     { role: "user", content: question },
   ];
 
-  const provider = createProvider();
   const stream = provider.chatStream({ messages });
 
   return { stream, citations };
