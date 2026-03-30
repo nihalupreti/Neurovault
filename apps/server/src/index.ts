@@ -8,6 +8,7 @@ import fileRoutes from "./modules/files/routes.js";
 import searchRoutes from "./modules/search/routes.js";
 import syncRoutes from "./modules/sync/routes.js";
 import qaRoutes from "./modules/qa/qa-routes.js";
+import graphRoutes from "./modules/graph/graph-routes.js";
 import { initWebSocket } from "./modules/sync/ws-manager.js";
 
 dotenv.config();
@@ -30,6 +31,7 @@ app.use("/api/file", fileRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/sync", syncRoutes);
 app.use("/api/qa", qaRoutes);
+app.use("/api/graph", graphRoutes);
 
 const server = createServer(app);
 initWebSocket(server);

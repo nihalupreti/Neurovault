@@ -1,5 +1,6 @@
 import { Types } from "mongoose";
 import { handleFileUpload } from "../chunker/dispatcher.js";
+import { onFileIndexed } from "./graph-hook.js";
 
 export async function emitFileUploaded(
   filePath: string,
@@ -9,5 +10,9 @@ export async function emitFileUploaded(
     console.error(`Chunker error for ${filePath}:`, err)
   );
 
-  console.log(`Dispatched chunking for ${filePath}`);
+  onFileIndexed(filePath, fileId.toString()).catch((err) =>
+    console.error(`Graph index error for ${filePath}:`, err)
+  );
+
+  console.log(`Dispatched chunking + graph indexing for ${filePath}`);
 }
