@@ -1,6 +1,6 @@
 "use client";
 
-import axios from "axios";
+import api from "./axios-instance";
 import { ENDPOINTS } from "./endpoints";
 
 export interface FolderNode {
@@ -74,36 +74,36 @@ export interface ClusterResponse {
 export async function getFolderTree(
   parentId?: string
 ): Promise<FolderTreeResponse> {
-  const { data } = await axios.get(ENDPOINTS.file.folderTree(parentId));
+  const { data } = await api.get(ENDPOINTS.file.folderTree(parentId));
   return data;
 }
 
 export async function getFile(id: string): Promise<string> {
-  const { data } = await axios.get(ENDPOINTS.file.get(id));
+  const { data } = await api.get(ENDPOINTS.file.get(id));
   return data;
 }
 
 export async function search(query: string): Promise<SearchResponse> {
-  const { data } = await axios.get(ENDPOINTS.search.query(query));
+  const { data } = await api.get(ENDPOINTS.search.query(query));
   return data;
 }
 
 export async function getGraphStats(): Promise<GraphStats> {
-  const { data } = await axios.get(ENDPOINTS.graph.stats);
+  const { data } = await api.get(ENDPOINTS.graph.stats);
   return data;
 }
 
 export async function getNeighbors(
   fileId: string
 ): Promise<NeighborsResponse> {
-  const { data } = await axios.get(ENDPOINTS.graph.neighbors(fileId));
+  const { data } = await api.get(ENDPOINTS.graph.neighbors(fileId));
   return data;
 }
 
 export async function getFileCluster(
   fileId: string
 ): Promise<ClusterResponse> {
-  const { data } = await axios.get(ENDPOINTS.graph.cluster(fileId));
+  const { data } = await api.get(ENDPOINTS.graph.cluster(fileId));
   return data;
 }
 
@@ -166,35 +166,35 @@ export interface PaginatedResponse<T> {
 }
 
 export async function listBooks(page = 1, limit = 20): Promise<PaginatedResponse<BookSummary>> {
-  const { data } = await axios.get(ENDPOINTS.books.list, { params: { page, limit } });
+  const { data } = await api.get(ENDPOINTS.books.list, { params: { page, limit } });
   return data;
 }
 
 export async function getBook(id: string): Promise<BookSummary> {
-  const { data } = await axios.get(ENDPOINTS.books.get(id));
+  const { data } = await api.get(ENDPOINTS.books.get(id));
   return data;
 }
 
 export async function getChapter(bookId: string, num: number): Promise<BookChapter> {
-  const { data } = await axios.get(ENDPOINTS.books.chapter(bookId, num));
+  const { data } = await api.get(ENDPOINTS.books.chapter(bookId, num));
   return data;
 }
 
 export async function importBook(file: File): Promise<{ bookId: string; title: string; totalChapters: number }> {
   const formData = new FormData();
   formData.append("book", file);
-  const { data } = await axios.post(ENDPOINTS.books.import, formData, {
+  const { data } = await api.post(ENDPOINTS.books.import, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
 }
 
 export async function deleteBook(id: string): Promise<void> {
-  await axios.delete(ENDPOINTS.books.delete(id));
+  await api.delete(ENDPOINTS.books.delete(id));
 }
 
 export async function getProgress(bookId: string): Promise<ReadingProgress> {
-  const { data } = await axios.get(ENDPOINTS.reader.progress(bookId));
+  const { data } = await api.get(ENDPOINTS.reader.progress(bookId));
   return data;
 }
 
@@ -202,7 +202,7 @@ export async function updateProgress(
   bookId: string,
   partial: Partial<ReadingProgress>
 ): Promise<ReadingProgress> {
-  const { data } = await axios.put(ENDPOINTS.reader.progress(bookId), partial);
+  const { data } = await api.put(ENDPOINTS.reader.progress(bookId), partial);
   return data;
 }
 
@@ -216,7 +216,7 @@ export async function listAnnotations(
   const params: Record<string, string> = { page: String(page), limit: String(limit) };
   if (chapter !== undefined) params.chapter = String(chapter);
   if (type !== undefined) params.type = type;
-  const { data } = await axios.get(ENDPOINTS.reader.annotations(bookId), { params });
+  const { data } = await api.get(ENDPOINTS.reader.annotations(bookId), { params });
   return data;
 }
 
@@ -224,7 +224,7 @@ export async function createAnnotation(
   bookId: string,
   body: Omit<BookAnnotation, "_id" | "bookId" | "createdAt">
 ): Promise<BookAnnotation> {
-  const { data } = await axios.post(ENDPOINTS.reader.annotations(bookId), body);
+  const { data } = await api.post(ENDPOINTS.reader.annotations(bookId), body);
   return data;
 }
 
@@ -233,12 +233,12 @@ export async function updateAnnotation(
   annotationId: string,
   updates: Partial<BookAnnotation>
 ): Promise<BookAnnotation> {
-  const { data } = await axios.put(ENDPOINTS.reader.annotation(bookId, annotationId), updates);
+  const { data } = await api.put(ENDPOINTS.reader.annotation(bookId, annotationId), updates);
   return data;
 }
 
 export async function deleteAnnotation(bookId: string, annotationId: string): Promise<void> {
-  await axios.delete(ENDPOINTS.reader.annotation(bookId, annotationId));
+  await api.delete(ENDPOINTS.reader.annotation(bookId, annotationId));
 }
 
 export async function getRelatedContent(
@@ -248,7 +248,7 @@ export async function getRelatedContent(
 ): Promise<{ results: RelatedContent[] }> {
   const params: Record<string, string> = {};
   if (limit !== undefined) params.limit = String(limit);
-  const { data } = await axios.get(ENDPOINTS.reader.related(bookId, sectionAnchor), { params });
+  const { data } = await api.get(ENDPOINTS.reader.related(bookId, sectionAnchor), { params });
   return data;
 }
 
@@ -257,7 +257,7 @@ export async function uploadFiles(
   formData: FormData,
   onProgress?: (percent: number) => void
 ): Promise<unknown> {
-  const { data } = await axios.post(
+  const { data } = await api.post(
     endpoint,
     formData,
     {

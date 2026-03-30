@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "axios";
+import api from "@/api/axios-instance";
 import { ENDPOINTS } from "@/api/endpoints";
 
 interface CaptureModalProps {
@@ -27,7 +27,7 @@ export function CaptureModal({ open, onClose }: CaptureModalProps) {
 
   const mutation = useMutation({
     mutationFn: async (body: { content: string }) => {
-      const res = await axios.post(ENDPOINTS.capture.create, body);
+      const res = await api.post(ENDPOINTS.capture.create, body);
       return res.data;
     },
     onSuccess: () => {

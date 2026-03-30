@@ -2,7 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { queryClient, uploadFiles } from "@/utils/http";
+import { queryClient } from "@/api/query-client";
+import { uploadFiles } from "@/api/client";
 import { Icon } from "./icons";
 
 interface ModalProps {
@@ -27,7 +28,8 @@ export default function UploadModal({ isOpen, onClose, target }: ModalProps) {
   }, [isOpen]);
 
   const { mutate, isPending: isLoading } = useMutation({
-    mutationFn: uploadFiles,
+    mutationFn: ({ endPoint, data }: { endPoint: string; data: FormData }) =>
+      uploadFiles(endPoint, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["folderTree"] });
       onClose();

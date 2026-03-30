@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import axios from "axios";
+import api, { setAuthToken } from "@/api/axios-instance";
 import { ENDPOINTS } from "@/api/endpoints";
 
 interface AuthState {
@@ -30,16 +30,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (secret) {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${secret}`;
-    } else {
-      delete axios.defaults.headers.common["Authorization"];
-    }
+    setAuthToken(secret);
   }, [secret]);
 
   const login = useCallback(async (value: string): Promise<boolean> => {
     try {
-      const { data } = await axios.post(ENDPOINTS.auth.login, { secret: value });
+      const { data } = await api.post(ENDPOINTS.auth.login, { secret: value });
       if (data.authenticated) {
         localStorage.setItem(STORAGE_KEY, value);
         setSecret(value);
