@@ -9,6 +9,7 @@ import searchRoutes from "./modules/search/routes.js";
 import syncRoutes from "./modules/sync/routes.js";
 import qaRoutes from "./modules/qa/qa-routes.js";
 import graphRoutes from "./modules/graph/graph-routes.js";
+import { initConstraints } from "./modules/graph/graph-service.js";
 import { initWebSocket } from "./modules/sync/ws-manager.js";
 
 dotenv.config();
@@ -38,4 +39,7 @@ initWebSocket(server);
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`server is running on port ${PORT}`);
+  initConstraints().catch((err) =>
+    console.error("Neo4j constraint init failed:", err)
+  );
 });

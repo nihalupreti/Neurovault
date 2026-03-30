@@ -23,9 +23,6 @@ export const handleGetNeighbors = async (req: Request, res: Response) => {
   try {
     const { fileId } = req.params;
     const result = await getNeighbors(fileId!);
-    if (result.explicit.length === 0 && result.implicit.length === 0) {
-      return res.status(404).json({ error: "File not found in graph" });
-    }
     res.json(result);
   } catch (err) {
     console.error("Neighbors error:", err);

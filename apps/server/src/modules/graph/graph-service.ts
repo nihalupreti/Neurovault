@@ -58,19 +58,21 @@ export async function syncWikilinks(
 ): Promise<void> {
   const session = getSession();
   try {
-    await session.run(
-      "MATCH (f:File {fileId: $fileId})-[r:LINKS_TO]->() DELETE r",
-      { fileId }
-    );
-    if (resolvedLinks.length > 0) {
-      await session.run(
-        `UNWIND $links AS link
-         MATCH (src:File {fileId: $fileId})
-         MATCH (tgt:File {fileId: link.targetFileId})
-         CREATE (src)-[:LINKS_TO {anchor: link.anchor}]->(tgt)`,
-        { fileId, links: resolvedLinks }
+    await session.executeWrite(async (tx) => {
+      await tx.run(
+        "MATCH (f:File {fileId: $fileId})-[r:LINKS_TO]->() DELETE r",
+        { fileId }
       );
-    }
+      if (resolvedLinks.length > 0) {
+        await tx.run(
+          `UNWIND $links AS link
+           MATCH (src:File {fileId: $fileId})
+           MATCH (tgt:File {fileId: link.targetFileId})
+           CREATE (src)-[:LINKS_TO {anchor: link.anchor}]->(tgt)`,
+          { fileId, links: resolvedLinks }
+        );
+      }
+    });
   } finally {
     await session.close();
   }
@@ -82,29 +84,31 @@ export async function upsertSimilarEdges(
 ): Promise<void> {
   const session = getSession();
   try {
-    await session.run(
-      "MATCH (f:File {fileId: $fileId})-[r:SIMILAR]-() DELETE r",
-      { fileId }
-    );
-    if (edges.length > 0) {
-      await session.run(
-        `UNWIND $edges AS edge
-         MATCH (src:File {fileId: $fileId})
-         MATCH (tgt:File {fileId: edge.targetFileId})
-         CREATE (src)-[:SIMILAR {
-           score: edge.score,
-           chunkPairs: edge.chunkPairs
-         }]->(tgt)`,
-        {
-          fileId,
-          edges: edges.map((e) => ({
-            targetFileId: e.targetFileId,
-            score: e.score,
-            chunkPairs: JSON.stringify(e.chunkPairs),
-          })),
-        }
+    await session.executeWrite(async (tx) => {
+      await tx.run(
+        "MATCH (f:File {fileId: $fileId})-[r:SIMILAR]-() DELETE r",
+        { fileId }
       );
-    }
+      if (edges.length > 0) {
+        await tx.run(
+          `UNWIND $edges AS edge
+           MATCH (src:File {fileId: $fileId})
+           MATCH (tgt:File {fileId: edge.targetFileId})
+           CREATE (src)-[:SIMILAR {
+             score: edge.score,
+             chunkPairs: edge.chunkPairs
+           }]->(tgt)`,
+          {
+            fileId,
+            edges: edges.map((e) => ({
+              targetFileId: e.targetFileId,
+              score: e.score,
+              chunkPairs: JSON.stringify(e.chunkPairs),
+            })),
+          }
+        );
+      }
+    });
   } finally {
     await session.close();
   }
@@ -241,9 +245,10 @@ export async function getStats(): Promise<GraphStats> {
   const session = getSession();
   try {
     const countResult = await session.run(
-      `MATCH (f:File)
-       OPTIONAL MATCH (f)-[r]-()
-       WITH count(DISTINCT f) AS nodeCount, count(r) / 2 AS edgeCount
+      `OPTIONAL MATCH (f:File)
+       WITH count(DISTINCT f) AS nodeCount
+       OPTIONAL MATCH ()-[r]->()
+       WITH nodeCount, count(r) AS edgeCount
        RETURN nodeCount, edgeCount,
               CASE WHEN nodeCount > 0 THEN toFloat(edgeCount * 2) / nodeCount ELSE 0.0 END AS avgDegree`
     );
