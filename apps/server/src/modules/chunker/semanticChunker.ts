@@ -1,4 +1,4 @@
-import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { MarkdownTextSplitter } from "@langchain/textsplitters";
 import { promises as fs } from "fs";
 import { getEmbeddings } from "@neurovault/utils/embeddings";
 import { getQdrantClient } from "@neurovault/config";
@@ -30,9 +30,9 @@ export async function processMarkdown(filePath: string, fileId: string) {
   await ensureCollectionExists();
 
   const text = await fs.readFile(filePath, "utf-8");
-  const splitter = new RecursiveCharacterTextSplitter({
+  const splitter = new MarkdownTextSplitter({
     chunkSize: 800,
-    chunkOverlap: 0,
+    chunkOverlap: 150,
   });
 
   const chunks = await splitter.createDocuments([text]);

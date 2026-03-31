@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { MarkdownTextSplitter } from "@langchain/textsplitters";
 
 export interface HashedChunk {
   index: number;
@@ -24,9 +24,9 @@ export function hashChunk(text: string): string {
 }
 
 export async function splitAndHash(text: string): Promise<HashedChunk[]> {
-  const splitter = new RecursiveCharacterTextSplitter({
+  const splitter = new MarkdownTextSplitter({
     chunkSize: 800,
-    chunkOverlap: 0,
+    chunkOverlap: 150,
   });
 
   const docs = await splitter.createDocuments([text]);
