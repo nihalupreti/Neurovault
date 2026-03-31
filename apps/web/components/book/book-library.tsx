@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { listBooks } from "@/api/client";
+import type { BookSummary } from "@/api/client";
 import { Icon } from "@/components/icons";
 
 const GLYPHS = ["▤", "❰❱", "⌬", "∞", "◴", "◈", "⬡", "⎔"];
@@ -11,14 +12,16 @@ const HUES = [24, 200, 145, 290, 60, 330, 180, 100];
 interface BookLibraryProps {
   onSelectBook: (bookId: string) => void;
   onImport: () => void;
+  initialData?: BookSummary[];
 }
 
-export function BookLibrary({ onSelectBook, onImport }: BookLibraryProps) {
+export function BookLibrary({ onSelectBook, onImport, initialData }: BookLibraryProps) {
   const [filter, setFilter] = useState("");
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["books"],
     queryFn: () => listBooks(),
+    initialData: initialData ? { success: true, data: initialData, meta: { page: 1, limit: 20, total: initialData.length, totalPages: 1 } } : undefined,
   });
 
   const books = data?.data ?? [];
