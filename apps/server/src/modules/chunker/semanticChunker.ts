@@ -2,6 +2,7 @@ import { MarkdownTextSplitter } from "@langchain/textsplitters";
 import { promises as fs } from "fs";
 import { getEmbeddings } from "@neurovault/utils/embeddings";
 import { getQdrantClient } from "@neurovault/config";
+import ChunkText from "../search/chunk-text.model.js";
 
 const client = getQdrantClient();
 const COLLECTION_NAME = "neurovault";
@@ -58,5 +59,16 @@ export async function processMarkdown(filePath: string, fileId: string) {
   if (points.length > 0) {
     await client.upsert(COLLECTION_NAME, { wait: true, points });
     console.log(`Uploaded ${points.length} chunks from ${filePath}`);
+  }
+
+  await ChunkText.deleteMany({ fileId });
+  if (points.length > 0) {
+    await ChunkText.insertMany(
+      points.map((p) => ({
+        fileId,
+        chunkIndex: p.payload.chunk_index,
+        text: p.payload.text,
+      }))
+    );
   }
 }
