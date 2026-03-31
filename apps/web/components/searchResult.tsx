@@ -1,9 +1,11 @@
 interface SearchResult {
   id: string;
   score: number;
+  type?: "file" | "semantic";
   payload: {
     text: string;
     fileId: string;
+    fileName?: string;
     chunk_index: number;
   };
 }
@@ -82,6 +84,8 @@ interface SearchResultItemProps {
 }
 
 function SearchResultItem({ result, onClick }: SearchResultItemProps) {
+  const isFile = result.type === "file";
+
   const truncateText = (text: string, maxLength: number = 200) => {
     return text.length > maxLength
       ? `${text.substring(0, maxLength)}...`
@@ -94,14 +98,32 @@ function SearchResultItem({ result, onClick }: SearchResultItemProps) {
       onClick={onClick}
     >
       <div className="flex items-start justify-between mb-2">
-        <span className="text-gray-400 text-xs">
-          {result.payload.fileName || `File ID: ${result.payload.fileId}`}
+        <span className="text-gray-400 text-xs flex items-center">
+          {isFile ? (
+            <>
+              <svg className="w-3 h-3 mr-1 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              <span className="text-blue-400 font-medium">
+                {result.payload.fileName || result.payload.fileId}
+              </span>
+            </>
+          ) : (
+            result.payload.fileName || `File ID: ${result.payload.fileId}`
+          )}
         </span>
 
         <div className="flex items-center space-x-2 flex-shrink-0">
-          <span className="text-xs text-gray-500">
-            {Math.round(result.score * 100)}% match
-          </span>
+          {!isFile && (
+            <span className="text-xs text-gray-500">
+              {Math.round(result.score * 100)}% match
+            </span>
+          )}
+          {isFile && (
+            <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full">
+              file
+            </span>
+          )}
           <svg
             className="w-4 h-4 text-gray-500 group-hover:text-gray-300 transition-colors"
             fill="none"
@@ -118,12 +140,14 @@ function SearchResultItem({ result, onClick }: SearchResultItemProps) {
         </div>
       </div>
 
-      <p className="text-gray-300 text-sm leading-relaxed mb-2">
-        {truncateText(result.payload.text)}
-      </p>
+      {!isFile && result.payload.text && (
+        <p className="text-gray-300 text-sm leading-relaxed mb-2">
+          {truncateText(result.payload.text)}
+        </p>
+      )}
 
       <div className="text-xs text-gray-500">
-        Click to navigate to this section
+        {isFile ? "Click to open file" : "Click to navigate to this section"}
       </div>
     </div>
   );
