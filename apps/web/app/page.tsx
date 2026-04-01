@@ -15,7 +15,7 @@ import { getFile } from "@/api/client";
 
 export default function Home() {
   return (
-    <Suspense>
+    <Suspense fallback={<div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "var(--ink-faint)", fontFamily: "var(--mono)", fontSize: 12 }}>Loading...</div>}>
       <HomeContent />
     </Suspense>
   );
