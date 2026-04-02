@@ -127,6 +127,7 @@ export function ChapterReader({
     <div className="nv-reader">
       <article
         className="nv-reader-main nv-chapter"
+        role="article"
         ref={mainRef}
         onMouseUp={handleMouseUp}
       >
@@ -144,7 +145,7 @@ export function ChapterReader({
 
         <div className="nv-reader-foot">
           {onPrevChapter ? (
-            <button className="nv-pager-btn" onClick={onPrevChapter}>
+            <button className="nv-pager-btn" onClick={onPrevChapter} aria-label="Previous chapter">
               <Icon
                 name="chevron"
                 size={12}
@@ -160,7 +161,7 @@ export function ChapterReader({
             chapter {chapter.number} of {chapterCount}
           </span>
           {onNextChapter ? (
-            <button className="nv-pager-btn" onClick={onNextChapter}>
+            <button className="nv-pager-btn" onClick={onNextChapter} aria-label="Next chapter">
               {nextTitle && <em>{nextTitle}</em>}
               <span>next</span>
               <Icon name="chevron" size={12} />

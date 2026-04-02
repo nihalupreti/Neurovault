@@ -24,7 +24,7 @@ export function VaultRail({ activeId, onSelectFile }: VaultRailProps) {
   });
 
   return (
-    <aside className="nv-leftrail">
+    <aside className="nv-leftrail" role="navigation" aria-label="Vault navigation">
       <div className="nv-rail-head">
         <div className="nv-rail-title">
           <span className="nv-rail-eyebrow">vault</span>
@@ -56,7 +56,7 @@ export function VaultRail({ activeId, onSelectFile }: VaultRailProps) {
         </div>
       )}
 
-      <div className="nv-tree">
+      <div className="nv-tree" role="tree">
         {treeError ? (
           <div style={{ color: "var(--ink-faint)", fontSize: "12px", padding: "8px" }}>
             Failed to load
@@ -107,7 +107,7 @@ const TreeNode = memo(function TreeNode({
   if (node.type === "folder") {
     const kids = children?.children ?? node.children ?? [];
     return (
-      <div>
+      <div role="treeitem" aria-expanded={open}>
         <button
           className="nv-tree-row nv-tree-folder-row"
           style={{ paddingLeft: 8 + depth * 14 }}
@@ -140,6 +140,7 @@ const TreeNode = memo(function TreeNode({
       style={{ paddingLeft: 8 + depth * 14 }}
       onClick={() => onSelectFile(node._id)}
       aria-label={`Open ${node.name.replace(/\.md$/, "")}`}
+      role="treeitem"
     >
       <span className="nv-tree-dot" />
       <span className="nv-tree-label">{node.name.replace(/\.md$/, "")}</span>

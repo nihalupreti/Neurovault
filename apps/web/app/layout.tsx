@@ -4,8 +4,16 @@ import type { Metadata } from "next";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Neurovault — a second brain",
-  description: "Personal knowledge engine with hybrid search and RAG",
+  title: {
+    default: "Neurovault — a second brain",
+    template: "%s | Neurovault",
+  },
+  description: "Personal knowledge engine with hybrid search, RAG Q&A, and knowledge graph",
+  openGraph: {
+    title: "Neurovault — a second brain",
+    description: "Personal knowledge engine with hybrid search, RAG Q&A, and knowledge graph",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

@@ -39,7 +39,7 @@ export function BookRightRail({
   onClose,
 }: BookRightRailProps) {
   return (
-    <aside className={`nv-rightrail ${mobile ? "is-mobile" : ""}`}>
+    <aside className={`nv-rightrail ${mobile ? "is-mobile" : ""}`} aria-label="Book details">
       <div className="nv-rail-tabs" role="tablist">
         <button
           className={`nv-tab ${mode === "outline" ? "is-active" : ""}`}

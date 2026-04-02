@@ -39,7 +39,7 @@ export function Header({
   return (
     <>
       <header className="nv-header">
-        <div className="nv-header-inner">
+        <nav className="nv-header-inner" aria-label="Main navigation">
           {mobile && (
             <button className="nv-icon-btn" onClick={onMenu} aria-label="Open vault">
               <Icon name="menu" size={16} />
@@ -105,7 +105,7 @@ export function Header({
               )}
             </div>
           </div>
-        </div>
+        </nav>
       </header>
 
       <LoginModal open={loginOpen} onClose={() => setLoginOpen(false)} />

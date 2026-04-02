@@ -67,7 +67,7 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
           <span>{fileName}</span>
         </div>
 
-        <article className="nv-doc">
+        <article className="nv-doc" role="article">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{

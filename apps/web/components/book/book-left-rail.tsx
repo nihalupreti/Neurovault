@@ -41,7 +41,7 @@ export function BookLeftRail({
   });
 
   return (
-    <aside className="nv-leftrail">
+    <aside className="nv-leftrail" aria-label="Book navigation">
       <div className="nv-leftrail-tabs">
         <button
           className={`nv-tab${tab === "library" ? " is-active" : ""}`}
