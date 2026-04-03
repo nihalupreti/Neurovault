@@ -5,7 +5,7 @@ import { runIndexPipeline } from "./sync.index-pipeline.js";
 import { apiSuccess } from "../../utils/api-response.js";
 import { NotFoundError } from "../../errors/app-error.js";
 import { VaultNotFoundError, ConflictNotFoundError, InvalidSyncPayloadError } from "./sync.errors.js";
-import { resolveConflictSchema } from "./sync.schemas.js";
+import { resolveConflictSchema } from "@neurovault/shared/schemas";
 
 export async function getFileHistory(req: Request, res: Response) {
   const vault = await Vault.findById(req.params.vaultId);

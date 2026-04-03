@@ -6,7 +6,7 @@ import fs from "fs";
 import path from "path";
 import { apiSuccess, apiCreated } from "../../utils/api-response.js";
 import { VaultNotFoundError } from "./sync.errors.js";
-import { createVaultSchema } from "./sync.schemas.js";
+import { createVaultSchema } from "@neurovault/shared/schemas";
 
 const VAULTS_BASE = process.env.VAULTS_PATH || "data/vaults";
 const COLLECTION_NAME = "neurovault";

@@ -8,7 +8,7 @@ import {
 } from "./search.service.js";
 import { apiSuccess } from "../../utils/api-response.js";
 import { InvalidSearchQueryError } from "./search.errors.js";
-import { searchQuerySchema } from "./search.schemas.js";
+import { searchQuerySchema } from "@neurovault/shared/schemas";
 
 export const handleSearch = async (req: Request, res: Response) => {
   const startTime = Date.now();

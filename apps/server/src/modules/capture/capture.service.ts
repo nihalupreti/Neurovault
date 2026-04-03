@@ -14,19 +14,10 @@ import {
   generateFilename,
 } from "./capture.note-formatter.js";
 
+import type { CaptureInput, CaptureResult } from "@neurovault/shared/types";
+
 const UPLOAD_DIR = process.env.UPLOAD_DIR || "uploads";
 const URL_REGEX = /^https?:\/\//i;
-
-export interface CaptureInput {
-  content: string;
-  note?: string;
-  folderId?: string;
-}
-
-export interface CaptureResult {
-  fileId: string;
-  status: "complete" | "processing";
-}
 
 export async function captureContent(input: CaptureInput): Promise<CaptureResult> {
   const isUrl = URL_REGEX.test(input.content.trim());

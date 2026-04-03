@@ -5,7 +5,7 @@ import {
   upsertFileNode,
   runLouvain,
 } from "./graph.service.js";
-import type { SimilarEdgeInput, ChunkPair } from "./graph.types.js";
+import type { SimilarEdgeInput, ChunkPair } from "@neurovault/shared/types";
 
 const COLLECTION = "neurovault";
 

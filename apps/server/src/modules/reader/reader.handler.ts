@@ -8,7 +8,7 @@ import { apiSuccess, apiCreated, apiPaginated } from "../../utils/api-response.j
 import { parsePagination } from "../../utils/pagination.js";
 import { AnnotationNotFoundError } from "./reader.errors.js";
 import { BookNotFoundError } from "../books/books.errors.js";
-import { createAnnotationSchema, updateProgressSchema } from "./reader.schemas.js";
+import { createAnnotationSchema, updateProgressSchema } from "@neurovault/shared/schemas";
 
 export const handleGetProgress = async (
   req: Request<{ bookId: string }>,

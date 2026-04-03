@@ -3,7 +3,7 @@ import { Vault } from "./sync.models.js";
 import { pushChanges, pullChanges } from "./sync.service.js";
 import { apiSuccess } from "../../utils/api-response.js";
 import { VaultNotFoundError, InvalidSyncPayloadError } from "./sync.errors.js";
-import { pushChangesSchema } from "./sync.schemas.js";
+import { pushChangesSchema } from "@neurovault/shared/schemas";
 
 export async function handlePush(req: Request, res: Response) {
   const vault = await Vault.findById(req.params.vaultId);

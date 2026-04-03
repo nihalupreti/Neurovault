@@ -11,36 +11,7 @@ import { runIndexPipeline } from "./sync.index-pipeline.js";
 import { notifyVaultChanged } from "./sync.ws-manager.js";
 import { ConflictRecord } from "./sync.models.js";
 import type { VaultDoc } from "./sync.models.js";
-
-export interface SyncChange {
-  path: string;
-  action: "upsert" | "delete";
-  content?: string;
-  clientHash: string;
-}
-
-export interface PushResult {
-  commitSha: string;
-  conflicts?: {
-    path: string;
-    serverVersion: string;
-    clientVersion: string;
-    baseVersion: string;
-  }[];
-}
-
-export interface PullChange {
-  path: string;
-  action: "upsert" | "delete";
-  content?: string;
-  contentHash: string;
-}
-
-export interface PullResult {
-  changes: PullChange[];
-  currentCommit: string;
-  hasMore: boolean;
-}
+import type { SyncChange, PushResult, PullChange, PullResult } from "@neurovault/shared/types";
 
 const vaultLocks = new Map<string, Promise<void>>();
 

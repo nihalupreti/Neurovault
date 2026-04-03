@@ -1,4 +1,4 @@
-import type { WikiLink } from "./graph.types.js";
+import type { WikiLink } from "@neurovault/shared/types";
 
 export function parseWikilinks(markdown: string): WikiLink[] {
   if (!markdown) return [];

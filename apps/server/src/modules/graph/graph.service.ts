@@ -1,13 +1,13 @@
 import { withNeo4jSession } from "@neurovault/config";
 import type { Record as Neo4jRecord, Node as Neo4jNode } from "neo4j-driver";
 import type {
-  FileNode,
+  GraphNode,
   GraphEdge,
   ResolvedLink,
   SimilarEdgeInput,
   Cluster,
   GraphStats,
-} from "./graph.types.js";
+} from "@neurovault/shared/types";
 
 export async function initConstraints(): Promise<void> {
   await withNeo4jSession((session) =>
@@ -94,8 +94,8 @@ export async function upsertSimilarEdges(
 }
 
 export async function getNeighbors(fileId: string): Promise<{
-  explicit: (FileNode & { anchor: string })[];
-  implicit: (FileNode & { score: number })[];
+  explicit: (GraphNode & { anchor: string })[];
+  implicit: (GraphNode & { score: number })[];
 }> {
   return withNeo4jSession(async (session) => {
     const explicitResult = await session.run(
@@ -119,7 +119,7 @@ export async function getNeighbors(fileId: string): Promise<{
 }
 
 export async function getFullGraph(): Promise<{
-  nodes: FileNode[];
+  nodes: GraphNode[];
   edges: GraphEdge[];
 }> {
   return withNeo4jSession(async (session) => {
@@ -154,7 +154,7 @@ export async function getFullGraph(): Promise<{
 
 export async function getFileCluster(
   fileId: string
-): Promise<{ clusterId: number; members: FileNode[] }> {
+): Promise<{ clusterId: number; members: GraphNode[] }> {
   return withNeo4jSession(async (session) => {
     const result = await session.run(
       `MATCH (f:File {fileId: $fileId})
@@ -189,7 +189,7 @@ export async function getAllClusters(): Promise<{ clusters: Cluster[] }> {
 export async function getShortestPath(
   fromFileId: string,
   toFileId: string
-): Promise<{ path: FileNode[]; length: number }> {
+): Promise<{ path: GraphNode[]; length: number }> {
   return withNeo4jSession(async (session) => {
     const result = await session.run(
       `MATCH p = shortestPath(
@@ -257,7 +257,7 @@ function safeParseJson<T>(str: string, fallback: T): T {
   }
 }
 
-function nodeToFileNode(node: Neo4jNode): FileNode {
+function nodeToFileNode(node: Neo4jNode): GraphNode {
   const props = node.properties;
   return {
     fileId: props.fileId,

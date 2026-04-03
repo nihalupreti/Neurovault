@@ -2,7 +2,7 @@ import type { Request, Response } from "express";
 import { captureContent } from "./capture.service.js";
 import { apiCreated } from "../../utils/api-response.js";
 import { UnauthorizedError } from "../../errors/app-error.js";
-import { captureSchema } from "./capture.schemas.js";
+import { captureSchema } from "@neurovault/shared/schemas";
 
 export const handleCapture = async (req: Request, res: Response) => {
   if (req.role !== "admin") {

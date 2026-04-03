@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { askQuestion } from "./qa.service.js";
-import { askSchema } from "./qa.schemas.js";
+import { askSchema } from "@neurovault/shared/schemas";
 
 export const handleAsk = async (req: Request, res: Response) => {
   const { question, history, limit, scope, bookId, chapterNumber } = askSchema.parse(req.body);

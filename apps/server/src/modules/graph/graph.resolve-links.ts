@@ -1,5 +1,5 @@
 import fileModel from "../files/files.model.js";
-import type { WikiLink, ResolvedLink } from "./graph.types.js";
+import type { WikiLink, ResolvedLink } from "@neurovault/shared/types";
 
 export async function resolveWikilinks(
   links: WikiLink[]
