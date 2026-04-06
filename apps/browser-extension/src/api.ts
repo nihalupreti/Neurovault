@@ -1,9 +1,7 @@
 import { CapturePayload, ExtensionConfig } from "./types.js";
+import type { CaptureResult as CaptureResponse } from "@neurovault/shared/types";
 
-export interface CaptureResponse {
-  fileId: string;
-  status: "complete" | "processing";
-}
+export type { CaptureResponse };
 
 export async function captureToServer(
   config: ExtensionConfig,

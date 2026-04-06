@@ -2,18 +2,12 @@
 
 import { useCallback, useRef, useState } from "react";
 import { ENDPOINTS } from "@/api/endpoints";
+import type {
+  ChatMessage as SharedChatMessage,
+  Citation,
+} from "@neurovault/shared/types";
 
-interface ChatMessage {
-  role: "system" | "user" | "assistant";
-  content: string;
-}
-
-interface Citation {
-  sourceIndex: number;
-  fileId: string;
-  fileName: string;
-  excerpt: string;
-}
+type ChatMessage = SharedChatMessage | { role: "system"; content: string };
 
 interface StreamCallbacks {
   onToken: (content: string) => void;

@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "chokidar": "^4.0.0",
-    "ws": "^8.20.0"
+    "ws": "^8.20.0",
+    "@neurovault/shared": "*"
   },
   "devDependencies": {
     "@types/ws": "^8.18.1",

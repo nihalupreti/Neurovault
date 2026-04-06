@@ -2,74 +2,24 @@
 
 import api from "./axios-instance";
 import { ENDPOINTS } from "./endpoints";
+import type {
+  FileNode as FolderNode,
+  FolderTreeResponse,
+  SearchResult,
+  SearchResponse,
+  GraphStats,
+  GraphNode as NeighborNode,
+  NeighborsResponse,
+  ClusterResponse,
+  BookSummary,
+  BookChapter,
+  ReadingProgress,
+  BookAnnotation,
+  RelatedContent,
+  PaginatedResponse,
+} from "@neurovault/shared/types";
 
-export interface FolderNode {
-  _id: string;
-  name: string;
-  type: "file" | "folder";
-  children?: FolderNode[];
-}
-
-export interface FolderTreeResponse {
-  _id?: string;
-  name: string;
-  children: FolderNode[];
-}
-
-export interface SearchResult {
-  id: string;
-  score: number;
-  type: string;
-  payload: {
-    text: string;
-    fileId: string;
-    fileName: string;
-    chunk_index: number;
-  };
-}
-
-export interface SearchResponse {
-  results: SearchResult[];
-  total: number;
-  query: string;
-  parsed: {
-    hybrid: string | null;
-    semantic: string | null;
-    keyword: string | null;
-    file: string | null;
-  };
-  searchTime: number;
-}
-
-export interface GraphStats {
-  nodeCount: number;
-  edgeCount: number;
-  avgDegree: number;
-  topConnected: Array<{
-    fileId: string;
-    fileName: string;
-    path: string;
-    clusterId?: number;
-    degree: number;
-  }>;
-}
-
-export interface NeighborNode {
-  fileId: string;
-  fileName: string;
-  path: string;
-  clusterId?: number;
-}
-
-export interface NeighborsResponse {
-  explicit: Array<NeighborNode & { anchor: string }>;
-  implicit: Array<NeighborNode & { score: number }>;
-}
-
-export interface ClusterResponse {
-  clusterId: number;
-  members: NeighborNode[];
-}
+export type { FolderNode, FolderTreeResponse, SearchResult, SearchResponse, GraphStats, NeighborNode, NeighborsResponse, ClusterResponse, BookSummary, BookChapter, ReadingProgress, BookAnnotation, RelatedContent, PaginatedResponse };
 
 export async function getFolderTree(
   parentId?: string
@@ -105,64 +55,6 @@ export async function getFileCluster(
 ): Promise<ClusterResponse> {
   const { data } = await api.get(ENDPOINTS.graph.cluster(fileId));
   return data;
-}
-
-export interface BookSummary {
-  _id: string;
-  title: string;
-  topic: string;
-  totalChapters: number;
-  chapters: Array<{ number: number; title: string; sectionAnchors: string[] }>;
-  createdAt: string;
-}
-
-export interface BookChapter {
-  _id: string;
-  bookId: string;
-  number: number;
-  title: string;
-  htmlContent: string;
-  sections: Array<{ anchor: string; title: string; level: number }>;
-}
-
-export interface ReadingProgress {
-  bookId: string;
-  currentChapter: number;
-  scrollPosition: number;
-  chaptersCompleted: number[];
-  timeSpentMinutes: Record<string, number>;
-  lastReadAt: string;
-}
-
-export interface BookAnnotation {
-  _id: string;
-  bookId: string;
-  chapterNumber: number;
-  sectionAnchor: string;
-  type: "highlight" | "note" | "vault-link";
-  textRange: { startOffset: number; endOffset: number };
-  highlightedText: string;
-  color: string;
-  noteContent?: string;
-  linkedNoteId?: string;
-  createdAt: string;
-}
-
-export interface RelatedContent {
-  sourceType: string;
-  fileId: string;
-  score: number;
-  snippet: string;
-  bookId?: string;
-  bookTitle?: string;
-  chapterNumber?: number;
-  sectionAnchor?: string;
-}
-
-export interface PaginatedResponse<T> {
-  success: boolean;
-  data: T[];
-  meta: { page: number; limit: number; total: number; totalPages: number };
 }
 
 export async function listBooks(page = 1, limit = 20): Promise<PaginatedResponse<BookSummary>> {

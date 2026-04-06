@@ -21,7 +21,7 @@ export function BookLibrary({ onSelectBook, onImport, initialData }: BookLibrary
   const { data, isLoading, error } = useQuery({
     queryKey: ["books"],
     queryFn: () => listBooks(),
-    initialData: initialData ? { success: true, data: initialData, meta: { page: 1, limit: 20, total: initialData.length, totalPages: 1 } } : undefined,
+    initialData: initialData ? { success: true, data: initialData, meta: { page: 1, limit: 20, total: initialData.length, totalPages: 1 }, message: "ok", timestamp: new Date().toISOString() } : undefined,
   });
 
   const books = data?.data ?? [];
