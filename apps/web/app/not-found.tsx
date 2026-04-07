@@ -18,7 +18,7 @@ export default function NotFound() {
     >
       <h2 style={{ fontSize: "1.25rem", fontWeight: 500 }}>Page not found</h2>
       <p style={{ fontSize: "0.875rem", opacity: 0.7 }}>
-        The page you're looking for doesn't exist.
+        The page you&apos;re looking for doesn&apos;t exist.
       </p>
       <Link
         href="/"

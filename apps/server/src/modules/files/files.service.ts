@@ -45,7 +45,7 @@ export async function createFolderStructure(
         });
         await emitFileUploaded(fileDoc.serverPath, fileDoc._id);
       } else {
-        let folderDoc = await fileModel.findOne({
+        let folderDoc: { _id: unknown } | null = await fileModel.findOne({
           name: nodeName,
           parentId,
           type: "folder",

@@ -43,7 +43,7 @@ export const toggleVisibility = async (req: Request, res: Response) => {
     throw new UnauthorizedError();
   }
 
-  const { id } = req.params;
+  const id = req.params.id as string;
   const { public: isPublic } = req.body as { public?: boolean };
 
   if (typeof isPublic !== "boolean") {

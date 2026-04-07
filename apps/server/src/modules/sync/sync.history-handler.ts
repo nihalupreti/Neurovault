@@ -55,8 +55,9 @@ export async function listConflicts(req: Request, res: Response) {
 }
 
 export async function resolveConflict(req: Request, res: Response) {
-  const conflict = await ConflictRecord.findById(req.params.id);
-  if (!conflict) throw new ConflictNotFoundError(req.params.id);
+  const conflictId = req.params.id as string;
+  const conflict = await ConflictRecord.findById(conflictId);
+  if (!conflict) throw new ConflictNotFoundError(conflictId);
 
   const vault = await Vault.findById(conflict.vaultId);
   if (!vault) throw new VaultNotFoundError();

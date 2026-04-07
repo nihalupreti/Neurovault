@@ -38,6 +38,10 @@ yarn-error.log*
 # Compiled plugin output
 apps/obsidian-plugin/main.js
 
+# Project
+CLAUDE.md
+docs/superpowers/
+
 # Misc
 .DS_Store
 *.pem

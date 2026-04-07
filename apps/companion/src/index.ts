@@ -130,7 +130,7 @@ class VaultSync {
         } else if (change.action === "delete") {
           try {
             fs.unlinkSync(absPath);
-          } catch {}
+          } catch { /* file already deleted */ }
         }
       }
 

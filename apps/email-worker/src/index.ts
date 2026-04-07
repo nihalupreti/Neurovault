@@ -24,7 +24,8 @@ export default {
 
     if (parsed.attachments && parsed.attachments.length > 0) {
       for (const att of parsed.attachments) {
-        const blob = new Blob([att.content], { type: att.mimeType });
+        const raw = typeof att.content === "string" ? att.content : new Uint8Array(att.content as ArrayBuffer);
+        const blob = new Blob([raw], { type: att.mimeType });
         const filename = att.filename || `attachment-${Date.now()}`;
         formData.append("attachments", blob, filename);
       }

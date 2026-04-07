@@ -72,10 +72,10 @@ export const handleSearch = async (req: Request, res: Response) => {
       score: r.score,
       type: "semantic" as const,
       payload: {
-        text: r.payload.text ?? "",
-        fileId: r.payload.fileId ?? "",
-        fileName: r.payload.fileName ?? "",
-        chunk_index: r.payload.chunk_index ?? 0,
+        text: String(r.payload.text ?? ""),
+        fileId: String(r.payload.fileId ?? ""),
+        fileName: String(r.payload.fileName ?? ""),
+        chunk_index: Number(r.payload.chunk_index ?? 0),
       },
     }));
   } else if (parsed.keyword) {
@@ -85,10 +85,10 @@ export const handleSearch = async (req: Request, res: Response) => {
       score: 1.0,
       type: "semantic" as const,
       payload: {
-        text: r.payload.text ?? "",
-        fileId: r.payload.fileId ?? "",
-        fileName: r.payload.fileName ?? "",
-        chunk_index: r.payload.chunk_index ?? 0,
+        text: String(r.payload.text ?? ""),
+        fileId: String(r.payload.fileId ?? ""),
+        fileName: String(r.payload.fileName ?? ""),
+        chunk_index: Number(r.payload.chunk_index ?? 0),
       },
     }));
   } else if (parsed.semantic) {
@@ -98,10 +98,10 @@ export const handleSearch = async (req: Request, res: Response) => {
       score: point.score,
       type: "semantic" as const,
       payload: {
-        text: point.payload?.text ?? "",
-        fileId: point.payload?.fileId ?? "",
-        fileName: point.payload?.fileName ?? "",
-        chunk_index: point.payload?.chunk_index ?? 0,
+        text: String(point.payload?.text ?? ""),
+        fileId: String(point.payload?.fileId ?? ""),
+        fileName: String(point.payload?.fileName ?? ""),
+        chunk_index: Number(point.payload?.chunk_index ?? 0),
       },
     }));
   }

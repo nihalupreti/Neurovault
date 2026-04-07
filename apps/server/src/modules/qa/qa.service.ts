@@ -91,10 +91,10 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
   }
 
   const chunks: RetrievedChunk[] = points.map((p: QdrantScoredPoint) => ({
-    fileId: p.payload?.fileId ?? "",
-    fileName: p.payload?.fileName ?? "",
-    text: p.payload?.text ?? "",
-    chunkIndex: p.payload?.chunk_index ?? 0,
+    fileId: String(p.payload?.fileId ?? ""),
+    fileName: String(p.payload?.fileName ?? ""),
+    text: String(p.payload?.text ?? ""),
+    chunkIndex: Number(p.payload?.chunk_index ?? 0),
     score: p.score ?? 0,
   }));
 

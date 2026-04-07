@@ -1,4 +1,3 @@
-import { log } from "./config.js";
 import type {
   SyncChange,
   PushResult as PushResponse,

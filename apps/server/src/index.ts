@@ -31,7 +31,7 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
-connectMongo(process.env.DB_URL);
+connectMongo(process.env.DB_URL!);
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;

@@ -62,7 +62,7 @@ describe("progress", () => {
 
   it("updateProgress upserts progress", async () => {
     mockProgressFindOneAndUpdate.mockReturnValue({ lean: () => Promise.resolve({ currentChapter: 3 }) });
-    const result = await updateProgress("book1", { currentChapter: 3, scrollPosition: 50 });
+    await updateProgress("book1", { currentChapter: 3, scrollPosition: 50 });
     expect(mockProgressFindOneAndUpdate).toHaveBeenCalled();
   });
 });

@@ -67,7 +67,7 @@ export class ApiClient {
         method: "GET",
       });
       return response.json as T;
-    } catch (err: any) {
+    } catch (err: unknown) {
       throw this.toSyncError(err);
     }
   }
@@ -81,14 +81,15 @@ export class ApiClient {
         body: JSON.stringify(body),
       });
       return response.json as T;
-    } catch (err: any) {
+    } catch (err: unknown) {
       throw this.toSyncError(err);
     }
   }
 
-  private toSyncError(err: any): SyncError {
-    const status = err.status || 0;
-    const message = err.message || "Network error";
+  private toSyncError(err: unknown): SyncError {
+    const e = err as Record<string, unknown>;
+    const status = (typeof e.status === "number" ? e.status : 0);
+    const message = (typeof e.message === "string" ? e.message : "Network error");
     const retryable = status === 0 || status >= 500;
     return new SyncError(message, status, retryable);
   }
