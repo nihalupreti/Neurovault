@@ -24,7 +24,7 @@ import readerRoutes from "./modules/reader/reader.routes.js";
 
 dotenv.config();
 
-const REQUIRED_ENV = ["DB_URL", "ADMIN_SECRET"] as const;
+const REQUIRED_ENV = ["DB_URL", "ADMIN_SECRET", "JINA_API_KEY"] as const;
 const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
 if (missing.length > 0) {
   console.error(`FATAL: Missing required env vars: ${missing.join(", ")}`);
