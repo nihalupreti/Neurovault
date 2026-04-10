@@ -1,7 +1,7 @@
 import { MarkdownTextSplitter } from "@langchain/textsplitters";
 import { promises as fs } from "fs";
 import { randomUUID } from "crypto";
-import { getEmbeddings } from "@neurovault/utils/embeddings";
+import { getEmbeddings, embeddingProvider } from "@neurovault/utils/embeddings";
 import { getQdrantClient } from "@neurovault/config";
 import ChunkText from "../search/search.chunk-text.model.js";
 
@@ -10,15 +10,20 @@ const COLLECTION_NAME = "neurovault";
 
 async function ensureCollectionExists() {
   try {
-    await client.getCollection(COLLECTION_NAME);
-    console.log(`Collection ${COLLECTION_NAME} already exists.`);
+    const info = await client.getCollection(COLLECTION_NAME);
+    const vectors = info.config.params.vectors as { size?: number } | undefined;
+    if (vectors?.size !== embeddingProvider.dimensions) {
+      console.log(`Vector dimension mismatch (${vectors?.size} → ${embeddingProvider.dimensions}). Recreating collection.`);
+      await client.deleteCollection(COLLECTION_NAME);
+      await client.createCollection(COLLECTION_NAME, {
+        vectors: { size: embeddingProvider.dimensions, distance: "Cosine" },
+      });
+      console.log(`Recreated collection: ${COLLECTION_NAME}`);
+    }
   } catch (err: unknown) {
     if ((err instanceof Error && err.message.includes("Not Found")) || (err as { code?: number })?.code === 404) {
       await client.createCollection(COLLECTION_NAME, {
-        vectors: {
-          size: 3072,
-          distance: "Cosine",
-        },
+        vectors: { size: embeddingProvider.dimensions, distance: "Cosine" },
       });
       console.log(`Created collection: ${COLLECTION_NAME}`);
     } else {
