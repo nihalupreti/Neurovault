@@ -32,7 +32,7 @@ const NO_RESULTS_MSG =
 export async function askQuestion(params: AskParams): Promise<AskResult> {
   const { question, history = [], limit = 5 } = params;
 
-  const queryEmbedding = await getEmbeddings(question);
+  const queryEmbedding = await getEmbeddings(question, "query");
   const client = getQdrantClient();
 
   let points: QdrantScoredPoint[];

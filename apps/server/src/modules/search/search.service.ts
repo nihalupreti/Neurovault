@@ -9,7 +9,7 @@ function escapeRegex(str: string): string {
 }
 
 export const searchSemantic = async (query: string, fileIds?: string[]) => {
-  const queryEmbeddings: number[] = await getEmbeddings(query);
+  const queryEmbeddings: number[] = await getEmbeddings(query, "query");
   if (fileIds) {
     return searchResultFiltered(queryEmbeddings, fileIds);
   }
