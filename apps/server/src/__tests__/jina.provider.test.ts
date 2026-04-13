@@ -27,28 +27,36 @@ describe("JinaProvider", () => {
   it("maps document task to retrieval.passage", async () => {
     mockFetch.mockResolvedValue(makeOkResponse(new Array(1024).fill(0.1)));
     await new JinaProvider().embed("hello", "document");
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const init = mockFetch.mock.calls[0]![1] as any;
+    const body = JSON.parse(init.body);
     expect(body.task).toBe("retrieval.passage");
   });
 
   it("maps query task to retrieval.query", async () => {
     mockFetch.mockResolvedValue(makeOkResponse(new Array(1024).fill(0.1)));
     await new JinaProvider().embed("hello", "query");
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const init = mockFetch.mock.calls[0]![1] as any;
+    const body = JSON.parse(init.body);
     expect(body.task).toBe("retrieval.query");
   });
 
   it("sends normalized: true", async () => {
     mockFetch.mockResolvedValue(makeOkResponse(new Array(1024).fill(0.1)));
     await new JinaProvider().embed("hello", "query");
-    const body = JSON.parse(mockFetch.mock.calls[0][1].body);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const init = mockFetch.mock.calls[0]![1] as any;
+    const body = JSON.parse(init.body);
     expect(body.normalized).toBe(true);
   });
 
   it("sends Authorization header with JINA_API_KEY", async () => {
     mockFetch.mockResolvedValue(makeOkResponse(new Array(1024).fill(0.1)));
     await new JinaProvider().embed("hello", "query");
-    expect(mockFetch.mock.calls[0][1].headers["Authorization"]).toBe("Bearer test-key");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const init = mockFetch.mock.calls[0]![1] as any;
+    expect(init.headers["Authorization"]).toBe("Bearer test-key");
   });
 
   it("returns the embedding array", async () => {

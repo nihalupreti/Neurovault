@@ -25,7 +25,7 @@ describe("chunkAndEmbedBook", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetEmbeddings.mockResolvedValue(new Array(3072).fill(0.1));
+    mockGetEmbeddings.mockResolvedValue(new Array(1024).fill(0.1));
     mockGetQdrantClient.mockReturnValue({
       upsert: mockUpsert,
       delete: mockDelete,

@@ -31,7 +31,7 @@ describe("createAnnotation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockAnnotationCreate.mockResolvedValue({ _id: "ann1", type: "highlight", highlightedText: "test" });
-    mockGetEmbeddings.mockResolvedValue(new Array(3072).fill(0));
+    mockGetEmbeddings.mockResolvedValue(new Array(1024).fill(0));
     mockGetQdrantClient.mockReturnValue({ upsert: vi.fn() });
   });
 

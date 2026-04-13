@@ -5,7 +5,7 @@ const { mockChatStream } = vi.hoisted(() => ({
 }));
 
 vi.mock("@neurovault/utils/embeddings", () => ({
-  getEmbeddings: vi.fn().mockResolvedValue(new Array(3072).fill(0)),
+  getEmbeddings: vi.fn().mockResolvedValue(new Array(1024).fill(0)),
 }));
 
 vi.mock("@neurovault/config", () => ({

@@ -15,7 +15,7 @@ describe("getRelatedContent", () => {
     mockGetQdrantClient.mockReturnValue({ scroll: mockScroll, query: mockQuery });
 
     mockScroll.mockResolvedValue({
-      points: [{ id: 1, vector: new Array(3072).fill(0.1), payload: { text: "test" } }],
+      points: [{ id: 1, vector: new Array(1024).fill(0.1), payload: { text: "test" } }],
     });
 
     mockQuery.mockResolvedValue({
