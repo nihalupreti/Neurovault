@@ -15,30 +15,43 @@ describe("hashChunk", () => {
 });
 
 describe("splitAndHash", () => {
-  it("splits text into chunks and hashes each", async () => {
-    const text = "a".repeat(800) + "\n\n" + "b".repeat(800);
-    const result = await splitAndHash(text);
+  it("splits text into chunks and hashes each", () => {
+    const sentence1 = "a".repeat(1500) + ".";
+    const sentence2 = "b".repeat(1500) + ".";
+    const text = sentence1 + " " + sentence2;
+    const result = splitAndHash(text);
     expect(result.length).toBeGreaterThanOrEqual(2);
     expect(result[0]!.index).toBe(0);
     expect(result[0]!.hash).not.toBe(result[1]!.hash);
   });
 
-  it("produces non-empty chunks", async () => {
+  it("produces non-empty chunks", () => {
     const text = "# Heading\n\nSome paragraph.\n\n## Another\n\nMore text here.";
-    const result = await splitAndHash(text);
+    const result = splitAndHash(text);
     expect(result.length).toBeGreaterThanOrEqual(1);
     for (const chunk of result) {
       expect(chunk.text.trim().length).toBeGreaterThan(0);
     }
   });
+
+  it("includes headingPath from parsed structure", () => {
+    const text = "# Title\n\nContent here.";
+    const result = splitAndHash(text);
+    expect(result[0]!.headingPath).toEqual(["Title"]);
+  });
 });
 
 describe("diffChunks", () => {
+  const h = (index: number, text: string) => ({
+    index,
+    text,
+    hash: hashChunk(text),
+    headingPath: [] as string[],
+    sectionContent: text,
+  });
+
   it("marks all as new when no old chunks exist", () => {
-    const newChunks = [
-      { index: 0, text: "chunk one", hash: hashChunk("chunk one") },
-      { index: 1, text: "chunk two", hash: hashChunk("chunk two") },
-    ];
+    const newChunks = [h(0, "chunk one"), h(1, "chunk two")];
     const result = diffChunks(newChunks, []);
     expect(result.toEmbed).toHaveLength(2);
     expect(result.toDelete).toHaveLength(0);
@@ -47,10 +60,8 @@ describe("diffChunks", () => {
 
   it("skips unchanged chunks by hash match", () => {
     const hash = hashChunk("same content");
-    const newChunks = [{ index: 0, text: "same content", hash }];
-    const oldChunks: ChunkRecord[] = [
-      { index: 0, contentHash: hash, qdrantPointId: "uuid-1" },
-    ];
+    const newChunks = [h(0, "same content")];
+    const oldChunks: ChunkRecord[] = [{ index: 0, contentHash: hash, qdrantPointId: "uuid-1" }];
     const result = diffChunks(newChunks, oldChunks);
     expect(result.toEmbed).toHaveLength(0);
     expect(result.toDelete).toHaveLength(0);
@@ -59,9 +70,7 @@ describe("diffChunks", () => {
   });
 
   it("detects changed chunks and marks old for deletion", () => {
-    const newChunks = [
-      { index: 0, text: "updated", hash: hashChunk("updated") },
-    ];
+    const newChunks = [h(0, "updated")];
     const oldChunks: ChunkRecord[] = [
       { index: 0, contentHash: hashChunk("original"), qdrantPointId: "uuid-old" },
     ];
@@ -73,13 +82,9 @@ describe("diffChunks", () => {
   });
 
   it("handles chunk count increase", () => {
-    const hash = hashChunk("kept");
-    const newChunks = [
-      { index: 0, text: "kept", hash },
-      { index: 1, text: "added", hash: hashChunk("added") },
-    ];
+    const newChunks = [h(0, "kept"), h(1, "added")];
     const oldChunks: ChunkRecord[] = [
-      { index: 0, contentHash: hash, qdrantPointId: "uuid-kept" },
+      { index: 0, contentHash: hashChunk("kept"), qdrantPointId: "uuid-kept" },
     ];
     const result = diffChunks(newChunks, oldChunks);
     expect(result.unchanged).toHaveLength(1);
@@ -88,9 +93,7 @@ describe("diffChunks", () => {
   });
 
   it("handles chunk count decrease", () => {
-    const newChunks = [
-      { index: 0, text: "only", hash: hashChunk("only") },
-    ];
+    const newChunks = [h(0, "only")];
     const oldChunks: ChunkRecord[] = [
       { index: 0, contentHash: hashChunk("only"), qdrantPointId: "uuid-0" },
       { index: 1, contentHash: hashChunk("removed"), qdrantPointId: "uuid-1" },

@@ -6,6 +6,12 @@ const { mockChatStream } = vi.hoisted(() => ({
 
 vi.mock("@neurovault/utils/embeddings", () => ({
   getEmbeddings: vi.fn().mockResolvedValue(new Array(1024).fill(0)),
+  getEmbeddingsBatch: vi.fn().mockResolvedValue([new Array(1024).fill(0)]),
+  embeddingProvider: { dimensions: 1024 },
+}));
+
+vi.mock("../../chunker/chunker.section.model.js", () => ({
+  default: { findOne: vi.fn().mockReturnValue({ lean: vi.fn().mockResolvedValue(null) }) },
 }));
 
 vi.mock("@neurovault/config", () => ({
@@ -19,7 +25,7 @@ vi.mock("@neurovault/config", () => ({
         },
         {
           id: "p2",
-          score: 0.80,
+          score: 0.8,
           payload: { text: "chunk text two", fileId: "f2", fileName: "guide.md", chunk_index: 1 },
         },
       ],
@@ -45,7 +51,7 @@ describe("askQuestion", () => {
       (async function* () {
         yield "Answer ";
         yield "here.";
-      })()
+      })(),
     );
 
     const result = await askQuestion({ question: "What is force?" });
@@ -91,16 +97,13 @@ describe("askQuestion", () => {
     mockChatStream.mockReturnValue(
       (async function* () {
         yield "ok";
-      })()
+      })(),
     );
 
     await askQuestion({ question: "test", limit: 10 });
 
     const { getQdrantClient } = await import("@neurovault/config");
     const client = getQdrantClient();
-    expect(client.query).toHaveBeenCalledWith(
-      "neurovault",
-      expect.objectContaining({ limit: 10 })
-    );
+    expect(client.query).toHaveBeenCalledWith("neurovault", expect.objectContaining({ limit: 10 }));
   });
 });

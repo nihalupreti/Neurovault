@@ -1,12 +1,15 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const mockGetEmbeddings = vi.hoisted(() => vi.fn());
+const mockGetEmbeddingsBatch = vi.hoisted(() => vi.fn());
 const mockGetQdrantClient = vi.hoisted(() => vi.fn());
-const mockChunkTextCreate = vi.hoisted(() => vi.fn());
+const mockChunkTextInsertMany = vi.hoisted(() => vi.fn());
 const mockChunkTextDeleteMany = vi.hoisted(() => vi.fn());
+const mockSectionContentInsertMany = vi.hoisted(() => vi.fn());
+const mockSectionContentDeleteMany = vi.hoisted(() => vi.fn());
 
 vi.mock("@neurovault/utils/embeddings", () => ({
-  getEmbeddings: mockGetEmbeddings,
+  getEmbeddingsBatch: mockGetEmbeddingsBatch,
+  embeddingProvider: { dimensions: 1024 },
 }));
 
 vi.mock("@neurovault/config", () => ({
@@ -14,7 +17,17 @@ vi.mock("@neurovault/config", () => ({
 }));
 
 vi.mock("../../search/search.chunk-text.model.js", () => ({
-  default: { deleteMany: mockChunkTextDeleteMany, insertMany: mockChunkTextCreate },
+  default: {
+    deleteMany: mockChunkTextDeleteMany,
+    insertMany: mockChunkTextInsertMany,
+  },
+}));
+
+vi.mock("../../chunker/chunker.section.model.js", () => ({
+  default: {
+    deleteMany: mockSectionContentDeleteMany,
+    insertMany: mockSectionContentInsertMany,
+  },
 }));
 
 import { chunkAndEmbedBook } from "../books.chunker.js";
@@ -25,16 +38,18 @@ describe("chunkAndEmbedBook", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetEmbeddings.mockResolvedValue(new Array(1024).fill(0.1));
+    mockGetEmbeddingsBatch.mockResolvedValue([new Array(1024).fill(0.1)]);
     mockGetQdrantClient.mockReturnValue({
       upsert: mockUpsert,
       delete: mockDelete,
     });
-    mockChunkTextCreate.mockResolvedValue([]);
+    mockChunkTextInsertMany.mockResolvedValue([]);
     mockChunkTextDeleteMany.mockResolvedValue({ deletedCount: 0 });
+    mockSectionContentInsertMany.mockResolvedValue([]);
+    mockSectionContentDeleteMany.mockResolvedValue({ deletedCount: 0 });
   });
 
-  it("generates embeddings for each section of plain text", async () => {
+  it("generates embeddings for each chapter", async () => {
     await chunkAndEmbedBook({
       bookId: "book123",
       bookTitle: "Test Book",
@@ -47,11 +62,8 @@ describe("chunkAndEmbedBook", () => {
       ],
     });
 
-    expect(mockGetEmbeddings).toHaveBeenCalled();
-    expect(mockUpsert).toHaveBeenCalledWith(
-      "neurovault",
-      expect.objectContaining({ wait: true }),
-    );
+    expect(mockGetEmbeddingsBatch).toHaveBeenCalled();
+    expect(mockUpsert).toHaveBeenCalledWith("neurovault", expect.objectContaining({ wait: true }));
   });
 
   it("stores chunks in MongoDB with source:'book' metadata", async () => {
@@ -67,10 +79,8 @@ describe("chunkAndEmbedBook", () => {
       ],
     });
 
-    expect(mockChunkTextCreate).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({ source: "book", bookId: "book123" }),
-      ]),
+    expect(mockChunkTextInsertMany).toHaveBeenCalledWith(
+      expect.arrayContaining([expect.objectContaining({ source: "book", bookId: "book123" })]),
     );
   });
 

@@ -9,6 +9,8 @@ const chunkTextSchema = new Schema({
   chapterNumber: { type: Number },
   sectionAnchor: { type: String },
   bookTitle: { type: String },
+  headingPath: { type: [String], default: [] },
+  sectionId: { type: String },
 });
 
 chunkTextSchema.index({ text: "text" });

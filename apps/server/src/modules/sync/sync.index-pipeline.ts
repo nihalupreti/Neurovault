@@ -8,9 +8,12 @@ import {
   type DiffResult,
 } from "./sync.chunk-differ.js";
 import { getChangedFiles, readFileAtCommit } from "./sync.git-storage.js";
-import { getEmbeddings } from "@neurovault/utils/embeddings";
+import { getEmbeddingsBatch } from "@neurovault/utils/embeddings";
 import { getQdrantClient } from "@neurovault/config";
 import { FileVersion, Vault, EmbeddingJob } from "./sync.models.js";
+import ChunkText from "../search/search.chunk-text.model.js";
+import SectionContent from "../chunker/chunker.section.model.js";
+import { sectionId } from "../chunker/parsers/parser.types.js";
 
 const COLLECTION_NAME = "neurovault";
 
@@ -18,11 +21,8 @@ export interface IndexAction extends DiffResult {
   filePath: string;
 }
 
-export async function buildIndexActions(
-  content: string,
-  oldChunks: ChunkRecord[]
-): Promise<DiffResult> {
-  const newChunks = await splitAndHash(content);
+export function buildIndexActions(content: string, oldChunks: ChunkRecord[]): DiffResult {
+  const newChunks = splitAndHash(content);
   return diffChunks(newChunks, oldChunks);
 }
 
@@ -34,11 +34,7 @@ export function buildDeleteActions(oldChunks: ChunkRecord[]): DiffResult {
   };
 }
 
-export function filterByGlobs(
-  paths: string[],
-  include: string[],
-  exclude: string[]
-): string[] {
+export function filterByGlobs(paths: string[], include: string[], exclude: string[]): string[] {
   let filtered = paths;
   if (include.length > 0) {
     filtered = micromatch(filtered, include);
@@ -55,7 +51,7 @@ export async function runIndexPipeline(
   fromSha: string,
   toSha: string,
   include: string[],
-  exclude: string[]
+  exclude: string[],
 ): Promise<void> {
   const changedFiles = await getChangedFiles(dir, fromSha, toSha);
   const allPaths = changedFiles.map((f) => f.path);
@@ -70,11 +66,12 @@ export async function runIndexPipeline(
       filePath: file.path,
       deleted: false,
     });
-    const oldChunks: ChunkRecord[] = existing?.chunks?.map((c) => ({
-      index: c.index,
-      contentHash: c.contentHash,
-      qdrantPointId: c.qdrantPointId,
-    })) ?? [];
+    const oldChunks: ChunkRecord[] =
+      existing?.chunks?.map((c) => ({
+        index: c.index,
+        contentHash: c.contentHash,
+        qdrantPointId: c.qdrantPointId,
+      })) ?? [];
 
     if (file.action === "delete") {
       const { toDelete } = buildDeleteActions(oldChunks);
@@ -93,7 +90,7 @@ export async function runIndexPipeline(
     }
 
     const content = await readFileAtCommit(dir, toSha, file.path);
-    const diff = await buildIndexActions(content, oldChunks);
+    const diff = buildIndexActions(content, oldChunks);
 
     if (diff.toDelete.length > 0) {
       await client.delete(COLLECTION_NAME, {
@@ -104,43 +101,83 @@ export async function runIndexPipeline(
 
     const newPoints = [];
     const newChunkRecords: ChunkRecord[] = [...diff.unchanged];
+    const sectionDocs = new Map<
+      string,
+      { sectionId: string; headingPath: string[]; content: string; fileId: string }
+    >();
 
-    for (const chunk of diff.toEmbed) {
-      const pointId = uuidv4();
-      let embedding: number[];
+    if (diff.toEmbed.length > 0) {
+      const texts = diff.toEmbed.map((c) => c.text);
+      let embeddings: number[][];
       try {
-        embedding = await getEmbeddings(chunk.text);
+        embeddings = await getEmbeddingsBatch(texts, "document", true);
       } catch (err) {
-        await EmbeddingJob.create({
-          vaultId,
-          filePath: file.path,
-          commitSha: toSha,
-          status: "failed",
-          lastError: String(err),
-        });
+        for (const chunk of diff.toEmbed) {
+          await EmbeddingJob.create({
+            vaultId,
+            filePath: file.path,
+            commitSha: toSha,
+            status: "failed",
+            lastError: String(err),
+          });
+        }
         continue;
       }
 
-      newPoints.push({
-        id: pointId,
-        vector: embedding,
-        payload: {
-          text: chunk.text,
-          fileId: file.path,
-          vaultId,
-          chunk_index: chunk.index,
-        },
-      });
+      for (let i = 0; i < diff.toEmbed.length; i++) {
+        const chunk = diff.toEmbed[i]!;
+        const pointId = uuidv4();
+        const sid = sectionId(chunk.headingPath);
 
-      newChunkRecords.push({
-        index: chunk.index,
-        contentHash: chunk.hash,
-        qdrantPointId: pointId,
-      });
+        newPoints.push({
+          id: pointId,
+          vector: embeddings[i]!,
+          payload: {
+            text: chunk.text,
+            fileId: file.path,
+            vaultId,
+            chunk_index: chunk.index,
+            headingPath: chunk.headingPath,
+            sectionId: sid,
+            source: "sync",
+          },
+        });
+
+        newChunkRecords.push({
+          index: chunk.index,
+          contentHash: chunk.hash,
+          qdrantPointId: pointId,
+        });
+
+        if (!sectionDocs.has(sid)) {
+          sectionDocs.set(sid, {
+            sectionId: sid,
+            headingPath: chunk.headingPath,
+            content: chunk.sectionContent,
+            fileId: file.path,
+          });
+        }
+      }
     }
 
     if (newPoints.length > 0) {
       await client.upsert(COLLECTION_NAME, { wait: true, points: newPoints });
+
+      await ChunkText.deleteMany({ fileId: file.path });
+      const chunkDocs = newPoints.map((p) => ({
+        fileId: file.path,
+        chunkIndex: p.payload.chunk_index,
+        text: p.payload.text,
+        headingPath: p.payload.headingPath,
+        sectionId: p.payload.sectionId,
+        source: "sync",
+      }));
+      await ChunkText.insertMany(chunkDocs);
+    }
+
+    if (sectionDocs.size > 0) {
+      await SectionContent.deleteMany({ fileId: file.path });
+      await SectionContent.insertMany(Array.from(sectionDocs.values()));
     }
 
     await FileVersion.findOneAndUpdate(
@@ -153,7 +190,7 @@ export async function runIndexPipeline(
         chunks: newChunkRecords,
         deleted: false,
       },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
   }
 

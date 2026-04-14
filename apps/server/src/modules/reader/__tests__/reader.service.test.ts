@@ -22,7 +22,11 @@ vi.mock("../reader.model.js", () => ({
   },
 }));
 
-vi.mock("@neurovault/utils/embeddings", () => ({ getEmbeddings: mockGetEmbeddings }));
+vi.mock("@neurovault/utils/embeddings", () => ({
+  getEmbeddings: mockGetEmbeddings,
+  getEmbeddingsBatch: vi.fn().mockResolvedValue([new Array(1024).fill(0)]),
+  embeddingProvider: { dimensions: 1024 },
+}));
 vi.mock("@neurovault/config", () => ({ getQdrantClient: mockGetQdrantClient }));
 
 import { createAnnotation, getProgress, updateProgress } from "../reader.service.js";
@@ -30,7 +34,11 @@ import { createAnnotation, getProgress, updateProgress } from "../reader.service
 describe("createAnnotation", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockAnnotationCreate.mockResolvedValue({ _id: "ann1", type: "highlight", highlightedText: "test" });
+    mockAnnotationCreate.mockResolvedValue({
+      _id: "ann1",
+      type: "highlight",
+      highlightedText: "test",
+    });
     mockGetEmbeddings.mockResolvedValue(new Array(1024).fill(0));
     mockGetQdrantClient.mockReturnValue({ upsert: vi.fn() });
   });
@@ -61,7 +69,9 @@ describe("progress", () => {
   });
 
   it("updateProgress upserts progress", async () => {
-    mockProgressFindOneAndUpdate.mockReturnValue({ lean: () => Promise.resolve({ currentChapter: 3 }) });
+    mockProgressFindOneAndUpdate.mockReturnValue({
+      lean: () => Promise.resolve({ currentChapter: 3 }),
+    });
     await updateProgress("book1", { currentChapter: 3, scrollPosition: 50 });
     expect(mockProgressFindOneAndUpdate).toHaveBeenCalled();
   });

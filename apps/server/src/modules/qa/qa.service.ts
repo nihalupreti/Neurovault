@@ -2,6 +2,7 @@ import { getEmbeddings } from "@neurovault/utils/embeddings";
 import { getQdrantClient } from "@neurovault/config";
 import { createProvider } from "./providers/index.js";
 import { buildSystemPrompt } from "./qa.prompts.js";
+import SectionContent from "../chunker/chunker.section.model.js";
 import type { ChatMessage, Citation, RetrievedChunk } from "./providers/types.js";
 
 interface QdrantScoredPoint {
@@ -59,10 +60,7 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
         with_payload: true,
       }),
     ]);
-    points = [
-      ...(chapterResult.points || []),
-      ...(vaultResult.points || []),
-    ];
+    points = [...(chapterResult.points || []), ...(vaultResult.points || [])];
   } else {
     let filter: Record<string, unknown> | undefined = undefined;
 
@@ -96,7 +94,22 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
     text: String(p.payload?.text ?? ""),
     chunkIndex: Number(p.payload?.chunk_index ?? 0),
     score: p.score ?? 0,
+    headingPath: Array.isArray(p.payload?.headingPath) ? (p.payload.headingPath as string[]) : [],
   }));
+
+  for (const chunk of chunks) {
+    const sId = points.find((p: QdrantScoredPoint) => String(p.payload?.text) === chunk.text)
+      ?.payload?.sectionId;
+    if (!sId) continue;
+    const section = await SectionContent.findOne({ sectionId: String(sId) }).lean();
+    if (
+      section &&
+      typeof section.content === "string" &&
+      section.content.length > chunk.text.length
+    ) {
+      chunk.text = section.content;
+    }
+  }
 
   if (chunks.length === 0) {
     return {
