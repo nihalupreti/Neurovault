@@ -4,37 +4,44 @@
    neurovault — minimal editorial dark mode
    ============================================================ */
 :root {
-  --accent-hue: 145;
-  --accent: oklch(0.74 0.13 var(--accent-hue));
-  --accent-soft: oklch(0.74 0.13 var(--accent-hue) / 0.18);
-  --accent-faint: oklch(0.74 0.13 var(--accent-hue) / 0.08);
+  --accent: #818cf8;
+  --accent-soft: #818cf840;
+  --accent-faint: #818cf815;
+  --accent-darker: #6366f1;
 
-  --bg-0: oklch(0.155 0.005 250);
-  --bg-1: oklch(0.185 0.005 250);
-  --bg-2: oklch(0.215 0.006 250);
-  --bg-3: oklch(0.255 0.006 250);
+  --bg-0: #0e0e14;
+  --bg-1: #111116;
+  --bg-2: #1a1a24;
+  --bg-3: #222230;
 
-  --ink:        oklch(0.96 0.005 90);
-  --ink-soft:   oklch(0.78 0.005 90);
-  --ink-mid:    oklch(0.62 0.005 90);
-  --ink-faint:  oklch(0.42 0.005 90);
-  --ink-ghost:  oklch(0.32 0.005 90);
+  --ink:       #f0f0f8;
+  --ink-soft:  #c8c8d8;
+  --ink-mid:   #8888a0;
+  --ink-faint: #6b6b7b;
+  --ink-ghost: #4b4b5b;
 
-  --rule:       oklch(0.27 0.005 250);
-  --rule-soft:  oklch(0.23 0.005 250);
+  --rule:      #222230;
+  --rule-soft: #1a1a2e;
 
   --reading-width: 640px;
 
-  --serif: "Newsreader", "Source Serif Pro", Georgia, serif;
-  --sans:  "Inter Tight", "Inter", -apple-system, system-ui, sans-serif;
-  --mono:  "JetBrains Mono", "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --sans: "Roboto", -apple-system, system-ui, sans-serif;
+  --mono: "Roboto Mono", ui-monospace, "SF Mono", Menlo, monospace;
 
-  --row-h: 30px;
-  --pad: 14px;
+  --row-h: 36px;
+  --pad: 16px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
 }
 
-[data-density="compact"] { --row-h: 26px; --pad: 10px; }
-[data-density="airy"]    { --row-h: 34px; --pad: 18px; }
+[data-density="compact"] { --row-h: 32px; --pad: 12px; }
+[data-density="airy"]    { --row-h: 40px; --pad: 20px; }
 
 * { box-sizing: border-box; }
 html, body, #root, #__next { height: 100%; }
@@ -45,7 +52,6 @@ body {
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: "ss01", "cv05", "cv11";
   font-size: 14px;
   line-height: 1.55;
 }
@@ -634,7 +640,8 @@ kbd {
   backdrop-filter: blur(6px);
   animation: fadeIn .15s ease;
 }
-.nv-modal {
+.nv-modal { display: none; }
+.nv-modal[open] {
   position: absolute; left: 50%; top: 14%;
   transform: translateX(-50%);
   width: min(720px, calc(100vw - 32px));
@@ -850,11 +857,11 @@ kbd {
    ============================================================ */
 
 :root {
-  --book-paper: oklch(0.18 0.008 60);   /* warm dark, paper feel */
-  --book-paper-2: oklch(0.21 0.008 60);
-  --book-ink: oklch(0.94 0.005 80);
-  --book-ink-soft: oklch(0.78 0.005 80);
-  --book-rule: oklch(0.30 0.005 60);
+  --book-paper: #27251f;
+  --book-paper-2: #302e27;
+  --book-ink: #f0ede6;
+  --book-ink-soft: #c4c0b6;
+  --book-rule: #3d3b33;
 
   --hl-amber: oklch(0.78 0.13 75);
   --hl-amber-bg: oklch(0.78 0.13 75 / 0.18);
