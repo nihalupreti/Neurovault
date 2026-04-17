@@ -46,11 +46,8 @@ export function Header({
             </button>
           )}
           <div className="nv-brand">
-            <div className="nv-brand-glyph" aria-hidden="true">
-              <span /><span /><span /><span />
-            </div>
+            <div className="nv-brand-glyph" aria-hidden="true" />
             <span className="nv-brand-name">neurovault</span>
-            <span className="nv-brand-sub">&mdash; a second brain</span>
           </div>
 
           <button className="nv-search-trigger" onClick={onSearchOpen}>
