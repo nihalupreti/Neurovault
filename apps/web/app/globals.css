@@ -118,6 +118,7 @@ kbd {
   align-items: baseline;
   gap: 8px;
   flex-shrink: 0;
+  width: 180px;
 }
 .nv-brand-glyph {
   width: 20px;
@@ -136,7 +137,8 @@ kbd {
 
 .nv-search-trigger {
   flex: 1;
-  max-width: 720px;
+  max-width: 520px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -168,6 +170,8 @@ kbd {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  width: 180px;
+  justify-content: flex-end;
 }
 
 .nv-sync-pill {
@@ -385,16 +389,6 @@ kbd {
 }
 .nv-tree-file-row.is-active .nv-tree-dot {
   background: var(--accent);
-}
-.nv-tree-file-row.is-active::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 5px;
-  bottom: 5px;
-  width: 2px;
-  background: var(--accent);
-  border-radius: 2px;
 }
 .nv-tree-meta {
   margin-left: auto;

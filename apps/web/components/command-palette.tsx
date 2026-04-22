@@ -44,7 +44,7 @@ export function CommandPalette({
       }}
     >
         <div className="nv-modal-input">
-          <Icon name="search" size={14} />
+          <Icon name="search" size={14} style={{ color: "var(--accent)" }} />
           <input
             autoFocus
             value={query}

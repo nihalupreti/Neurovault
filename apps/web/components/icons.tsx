@@ -1,10 +1,13 @@
+import type { CSSProperties } from "react";
+
 interface IconProps {
   name: string;
   size?: number;
   className?: string;
+  style?: CSSProperties;
 }
 
-export function Icon({ name, size = 14, className }: IconProps) {
+export function Icon({ name, size = 14, className, style }: IconProps) {
   const props = {
     width: size,
     height: size,
@@ -15,6 +18,7 @@ export function Icon({ name, size = 14, className }: IconProps) {
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
     className,
+    style,
   };
 
   switch (name) {

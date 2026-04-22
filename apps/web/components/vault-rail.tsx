@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Icon } from "./icons";
 import { getFolderTree, getGraphStats } from "@/api/client";
 import type { FolderNode } from "@/api/client";
+import UploadModal from "./uploadModal";
+import { useAuth } from "@/contexts/auth-context";
 
 interface VaultRailProps {
   activeId: string | null;
@@ -12,9 +14,13 @@ interface VaultRailProps {
 }
 
 export function VaultRail({ activeId, onSelectFile }: VaultRailProps) {
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const { isAdmin } = useAuth();
+
   const { data: tree, isError: treeError } = useQuery({
-    queryKey: ["folderTree"],
+    queryKey: ["folderTree", isAdmin],
     queryFn: () => getFolderTree(),
+    enabled: isAdmin,
   });
 
   const { data: stats, isError: statsError } = useQuery({
@@ -46,12 +52,12 @@ export function VaultRail({ activeId, onSelectFile }: VaultRailProps) {
             <span>notes</span>
           </div>
           <div>
-            <b>{stats ? `${(stats.edgeCount / 1000).toFixed(1)}k` : "—"}</b>
-            <span>chunks</span>
-          </div>
-          <div>
             <b>{stats?.edgeCount ?? "—"}</b>
             <span>edges</span>
+          </div>
+          <div>
+            <b>{stats ? stats.avgDegree.toFixed(1) : "—"}</b>
+            <span>avg deg</span>
           </div>
         </div>
       )}
@@ -75,12 +81,14 @@ export function VaultRail({ activeId, onSelectFile }: VaultRailProps) {
       </div>
 
       <div className="nv-rail-foot">
-        <button className="nv-foot-btn">
-          <Icon name="plus" size={12} />
+        <button className="nv-foot-btn" onClick={() => setUploadOpen(true)}>
+          <Icon name="plus" size={12} style={{ color: "var(--accent)" }} />
           <span>add source</span>
         </button>
         <span className="nv-foot-meta">last sync &middot; now</span>
       </div>
+
+      <UploadModal isOpen={uploadOpen} onClose={() => setUploadOpen(false)} target="file" />
     </aside>
   );
 }

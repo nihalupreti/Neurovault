@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Icon } from "./icons";
 
 interface Heading {
   id: string;
@@ -53,10 +52,6 @@ export function OutlinePane({ content }: OutlinePaneProps) {
         })}
       </ul>
 
-      <div className="nv-pane-eyebrow nv-pane-eyebrow-spaced">recent</div>
-      <ul className="nv-recent">
-        <li><Icon name="file" size={11} /><span>Recently viewed files</span><em>&mdash;</em></li>
-      </ul>
     </div>
   );
 }
