@@ -2,6 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { getNeighbors, getFileCluster } from "@/api/client";
+import { Icon } from "@/components/icons";
 
 const MAX_VISIBLE_NODES = 6;
 
@@ -27,11 +28,17 @@ export function ConnectionsPane({ fileId }: ConnectionsPaneProps) {
     ...(neighbors?.implicit ?? []).map((n) => ({ ...n, type: "implicit" as const })),
   ].slice(0, MAX_VISIBLE_NODES);
 
-  if (neighborsError || clusterError) {
+  if (neighborsError && clusterError) {
     return (
-      <div className="nv-conn">
-        <div style={{ color: "var(--ink-faint)", fontSize: "12px", padding: "8px" }}>
-          Failed to load
+      <div className="nv-empty-hero" style={{ minHeight: "auto", padding: "48px 24px" }}>
+        <div className="nv-empty-hero-inner">
+          <div className="nv-empty-hero-icon">
+            <Icon name="graph" size={20} />
+          </div>
+          <h3>No connections yet</h3>
+          <p style={{ marginBottom: 0 }}>
+            This note hasn&apos;t been indexed in the knowledge graph. Connections will appear after processing.
+          </p>
         </div>
       </div>
     );
@@ -40,7 +47,7 @@ export function ConnectionsPane({ fileId }: ConnectionsPaneProps) {
   return (
     <div className="nv-conn">
       <div className="nv-pane-eyebrow">
-        cluster &middot; {cluster ? `#${cluster.clusterId}` : "loading"}
+        cluster &middot; {clusterError ? "none" : cluster ? `#${cluster.clusterId}` : "loading"}
       </div>
 
       <Constellation nodes={allNodes} />

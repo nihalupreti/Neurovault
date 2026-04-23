@@ -2,12 +2,23 @@
 
 export default function BooksError({ error, reset }: { error: Error; reset: () => void }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", gap: 16, color: "var(--ink-soft)" }}>
-      <h2 style={{ fontFamily: "var(--sans)", fontSize: 20, fontWeight: 400 }}>Something went wrong</h2>
-      <p style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--ink-faint)" }}>{error.message}</p>
-      <button onClick={reset} style={{ padding: "8px 16px", background: "var(--bg-2)", border: "1px solid var(--rule)", borderRadius: 6, color: "var(--ink-soft)", fontFamily: "var(--mono)", fontSize: 11, cursor: "pointer" }}>
-        Try again
-      </button>
+    <div className="nv-empty-hero">
+      <div className="nv-empty-hero-inner">
+        <div className="nv-error-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4" />
+            <path d="M12 16h.01" />
+          </svg>
+        </div>
+        <h3>Something went wrong</h3>
+        <p>{error.message}</p>
+        <div className="nv-empty-hero-actions">
+          <button className="nv-empty-hero-btn is-secondary" onClick={reset}>
+            Try again
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

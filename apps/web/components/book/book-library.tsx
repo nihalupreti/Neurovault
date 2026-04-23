@@ -36,7 +36,12 @@ export function BookLibrary({ onSelectBook, onImport, initialData }: BookLibrary
   if (isLoading) {
     return (
       <div className="nv-library-wrap">
-        <div className="nv-empty-state">Loading books&hellip;</div>
+        <div className="nv-empty-hero" style={{ minHeight: "40vh" }}>
+          <div className="nv-empty-hero-inner">
+            <div className="nv-spinner" />
+            <p style={{ marginBottom: 0 }}>Loading books…</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -44,22 +49,32 @@ export function BookLibrary({ onSelectBook, onImport, initialData }: BookLibrary
   if (error) {
     return (
       <div className="nv-library-wrap">
-        <div className="nv-empty-state">Failed to load books.</div>
+        <div className="nv-empty-hero" style={{ minHeight: "40vh" }}>
+          <div className="nv-empty-hero-inner">
+            <div className="nv-error-icon">
+              <Icon name="x" size={20} />
+            </div>
+            <h3>Something went wrong</h3>
+            <p style={{ marginBottom: 0 }}>Failed to load books.</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="nv-library-wrap">
-      <button className="nv-import-card" onClick={onImport}>
-        <span className="nv-import-card-icon">
-          <Icon name="plus" size={14} />
-        </span>
-        <span className="nv-import-card-body">
-          <b>import book</b>
-          <span>epub · pdf · html</span>
-        </span>
-      </button>
+      {books.length > 0 && (
+        <button className="nv-import-card" onClick={onImport}>
+          <span className="nv-import-card-icon">
+            <Icon name="plus" size={14} />
+          </span>
+          <span className="nv-import-card-body">
+            <b>import book</b>
+            <span>epub · pdf · html</span>
+          </span>
+        </button>
+      )}
 
       {books.length > 0 && (
         <div className="nv-rail-search">
@@ -73,8 +88,19 @@ export function BookLibrary({ onSelectBook, onImport, initialData }: BookLibrary
       )}
 
       {filtered.length === 0 && books.length === 0 && (
-        <div className="nv-empty-state">
-          No books yet. Import one to get started.
+        <div className="nv-empty-hero" style={{ minHeight: "40vh" }}>
+          <div className="nv-empty-hero-inner">
+            <div className="nv-empty-hero-icon">
+              <Icon name="folder" size={24} />
+            </div>
+            <h3>Your library is empty</h3>
+            <p>Import a book to start reading. Supports EPUB, PDF, and HTML.</p>
+            <div className="nv-empty-hero-actions">
+              <button className="nv-empty-hero-btn is-primary" onClick={onImport}>
+                Import book
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

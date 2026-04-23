@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -18,6 +19,12 @@ interface ReadingViewProps {
 export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) {
   const { highlightText, currentFileId } = useHighlight();
 
+  useEffect(() => {
+    if (!highlightText || currentFileId !== fileId) return;
+    const el = document.querySelector(".nv-blk-highlight");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [highlightText, currentFileId, fileId]);
+
   const { data: content, isLoading, isError } = useQuery({
     queryKey: ["file", fileId],
     queryFn: () => getFile(fileId!),
@@ -28,8 +35,17 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
     return (
       <main className="nv-reading">
         <div className="nv-reading-frame">
-          <div style={{ textAlign: "center", padding: "120px 0", color: "var(--ink-faint)" }}>
-            Select a file from the vault
+          <div className="nv-empty-hero">
+            <div className="nv-empty-hero-inner">
+              <div className="nv-empty-hero-icon">
+                <Icon name="file" size={24} />
+              </div>
+              <h3>No file selected</h3>
+              <p>
+                Choose a note from the sidebar, or use{" "}
+                <kbd>⌘K</kbd> to search your vault.
+              </p>
+            </div>
           </div>
         </div>
       </main>
@@ -40,7 +56,12 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
     return (
       <main className="nv-reading">
         <div className="nv-reading-frame">
-          <div style={{ color: "var(--ink-faint)", padding: "60px 0" }}>Loading&hellip;</div>
+          <div className="nv-empty-hero">
+            <div className="nv-empty-hero-inner">
+              <div className="nv-spinner" />
+              <p style={{ marginBottom: 0 }}>Loading file…</p>
+            </div>
+          </div>
         </div>
       </main>
     );
@@ -50,7 +71,15 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
     return (
       <main className="nv-reading">
         <div className="nv-reading-frame">
-          <div style={{ color: "var(--ink-faint)", padding: "60px 0" }}>Failed to load file</div>
+          <div className="nv-empty-hero">
+            <div className="nv-empty-hero-inner">
+              <div className="nv-error-icon">
+                <Icon name="x" size={20} />
+              </div>
+              <h3>Something went wrong</h3>
+              <p style={{ marginBottom: 0 }}>Failed to load this file</p>
+            </div>
+          </div>
         </div>
       </main>
     );
