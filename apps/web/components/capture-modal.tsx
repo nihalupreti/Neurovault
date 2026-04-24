@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import api from "@/api/axios-instance";
 import { ENDPOINTS } from "@/api/endpoints";
+import { Icon } from "./icons";
 
 interface CaptureModalProps {
   open: boolean;
@@ -58,31 +59,41 @@ export function CaptureModal({ open, onClose }: CaptureModalProps) {
   return (
     <dialog
       ref={dialogRef}
-      className="nv-modal"
+      className="nv-modal nv-modal-chrome"
       onClose={handleClose}
       onClick={(e) => {
         if (e.target === dialogRef.current) handleClose();
       }}
     >
-      <div className="nv-modal-header">
-        <span>Quick Capture</span>
+      <div className="nv-modal-chrome-header">
+        <div className="nv-modal-chrome-title">
+          <div className="nv-modal-chrome-title-icon">
+            <Icon name="plus" size={14} />
+          </div>
+          <span>Quick Capture</span>
+        </div>
+        <button className="nv-modal-chrome-close" onClick={handleClose}>
+          <Icon name="x" size={14} />
+        </button>
       </div>
       <form onSubmit={handleSubmit}>
-        <textarea
-          className="nv-modal-input"
-          placeholder="Paste a URL, or type a note..."
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          onKeyDown={handleKeyDown}
-          autoFocus
-          rows={3}
-        />
-        <div className="nv-modal-foot">
-          <span className="nv-modal-eyebrow">
+        <div className="nv-modal-chrome-body">
+          <textarea
+            className="nv-modal-chrome-textarea"
+            placeholder="Paste a URL, or type a note..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleKeyDown}
+            autoFocus
+          />
+        </div>
+        <div className="nv-modal-chrome-footer">
+          <span style={{ flex: 1, fontFamily: "var(--mono)", fontSize: "10px", color: "var(--accent)", letterSpacing: "0.04em" }}>
             {/^https?:\/\//i.test(content.trim()) ? "link detected" : ""}
           </span>
-          <button type="submit" disabled={mutation.isPending || !content.trim()}>
-            {mutation.isPending ? "Saving..." : "Capture"}
+          <button type="button" className="nv-btn-secondary" onClick={handleClose}>Cancel</button>
+          <button type="submit" className="nv-btn-primary" disabled={mutation.isPending || !content.trim()}>
+            {mutation.isPending ? "Saving…" : "Capture"}
           </button>
         </div>
       </form>

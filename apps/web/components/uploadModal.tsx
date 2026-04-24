@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/api/query-client";
 import { uploadFiles } from "@/api/client";
+import { ENDPOINTS } from "@/api/endpoints";
 import { Icon } from "./icons";
 
 interface ModalProps {
@@ -13,8 +14,6 @@ interface ModalProps {
 }
 
 export default function UploadModal({ isOpen, onClose, target }: ModalProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const folderInputRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
@@ -41,7 +40,7 @@ export default function UploadModal({ isOpen, onClose, target }: ModalProps) {
     if (!files) return;
 
     const endpoint =
-      target === "file" ? "/file/upload/file" : "/file/upload/folder";
+      target === "file" ? ENDPOINTS.file.upload : ENDPOINTS.file.uploadFolder;
 
     const formData = new FormData();
 
@@ -57,58 +56,67 @@ export default function UploadModal({ isOpen, onClose, target }: ModalProps) {
     mutate({ endPoint: endpoint, data: formData });
   };
 
-  const triggerInput = () => {
-    if (target === "file") {
-      fileInputRef.current?.click();
-    } else {
-      folderInputRef.current?.click();
-    }
-  };
-
   return (
     <dialog
       ref={dialogRef}
-      className="nv-modal"
+      className="nv-modal nv-modal-chrome"
       onClose={onClose}
       onClick={(e) => {
         if (e.target === dialogRef.current) onClose();
       }}
     >
-      <div className="nv-modal-header">
-        <span>Upload {target}</span>
+      <div className="nv-modal-chrome-header">
+        <div className="nv-modal-chrome-title">
+          <div className="nv-modal-chrome-title-icon">
+            <Icon name="plus" size={14} />
+          </div>
+          <span>Upload files</span>
+        </div>
+        <button className="nv-modal-chrome-close" onClick={onClose}>
+          <Icon name="x" size={14} />
+        </button>
       </div>
 
-      <div className="nv-upload-zone" onClick={triggerInput}>
-        {isLoading ? (
-          <p style={{ color: "var(--ink-soft)" }}>Uploading...</p>
-        ) : (
-          <>
-            <Icon name="plus" size={24} />
-            <p style={{ color: "var(--ink-soft)", marginTop: "8px" }}>
-              Click to upload
-            </p>
-            <p style={{ color: "var(--ink-faint)", fontSize: "12px", marginTop: "4px" }}>
-              Markdown, PDF, or TXT
-            </p>
-          </>
-        )}
+      <div className="nv-modal-chrome-body">
+        <div className="nv-upload-zone" style={{ position: "relative" }}>
+          {!isLoading && (
+            <input
+              type="file"
+              multiple={target === "file"}
+              // @ts-expect-error webkitdirectory not in TS defs
+              webkitdirectory={target === "folder" ? "" : undefined}
+              style={{
+                position: "absolute",
+                inset: 0,
+                opacity: 0,
+                cursor: "pointer",
+                width: "100%",
+                height: "100%",
+              }}
+              onChange={handleFiles}
+            />
+          )}
+          {isLoading ? (
+            <div className="nv-spinner" />
+          ) : (
+            <>
+              <Icon name="plus" size={24} />
+              <p style={{ color: "var(--ink-soft)", marginTop: "8px", marginBottom: "4px" }}>
+                Click to browse or drag files here
+              </p>
+              <p style={{ color: "var(--ink-faint)", fontSize: "12px", margin: 0 }}>
+                Markdown, PDF, or TXT
+              </p>
+            </>
+          )}
+        </div>
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        style={{ display: "none" }}
-        onChange={handleFiles}
-      />
-      <input
-        ref={folderInputRef}
-        type="file"
-        // @ts-expect-error webkitdirectory not in TS defs
-        webkitdirectory=""
-        style={{ display: "none" }}
-        onChange={handleFiles}
-      />
+      <div className="nv-modal-chrome-footer" style={{ justifyContent: "space-between" }}>
+        <span style={{ fontFamily: "var(--mono)", fontSize: "10px", color: "var(--ink-faint)" }}>
+          Max 10MB per file
+        </span>
+      </div>
     </dialog>
   );
 }

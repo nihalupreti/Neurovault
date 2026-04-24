@@ -51,29 +51,40 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   return (
     <dialog
       ref={dialogRef}
-      className="nv-modal nv-login-modal"
+      className="nv-modal nv-modal-chrome"
       onClose={handleClose}
       onClick={(e) => {
         if (e.target === dialogRef.current) handleClose();
       }}
     >
-      <div className="nv-modal-header">
-        <Icon name="lock" size={14} />
-        <span>Admin Access</span>
+      <div className="nv-modal-chrome-header">
+        <div className="nv-modal-chrome-title">
+          <div className="nv-modal-chrome-title-icon">
+            <Icon name="lock" size={14} />
+          </div>
+          <span>Admin Access</span>
+        </div>
+        <button className="nv-modal-chrome-close" onClick={handleClose}>
+          <Icon name="x" size={14} />
+        </button>
       </div>
       <form onSubmit={handleSubmit}>
-        <input
-          type="password"
-          placeholder="Enter secret"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          autoFocus
-          className={error ? "nv-input-error" : ""}
-        />
-        {error && <span className="nv-login-error">Invalid secret</span>}
-        <button type="submit" disabled={loading || !value.trim()}>
-          {loading ? "Verifying…" : "Unlock"}
-        </button>
+        <div className="nv-modal-chrome-body">
+          <input
+            type="password"
+            className={`nv-modal-chrome-input${error ? " nv-input-error" : ""}`}
+            placeholder="Enter secret"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            autoFocus
+          />
+          {error && <span className="nv-login-error" style={{ display: "block", marginTop: "8px" }}>Invalid secret</span>}
+        </div>
+        <div className="nv-modal-chrome-footer">
+          <button type="submit" className="nv-btn-primary" disabled={loading || !value.trim()}>
+            {loading ? "Verifying…" : "Unlock"}
+          </button>
+        </div>
       </form>
     </dialog>
   );
