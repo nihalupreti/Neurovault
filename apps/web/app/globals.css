@@ -118,7 +118,7 @@ kbd {
   align-items: baseline;
   gap: 8px;
   flex-shrink: 0;
-  width: 180px;
+  min-width: 180px;
 }
 .nv-brand-glyph {
   width: 20px;
@@ -170,7 +170,7 @@ kbd {
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
-  width: 180px;
+  min-width: 180px;
   justify-content: flex-end;
 }
 
