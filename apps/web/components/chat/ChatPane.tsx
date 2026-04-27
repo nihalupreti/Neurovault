@@ -22,7 +22,7 @@ interface RateLimitInfo {
   contact: { email?: string; linkedin?: string };
 }
 
-export default function ChatPane() {
+export default function ChatPane({ onSelectFile }: { onSelectFile?: (id: string) => void }) {
   const { isAdmin } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [rateLimited, setRateLimited] = useState<RateLimitInfo | null>(null);
@@ -121,24 +121,26 @@ export default function ChatPane() {
 
       <div ref={scrollRef} className="nv-chat-stream">
         {messages.length === 0 && (
-          <div className="nv-chat-empty">
-            <Icon name="sparkle" size={14} />
-            <p>
-              Pose a question. Answers stream from your vault with inline
-              citations back to source chunks.
-            </p>
-            <div className="nv-chat-suggest">
-              {SUGGESTIONS.map((s) => (
-                <button key={s} onClick={() => handleSend(s)}>
-                  {s}
-                </button>
-              ))}
+          <div className="nv-chat-empty-hero">
+            <div>
+              <div className="nv-chat-empty-icon">
+                <Icon name="chat" size={20} />
+              </div>
+              <h4>Ask anything about your notes</h4>
+              <p>Answers stream with cited sources</p>
+              <div className="nv-chat-suggest">
+                {SUGGESTIONS.map((s) => (
+                  <button key={s} onClick={() => handleSend(s)}>
+                    {s}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
 
         {messages.map((m, i) => (
-          <ChatBubble key={i} message={m} />
+          <ChatBubble key={i} message={m} onSelectFile={onSelectFile} />
         ))}
       </div>
 

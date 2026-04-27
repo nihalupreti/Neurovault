@@ -10,6 +10,16 @@ import { useHighlight } from "@/contexts/HighlightContext";
 
 const HIGHLIGHT_MATCH_LENGTH = 40;
 
+function getFirstHeading(markdown: string): string {
+  const match = markdown.match(/^#\s+(.+)/m);
+  return match ? match[1].replace(/[*_`[\]]/g, "") : "Untitled";
+}
+
+function getReadingTime(wordCount: number): string {
+  const minutes = Math.max(1, Math.ceil(wordCount / 200));
+  return `${minutes} min read`;
+}
+
 interface ReadingViewProps {
   fileId: string | null;
   fileName: string;
@@ -25,7 +35,11 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
     if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [highlightText, currentFileId, fileId]);
 
-  const { data: content, isLoading, isError } = useQuery({
+  const {
+    data: content,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["file", fileId],
     queryFn: () => getFile(fileId!),
     enabled: !!fileId,
@@ -42,8 +56,7 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
               </div>
               <h3>No file selected</h3>
               <p>
-                Choose a note from the sidebar, or use{" "}
-                <kbd>⌘K</kbd> to search your vault.
+                Choose a note from the sidebar, or use <kbd>⌘K</kbd> to search your vault.
               </p>
             </div>
           </div>
@@ -86,14 +99,16 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
   }
 
   const shouldHighlight = currentFileId === fileId && highlightText;
+  const wordCount = content ? content.split(/\s+/).length : 0;
 
   return (
     <main className="nv-reading">
       <div className="nv-reading-frame">
         <div className="nv-doc-breadcrumb">
-          <span>{folderName}</span>
+          <Icon name="folder" size={11} />
+          <span>vault</span>
           <span className="nv-bc-sep">/</span>
-          <span>{fileName}</span>
+          <span>{content ? getFirstHeading(content) : "Untitled"}</span>
         </div>
 
         <article className="nv-doc" role="article">
@@ -107,12 +122,10 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
                 const text = String(children);
                 const isHighlighted =
                   shouldHighlight &&
-                  text.toLowerCase().includes(highlightText!.toLowerCase().slice(0, HIGHLIGHT_MATCH_LENGTH));
-                return (
-                  <p className={isHighlighted ? "nv-blk-highlight" : undefined}>
-                    {children}
-                  </p>
-                );
+                  text
+                    .toLowerCase()
+                    .includes(highlightText!.toLowerCase().slice(0, HIGHLIGHT_MATCH_LENGTH));
+                return <p className={isHighlighted ? "nv-blk-highlight" : undefined}>{children}</p>;
               },
               pre: ({ children }) => <pre className="nv-math">{children}</pre>,
               blockquote: ({ children }) => (
@@ -137,9 +150,13 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
 
         <div className="nv-doc-foot">
           <div className="nv-doc-foot-stats">
-            <span><Icon name="clock" size={11} /> updated recently</span>
+            <span>
+              <Icon name="clock" size={11} /> updated recently
+            </span>
             <span>&middot;</span>
-            <span>{content ? content.split(/\s+/).length.toLocaleString() : 0} words</span>
+            <span>{wordCount.toLocaleString()} words</span>
+            <span>&middot;</span>
+            <span>{getReadingTime(wordCount)}</span>
           </div>
         </div>
       </div>
