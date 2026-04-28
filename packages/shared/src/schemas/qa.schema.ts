@@ -10,6 +10,16 @@ export const askSchema = z.object({
   scope: z.enum(["chapter", "book", "connected", "default"]).optional(),
   bookId: z.string().optional(),
   chapterNumber: z.number().int().optional(),
+  conversationId: z.string().optional(),
 });
 
 export type AskInput = z.infer<typeof askSchema>;
+
+export const createConversationSchema = z.object({
+  contextType: z.enum(["book", "file", "vault"]),
+  contextId: z.string().min(1),
+});
+
+export const renameConversationSchema = z.object({
+  title: z.string().min(1).max(100),
+});
