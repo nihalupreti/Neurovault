@@ -15,6 +15,7 @@ interface ModalProps {
 
 export default function UploadModal({ isOpen, onClose, target }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -39,8 +40,7 @@ export default function UploadModal({ isOpen, onClose, target }: ModalProps) {
     const files = e.target.files;
     if (!files) return;
 
-    const endpoint =
-      target === "file" ? ENDPOINTS.file.upload : ENDPOINTS.file.uploadFolder;
+    const endpoint = target === "file" ? ENDPOINTS.file.upload : ENDPOINTS.file.uploadFolder;
 
     const formData = new FormData();
 
@@ -78,24 +78,23 @@ export default function UploadModal({ isOpen, onClose, target }: ModalProps) {
       </div>
 
       <div className="nv-modal-chrome-body">
-        <div className="nv-upload-zone" style={{ position: "relative" }}>
-          {!isLoading && (
-            <input
-              type="file"
-              multiple={target === "file"}
-              // @ts-expect-error webkitdirectory not in TS defs
-              webkitdirectory={target === "folder" ? "" : undefined}
-              style={{
-                position: "absolute",
-                inset: 0,
-                opacity: 0,
-                cursor: "pointer",
-                width: "100%",
-                height: "100%",
-              }}
-              onChange={handleFiles}
-            />
-          )}
+        {isOpen && (
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple={target === "file"}
+            // @ts-expect-error webkitdirectory not in TS defs
+            webkitdirectory={target === "folder" ? "" : undefined}
+            style={{ display: "none" }}
+            onChange={handleFiles}
+          />
+        )}
+        <button
+          type="button"
+          className="nv-upload-zone"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isLoading}
+        >
           {isLoading ? (
             <div className="nv-spinner" />
           ) : (
@@ -109,7 +108,7 @@ export default function UploadModal({ isOpen, onClose, target }: ModalProps) {
               </p>
             </>
           )}
-        </div>
+        </button>
       </div>
 
       <div className="nv-modal-chrome-footer" style={{ justifyContent: "space-between" }}>
