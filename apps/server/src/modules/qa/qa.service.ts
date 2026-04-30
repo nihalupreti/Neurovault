@@ -11,7 +11,11 @@ interface QdrantScoredPoint {
   payload?: Record<string, unknown> | null;
 }
 
-const provider = createProvider();
+let _provider: ReturnType<typeof createProvider> | null = null;
+function getProvider() {
+  if (!_provider) _provider = createProvider();
+  return _provider;
+}
 
 interface AskParams {
   question: string;
@@ -128,7 +132,7 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
   }));
 
   const systemPrompt = buildSystemPrompt(chunks);
-  const recentHistory = history.slice(-6);
+  const recentHistory = history;
 
   const messages: ChatMessage[] = [
     { role: "system", content: systemPrompt },
@@ -136,7 +140,28 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
     { role: "user", content: question },
   ];
 
-  const stream = provider.chatStream({ messages });
+  const stream = getProvider().chatStream({ messages });
 
   return { stream, citations };
+}
+
+export async function generateTitle(question: string): Promise<string> {
+  const provider = getProvider();
+  const messages: ChatMessage[] = [
+    {
+      role: "user",
+      content: `Generate a concise 3-6 word title for a conversation that starts with this question. Reply with ONLY the title, no quotes or punctuation:\n\n${question}`,
+    },
+  ];
+
+  let title = "";
+  for await (const token of provider.chatStream({
+    messages,
+    maxTokens: 30,
+    temperature: 0.5,
+  })) {
+    title += token;
+  }
+
+  return title.trim() || question.slice(0, 50);
 }
