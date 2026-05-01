@@ -20,6 +20,9 @@ export const ENDPOINTS = {
   },
   qa: {
     ask: `${BASE}/api/qa/ask`,
+    conversations: `${BASE}/api/qa/conversations`,
+    conversationMessages: (id: string) => `${BASE}/api/qa/conversations/${id}/messages`,
+    conversation: (id: string) => `${BASE}/api/qa/conversations/${id}`,
   },
   graph: {
     root: `${BASE}/api/graph`,

@@ -15,6 +15,15 @@ interface StreamCallbacks {
   onDone: () => void;
   onError: (message: string) => void;
   onRateLimited?: (contact: { email?: string; linkedin?: string }) => void;
+  onTitle?: (title: string) => void;
+}
+
+interface AskOptions {
+  question: string;
+  history: ChatMessage[];
+  callbacks: StreamCallbacks;
+  limit?: number;
+  conversationId?: string;
 }
 
 export function useQAStream() {
@@ -28,12 +37,8 @@ export function useQAStream() {
   }, []);
 
   const ask = useCallback(
-    async (
-      question: string,
-      history: ChatMessage[],
-      callbacks: StreamCallbacks,
-      limit?: number
-    ) => {
+    async (opts: AskOptions) => {
+      const { question, history, callbacks, limit, conversationId } = opts;
       abort();
 
       const controller = new AbortController();
@@ -43,18 +48,18 @@ export function useQAStream() {
       try {
         const secret = typeof window !== "undefined" ? localStorage.getItem("nv_admin_secret") : null;
 
-        const response = await fetch(
-          ENDPOINTS.qa.ask,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              ...(secret ? { Authorization: `Bearer ${secret}` } : {}),
-            },
-            body: JSON.stringify({ question, history, limit }),
-            signal: controller.signal,
-          }
-        );
+        const body: Record<string, unknown> = { question, history, limit };
+        if (conversationId) body.conversationId = conversationId;
+
+        const response = await fetch(ENDPOINTS.qa.ask, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(secret ? { Authorization: `Bearer ${secret}` } : {}),
+          },
+          body: JSON.stringify(body),
+          signal: controller.signal,
+        });
 
         if (response.status === 429) {
           const errorData = await response.json();
@@ -96,6 +101,9 @@ export function useQAStream() {
                   case "citations":
                     callbacks.onCitations(parsed);
                     break;
+                  case "title":
+                    callbacks.onTitle?.(parsed.title);
+                    break;
                   case "done":
                     callbacks.onDone();
                     break;
@@ -119,7 +127,7 @@ export function useQAStream() {
         abortRef.current = null;
       }
     },
-    [abort]
+    [abort],
   );
 
   return { ask, abort, isStreaming };
