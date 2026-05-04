@@ -591,6 +591,14 @@ kbd {
   box-shadow: 0 0 14px color-mix(in oklab, var(--accent) 50%, transparent);
 }
 
+.nv-flash {
+  animation: nv-flash-bg 1.5s ease-out;
+}
+@keyframes nv-flash-bg {
+  0% { background: var(--accent-faint); }
+  100% { background: transparent; }
+}
+
 .nv-doc-foot {
   margin-top: 56px;
   padding-top: 16px;
@@ -2997,6 +3005,7 @@ kbd {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
   min-height: 160px;
   border: 1px dashed var(--rule);
   border-radius: 8px;

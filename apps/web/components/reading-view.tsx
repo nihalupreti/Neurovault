@@ -12,12 +12,19 @@ const HIGHLIGHT_MATCH_LENGTH = 40;
 
 function getFirstHeading(markdown: string): string {
   const match = markdown.match(/^#\s+(.+)/m);
-  return match ? match[1].replace(/[*_`[\]]/g, "") : "Untitled";
+  return match?.[1] ? match[1].replace(/[*_`[\]]/g, "") : "Untitled";
 }
 
 function getReadingTime(wordCount: number): string {
   const minutes = Math.max(1, Math.ceil(wordCount / 200));
   return `${minutes} min read`;
+}
+
+function toHeadingId(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/-$/, "");
 }
 
 interface ReadingViewProps {
@@ -115,9 +122,15 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
-              h1: ({ children }) => <h1 className="nv-h1">{children}</h1>,
-              h2: ({ children }) => <h2 className="nv-h2">{children}</h2>,
-              h3: ({ children }) => <h3 className="nv-h3">{children}</h3>,
+              h1: ({ children }) => (
+                <h1 id={toHeadingId(String(children))} className="nv-h1">{children}</h1>
+              ),
+              h2: ({ children }) => (
+                <h2 id={toHeadingId(String(children))} className="nv-h2">{children}</h2>
+              ),
+              h3: ({ children }) => (
+                <h3 id={toHeadingId(String(children))} className="nv-h3">{children}</h3>
+              ),
               p: ({ children }) => {
                 const text = String(children);
                 const isHighlighted =
