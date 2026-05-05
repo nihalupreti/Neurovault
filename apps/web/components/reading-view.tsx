@@ -123,13 +123,19 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
             remarkPlugins={[remarkGfm]}
             components={{
               h1: ({ children }) => (
-                <h1 id={toHeadingId(String(children))} className="nv-h1">{children}</h1>
+                <h1 id={toHeadingId(String(children))} className="nv-h1">
+                  {children}
+                </h1>
               ),
               h2: ({ children }) => (
-                <h2 id={toHeadingId(String(children))} className="nv-h2">{children}</h2>
+                <h2 id={toHeadingId(String(children))} className="nv-h2">
+                  {children}
+                </h2>
               ),
               h3: ({ children }) => (
-                <h3 id={toHeadingId(String(children))} className="nv-h3">{children}</h3>
+                <h3 id={toHeadingId(String(children))} className="nv-h3">
+                  {children}
+                </h3>
               ),
               p: ({ children }) => {
                 const text = String(children);
