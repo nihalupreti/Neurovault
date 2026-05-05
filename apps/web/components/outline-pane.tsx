@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface Heading {
   id: string;
@@ -30,9 +30,32 @@ function extractHeadings(markdown: string): Heading[] {
   return headings;
 }
 
+function clearSectionHighlight() {
+  document.querySelectorAll(".nv-section-highlight").forEach((el) => {
+    el.classList.remove("nv-section-highlight");
+  });
+}
+
+function highlightSection(headingEl: HTMLElement) {
+  clearSectionHighlight();
+  const tagLevel = parseInt(headingEl.tagName[1]!, 10);
+  let sibling = headingEl.nextElementSibling;
+  const elements = [headingEl];
+  while (sibling) {
+    if (/^H[1-3]$/.test(sibling.tagName)) {
+      const sibLevel = parseInt(sibling.tagName[1]!, 10);
+      if (sibLevel <= tagLevel) break;
+    }
+    elements.push(sibling as HTMLElement);
+    sibling = sibling.nextElementSibling;
+  }
+  elements.forEach((el) => el.classList.add("nv-section-highlight"));
+}
+
 export function OutlinePane({ content }: OutlinePaneProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const headings = useMemo(() => (content ? extractHeadings(content) : []), [content]);
+  const scrollCleanupRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     if (headings.length > 0 && !activeId) {
@@ -40,18 +63,37 @@ export function OutlinePane({ content }: OutlinePaneProps) {
     }
   }, [headings, activeId]);
 
+  useEffect(() => {
+    return () => {
+      scrollCleanupRef.current?.();
+      clearSectionHighlight();
+    };
+  }, []);
+
   const handleClick = useCallback((e: React.MouseEvent, id: string) => {
     e.preventDefault();
     setActiveId(id);
+
+    scrollCleanupRef.current?.();
+
     const el = document.getElementById(id);
     if (!el) return;
     el.scrollIntoView({ behavior: "smooth", block: "start" });
-    el.classList.add("nv-flash");
-    const onEnd = () => {
-      el.classList.remove("nv-flash");
-      el.removeEventListener("animationend", onEnd);
+    highlightSection(el);
+
+    const onScroll = () => {
+      clearSectionHighlight();
+      cleanup();
     };
-    el.addEventListener("animationend", onEnd);
+    const cleanup = () => {
+      window.removeEventListener("scroll", onScroll, true);
+      scrollCleanupRef.current = null;
+    };
+
+    setTimeout(() => {
+      window.addEventListener("scroll", onScroll, { capture: true, once: true });
+      scrollCleanupRef.current = cleanup;
+    }, 600);
   }, []);
 
   return (

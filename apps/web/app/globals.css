@@ -591,12 +591,24 @@ kbd {
   box-shadow: 0 0 14px color-mix(in oklab, var(--accent) 50%, transparent);
 }
 
+.nv-section-highlight {
+  background: var(--hl-amber-bg);
+  border-left: 2px solid var(--hl-amber);
+  margin-left: -22px;
+  padding-left: 20px;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
 .nv-flash {
   animation: nv-flash-bg 1.5s ease-out;
 }
 @keyframes nv-flash-bg {
-  0% { background: var(--accent-faint); }
-  100% { background: transparent; }
+  0% {
+    background: var(--accent-faint);
+  }
+  100% {
+    background: transparent;
+  }
 }
 
 .nv-doc-foot {
