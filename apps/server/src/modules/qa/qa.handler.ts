@@ -9,7 +9,7 @@ import {
 import { Conversation } from "./qa.conversation.model.js";
 
 export const handleAsk = async (req: Request, res: Response) => {
-  const { question, history, limit, scope, bookId, chapterNumber, conversationId } =
+  const { question, history, limit, scope, bookId, chapterNumber, conversationId, contextItems } =
     askSchema.parse(req.body);
 
   res.writeHead(200, {
@@ -47,6 +47,7 @@ export const handleAsk = async (req: Request, res: Response) => {
       scope: scope as "chapter" | "book" | "connected" | undefined,
       bookId,
       chapterNumber,
+      contextItems,
     });
 
     let fullResponse = "";

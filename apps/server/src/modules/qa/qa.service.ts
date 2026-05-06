@@ -24,6 +24,12 @@ interface AskParams {
   scope?: "chapter" | "book" | "connected";
   bookId?: string;
   chapterNumber?: number;
+  contextItems?: Array<{
+    type: "selection" | "file";
+    fileId: string;
+    fileName: string;
+    excerpt?: string;
+  }>;
 }
 
 interface AskResult {
@@ -35,10 +41,63 @@ const NO_RESULTS_MSG =
   "I couldn't find any relevant notes for this question. Try rephrasing or adding more notes to your vault.";
 
 export async function askQuestion(params: AskParams): Promise<AskResult> {
-  const { question, history = [], limit = 5 } = params;
+  const { question, history = [], limit = 5, contextItems } = params;
 
   const queryEmbedding = await getEmbeddings(question, "query");
   const client = getQdrantClient();
+
+  const pinnedChunks: RetrievedChunk[] = [];
+  const pinnedFileIds = new Set<string>();
+
+  if (contextItems && contextItems.length > 0) {
+    const fileItems = contextItems.filter((item) => item.type === "file");
+    const selectionItems = contextItems.filter((item) => item.type === "selection");
+
+    for (const item of selectionItems) {
+      pinnedFileIds.add(item.fileId);
+      pinnedChunks.push({
+        fileId: item.fileId,
+        fileName: item.fileName,
+        text: item.excerpt ?? "",
+        chunkIndex: 0,
+        score: 1,
+        headingPath: [],
+      });
+    }
+
+    const fileQueries = fileItems.map((item) =>
+      client.query("neurovault", {
+        query: queryEmbedding,
+        limit: 3,
+        filter: {
+          must: [{ key: "fileId", match: { value: item.fileId } }],
+        },
+        with_payload: true,
+      })
+    );
+
+    const fileResults = await Promise.all(fileQueries);
+
+    for (let i = 0; i < fileItems.length; i++) {
+      const item = fileItems[i]!;
+      pinnedFileIds.add(item.fileId);
+      const pts: QdrantScoredPoint[] = fileResults[i]!.points || [];
+      for (const p of pts) {
+        pinnedChunks.push({
+          fileId: String(p.payload?.fileId ?? item.fileId),
+          fileName: String(p.payload?.fileName ?? item.fileName),
+          text: String(p.payload?.text ?? ""),
+          chunkIndex: Number(p.payload?.chunk_index ?? 0),
+          score: p.score ?? 0,
+          headingPath: Array.isArray(p.payload?.headingPath)
+            ? (p.payload.headingPath as string[])
+            : [],
+        });
+      }
+    }
+  }
+
+  const vaultLimit = contextItems && contextItems.length > 0 ? 3 : limit;
 
   let points: QdrantScoredPoint[];
 
@@ -46,7 +105,7 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
     const [chapterResult, vaultResult] = await Promise.all([
       client.query("neurovault", {
         query: queryEmbedding,
-        limit: Math.ceil(limit / 2),
+        limit: Math.ceil(vaultLimit / 2),
         filter: {
           must: [
             { key: "bookId", match: { value: params.bookId } },
@@ -57,7 +116,7 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
       }),
       client.query("neurovault", {
         query: queryEmbedding,
-        limit: Math.ceil(limit / 2),
+        limit: Math.ceil(vaultLimit / 2),
         filter: {
           must_not: [{ key: "bookId", match: { value: params.bookId } }],
         },
@@ -85,14 +144,19 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
 
     const searchResult = await client.query("neurovault", {
       query: queryEmbedding,
-      limit,
+      limit: vaultLimit,
       filter,
       with_payload: true,
     });
     points = searchResult.points || [];
   }
 
-  const chunks: RetrievedChunk[] = points.map((p: QdrantScoredPoint) => ({
+  const filteredPoints =
+    pinnedFileIds.size > 0
+      ? points.filter((p) => !pinnedFileIds.has(String(p.payload?.fileId ?? "")))
+      : points;
+
+  const vaultChunks: RetrievedChunk[] = filteredPoints.map((p: QdrantScoredPoint) => ({
     fileId: String(p.payload?.fileId ?? ""),
     fileName: String(p.payload?.fileName ?? ""),
     text: String(p.payload?.text ?? ""),
@@ -101,9 +165,12 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
     headingPath: Array.isArray(p.payload?.headingPath) ? (p.payload.headingPath as string[]) : [],
   }));
 
+  const chunks: RetrievedChunk[] = [...pinnedChunks, ...vaultChunks];
+
   for (const chunk of chunks) {
-    const sId = points.find((p: QdrantScoredPoint) => String(p.payload?.text) === chunk.text)
-      ?.payload?.sectionId;
+    const sId = filteredPoints.find(
+      (p: QdrantScoredPoint) => String(p.payload?.text) === chunk.text
+    )?.payload?.sectionId;
     if (!sId) continue;
     const section = await SectionContent.findOne({ sectionId: String(sId) }).lean();
     if (

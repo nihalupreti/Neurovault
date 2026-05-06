@@ -5,6 +5,13 @@ export interface ChatMessage {
 
 export type QAScope = "chapter" | "book" | "connected" | "default";
 
+export interface ContextItem {
+  type: "selection" | "file";
+  fileId: string;
+  fileName: string;
+  excerpt?: string;
+}
+
 export interface QARequest {
   question: string;
   history?: ChatMessage[];
@@ -12,6 +19,7 @@ export interface QARequest {
   scope?: QAScope;
   bookId?: string;
   chapterNumber?: number;
+  contextItems?: ContextItem[];
 }
 
 export interface Citation {
