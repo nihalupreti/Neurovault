@@ -10,6 +10,8 @@ import { ChatComposer } from "./ChatComposer";
 import { RateLimitOverlay } from "./RateLimitOverlay";
 import { Icon } from "../icons";
 import { useAuth } from "@/contexts/auth-context";
+import { useSelectionContext } from "@/contexts/selection-context";
+import type { ContextItem } from "@/contexts/selection-context";
 import {
   useConversations,
   useConversationMessages,
@@ -41,6 +43,7 @@ export default function ChatPane({ onSelectFile }: { onSelectFile?: (id: string)
   const [showList, setShowList] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { ask, abort, isStreaming } = useQAStream();
+  const { contextItems: selectionItems, promoteToGhost } = useSelectionContext();
   const invalidateMessages = useInvalidateMessages();
 
   const { data: conversations = [] } = useConversations(CONTEXT_TYPE, CONTEXT_ID);
@@ -101,7 +104,14 @@ export default function ChatPane({ onSelectFile }: { onSelectFile?: (id: string)
         setActiveConversationId(convId);
       }
 
-      const userMsg: Message = { role: "user", content: question, isStreaming: false };
+      const contextSnapshot: ContextItem[] = [...selectionItems];
+
+      const userMsg: Message = {
+        role: "user",
+        content: question,
+        isStreaming: false,
+        contextItems: contextSnapshot.length > 0 ? contextSnapshot : undefined,
+      };
       const assistantMsg: Message = { role: "assistant", content: "", isStreaming: true };
 
       setMessages((prev) => [...prev, userMsg, assistantMsg]);
@@ -114,6 +124,7 @@ export default function ChatPane({ onSelectFile }: { onSelectFile?: (id: string)
         question,
         history,
         conversationId: convId,
+        contextItems: contextSnapshot.length > 0 ? contextSnapshot : undefined,
         callbacks: {
           onToken: (content) => {
             setMessages((prev) => {
@@ -144,6 +155,7 @@ export default function ChatPane({ onSelectFile }: { onSelectFile?: (id: string)
               return updated;
             });
             if (convId) invalidateMessages(convId);
+            promoteToGhost();
           },
           onError: (message) => {
             setMessages((prev) => {
@@ -169,7 +181,18 @@ export default function ChatPane({ onSelectFile }: { onSelectFile?: (id: string)
         },
       });
     },
-    [ask, messages, rateLimited, isAdmin, activeConversationId, createConv, invalidateMessages, queryClient],
+    [
+      ask,
+      messages,
+      rateLimited,
+      isAdmin,
+      activeConversationId,
+      createConv,
+      invalidateMessages,
+      queryClient,
+      selectionItems,
+      promoteToGhost,
+    ],
   );
 
   const handleStop = useCallback(() => {

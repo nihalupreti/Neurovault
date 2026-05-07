@@ -2,6 +2,9 @@
 
 import { KeyboardEvent, useState } from "react";
 import { Icon } from "../icons";
+import { ContextChips } from "./ContextChips";
+import { ContextPicker } from "./ContextPicker";
+import { useSelectionContext } from "@/contexts/selection-context";
 
 interface ChatComposerProps {
   onSend: (text: string) => void;
@@ -13,6 +16,8 @@ interface ChatComposerProps {
 export function ChatComposer({ onSend, onStop, isStreaming, disabled }: ChatComposerProps) {
   const [draft, setDraft] = useState("");
   const [mode, setMode] = useState<"hybrid" | "semantic" | "keyword">("hybrid");
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const { contextItems } = useSelectionContext();
 
   const send = () => {
     const text = draft.trim();
@@ -30,14 +35,27 @@ export function ChatComposer({ onSend, onStop, isStreaming, disabled }: ChatComp
 
   return (
     <div className="nv-chat-composer">
-      <textarea
-        rows={2}
-        placeholder="Ask anything in your vault…"
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onKeyDown={handleKeyDown}
-        disabled={disabled}
-      />
+      <ContextChips />
+
+      <div className="nv-chat-composer-input-row">
+        <button
+          className="nv-context-add-btn"
+          onClick={() => setPickerOpen(true)}
+          title="Add context"
+          disabled={contextItems.length >= 5}
+        >
+          <Icon name="plus" size={11} />
+        </button>
+        <textarea
+          rows={2}
+          placeholder="Ask anything in your vault…"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={disabled}
+        />
+      </div>
+
       <div className="nv-chat-composer-row">
         <div className="nv-chat-mode">
           {(["hybrid", "semantic", "keyword"] as const).map((m) => (
@@ -61,6 +79,8 @@ export function ChatComposer({ onSend, onStop, isStreaming, disabled }: ChatComp
           )}
         </button>
       </div>
+
+      <ContextPicker open={pickerOpen} onClose={() => setPickerOpen(false)} />
     </div>
   );
 }

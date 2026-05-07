@@ -1,11 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { Icon } from "@/components/icons";
-import { createAnnotation } from "@/api/client";
 import type { BookAnnotation, BookChapter } from "@/api/client";
-import { SelectionToolbar } from "./selection-toolbar";
+import { SelectionToolbar } from "../selection-toolbar";
 import { MarginGutter } from "./margin-gutter";
 
 interface ChapterReaderProps {
@@ -32,21 +30,6 @@ export function ChapterReader({
   nextTitle,
 }: ChapterReaderProps) {
   const mainRef = useRef<HTMLElement>(null);
-  const [toolbarPos, setToolbarPos] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-  const queryClient = useQueryClient();
-
-  const annotationMutation = useMutation({
-    mutationFn: (body: Omit<BookAnnotation, "_id" | "bookId" | "createdAt">) =>
-      createAnnotation(chapter.bookId, body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["annotations", chapter.bookId],
-      });
-    },
-  });
 
   useEffect(() => {
     const el = mainRef.current;
@@ -68,68 +51,12 @@ export function ChapterReader({
     return () => obs.disconnect();
   }, [chapter, onSectionEnter]);
 
-  const getSelectedText = useCallback(() => {
-    const sel = window.getSelection();
-    if (!sel || sel.toString().length <= 4) return null;
-    return sel;
-  }, []);
-
-  const handleMouseUp = useCallback(() => {
-    const sel = getSelectedText();
-    if (!sel || !mainRef.current) {
-      setToolbarPos(null);
-      return;
-    }
-    const range = sel.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-    const parentRect = mainRef.current.getBoundingClientRect();
-    setToolbarPos({
-      x: rect.left - parentRect.left + rect.width / 2,
-      y: rect.top - parentRect.top - 38,
-    });
-  }, [getSelectedText]);
-
-  const handleHighlight = useCallback(
-    (color: "amber" | "green") => {
-      const sel = window.getSelection();
-      if (!sel || sel.toString().length <= 4) return;
-
-      const text = sel.toString();
-      const range = sel.getRangeAt(0);
-
-      annotationMutation.mutate({
-        chapterNumber: chapter.number,
-        sectionAnchor: "",
-        type: "highlight",
-        textRange: {
-          startOffset: range.startOffset,
-          endOffset: range.endOffset,
-        },
-        highlightedText: text,
-        color,
-      });
-
-      setToolbarPos(null);
-      sel.removeAllRanges();
-    },
-    [annotationMutation, chapter.number]
-  );
-
-  const handleNote = useCallback(() => {
-    setToolbarPos(null);
-  }, []);
-
-  const handleAsk = useCallback(() => {
-    setToolbarPos(null);
-  }, []);
-
   return (
     <div className="nv-reader">
       <article
         className="nv-reader-main nv-chapter"
         role="article"
         ref={mainRef}
-        onMouseUp={handleMouseUp}
       >
         <div className="nv-book-breadcrumb">
           <span>library</span>
@@ -171,13 +98,13 @@ export function ChapterReader({
           )}
         </div>
 
-        <SelectionToolbar
-          position={toolbarPos}
-          onHighlight={handleHighlight}
-          onNote={handleNote}
-          onAsk={handleAsk}
-        />
       </article>
+
+      <SelectionToolbar
+        fileId={chapter.bookId}
+        fileName={chapter.title}
+        containerRef={mainRef}
+      />
 
       <MarginGutter annotations={annotations} />
     </div>

@@ -3,15 +3,23 @@
 import { Icon } from "../icons";
 import { useHighlight } from "@/contexts/HighlightContext";
 import type { Citation } from "@/hooks/useQAStream";
+import type { ContextItem } from "@/contexts/selection-context";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
   citations?: Citation[];
   isStreaming: boolean;
+  contextItems?: ContextItem[];
 }
 
-export function ChatBubble({ message }: { message: Message }) {
+export function ChatBubble({
+  message,
+  onSelectFile,
+}: {
+  message: Message;
+  onSelectFile?: (id: string) => void;
+}) {
   const { setHighlight } = useHighlight();
 
   if (message.role === "user") {
@@ -19,6 +27,16 @@ export function ChatBubble({ message }: { message: Message }) {
       <div className="nv-msg nv-msg-user">
         <span className="nv-msg-tag">you</span>
         <p>{message.content}</p>
+        {message.contextItems && message.contextItems.length > 0 && (
+          <div className="nv-msg-context">
+            {message.contextItems.map((item, i) => (
+              <span key={`${item.fileId}-${i}`} className="nv-msg-context-chip">
+                <Icon name="file" size={9} />
+                {item.fileName}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -37,7 +55,10 @@ export function ChatBubble({ message }: { message: Message }) {
               <button
                 key={c.sourceIndex}
                 className="nv-msg-cite"
-                onClick={() => setHighlight(c.fileId, c.excerpt)}
+                onClick={() => {
+                  onSelectFile?.(c.fileId);
+                  setHighlight(c.fileId, c.excerpt);
+                }}
               >
                 <span className="nv-msg-cite-n">{i + 1}</span>
                 <span className="nv-msg-cite-meta">

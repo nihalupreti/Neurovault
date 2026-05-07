@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getFile } from "@/api/client";
 import { Icon } from "./icons";
 import { useHighlight } from "@/contexts/HighlightContext";
+import { SelectionToolbar } from "./selection-toolbar";
 
 const HIGHLIGHT_MATCH_LENGTH = 40;
 
@@ -35,6 +36,7 @@ interface ReadingViewProps {
 
 export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) {
   const { highlightText, currentFileId } = useHighlight();
+  const articleRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!highlightText || currentFileId !== fileId) return;
@@ -118,7 +120,7 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
           <span>{content ? getFirstHeading(content) : "Untitled"}</span>
         </div>
 
-        <article className="nv-doc" role="article">
+        <article ref={articleRef} className="nv-doc" role="article">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
@@ -166,6 +168,14 @@ export function ReadingView({ fileId, fileName, folderName }: ReadingViewProps) 
             {content ?? ""}
           </ReactMarkdown>
         </article>
+
+        {fileId && content && (
+          <SelectionToolbar
+            fileId={fileId}
+            fileName={getFirstHeading(content)}
+            containerRef={articleRef}
+          />
+        )}
 
         <div className="nv-doc-foot">
           <div className="nv-doc-foot-stats">

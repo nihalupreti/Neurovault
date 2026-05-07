@@ -2,10 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { ENDPOINTS } from "@/api/endpoints";
-import type {
-  ChatMessage as SharedChatMessage,
-  Citation,
-} from "@neurovault/shared/types";
+import type { ChatMessage as SharedChatMessage, Citation } from "@neurovault/shared/types";
 
 type ChatMessage = SharedChatMessage | { role: "system"; content: string };
 
@@ -24,6 +21,12 @@ interface AskOptions {
   callbacks: StreamCallbacks;
   limit?: number;
   conversationId?: string;
+  contextItems?: Array<{
+    type: "selection" | "file";
+    fileId: string;
+    fileName: string;
+    excerpt?: string;
+  }>;
 }
 
 export function useQAStream() {
@@ -38,7 +41,7 @@ export function useQAStream() {
 
   const ask = useCallback(
     async (opts: AskOptions) => {
-      const { question, history, callbacks, limit, conversationId } = opts;
+      const { question, history, callbacks, limit, conversationId, contextItems } = opts;
       abort();
 
       const controller = new AbortController();
@@ -46,10 +49,12 @@ export function useQAStream() {
       setIsStreaming(true);
 
       try {
-        const secret = typeof window !== "undefined" ? localStorage.getItem("nv_admin_secret") : null;
+        const secret =
+          typeof window !== "undefined" ? localStorage.getItem("nv_admin_secret") : null;
 
         const body: Record<string, unknown> = { question, history, limit };
         if (conversationId) body.conversationId = conversationId;
+        if (contextItems && contextItems.length > 0) body.contextItems = contextItems;
 
         const response = await fetch(ENDPOINTS.qa.ask, {
           method: "POST",
