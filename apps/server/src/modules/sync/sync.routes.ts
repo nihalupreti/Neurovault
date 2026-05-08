@@ -28,8 +28,8 @@ router.delete("/vault/:vaultId", asHandler(deleteVault));
 router.post("/:vaultId/push", asHandler(handlePush));
 router.get("/:vaultId/pull", asHandler(handlePull));
 
-router.get("/:vaultId/history/*", asHandler(getFileHistory));
-router.get("/:vaultId/version/:commitSha/*", asHandler(getFileAtVersion));
+router.get("/:vaultId/history/*filePath", asHandler(getFileHistory));
+router.get("/:vaultId/version/:commitSha/*filePath", asHandler(getFileAtVersion));
 router.get("/:vaultId/conflicts", asHandler(listConflicts));
 router.post("/:vaultId/conflicts/:id/resolve", asHandler(resolveConflict));
 

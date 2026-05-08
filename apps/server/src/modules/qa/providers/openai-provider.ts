@@ -19,25 +19,63 @@ export class OpenAICompatibleProvider implements LLMProvider {
     this.model = config.model;
   }
 
-  async *chatStream(params: {
+  chatStream(params: {
     messages: ChatMessage[];
     temperature?: number;
     maxTokens?: number;
   }): AsyncIterable<string> {
-    const stream = await this.client.chat.completions.create({
-      model: this.model,
-      messages: params.messages.map((m) => ({
-        role: m.role,
-        content: m.content,
-      })),
-      stream: true,
-      temperature: params.temperature ?? 0.3,
-      max_tokens: params.maxTokens ?? 2048,
-    });
+    const tokens: string[] = [];
+    let notify: (() => void) | null = null;
+    let done = false;
+    let streamError: Error | null = null;
 
-    for await (const chunk of stream) {
-      const content = chunk.choices[0]?.delta?.content;
-      if (content) yield content;
-    }
+    // Consume SDK stream in an isolated async context to avoid
+    // nested async-generator deadlock in CJS bundles
+    this.client.chat.completions
+      .create({
+        model: this.model,
+        messages: params.messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        })),
+        stream: true,
+        temperature: params.temperature ?? 0.3,
+        max_tokens: params.maxTokens ?? 2048,
+      })
+      .then(async (stream) => {
+        for await (const chunk of stream) {
+          const content = chunk.choices[0]?.delta?.content;
+          if (content) {
+            tokens.push(content);
+            notify?.();
+            notify = null;
+          }
+        }
+      })
+      .catch((err: unknown) => {
+        streamError = err instanceof Error ? err : new Error(String(err));
+      })
+      .finally(() => {
+        done = true;
+        notify?.();
+        notify = null;
+      });
+
+    return {
+      [Symbol.asyncIterator]() {
+        return {
+          async next(): Promise<IteratorResult<string>> {
+            while (tokens.length === 0 && !done && !streamError) {
+              await new Promise<void>((r) => {
+                notify = r;
+              });
+            }
+            if (tokens.length > 0) return { value: tokens.shift()!, done: false };
+            if (streamError) throw streamError;
+            return { value: undefined as unknown as string, done: true };
+          },
+        };
+      },
+    };
   }
 }

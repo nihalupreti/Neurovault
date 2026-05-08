@@ -7,10 +7,7 @@ import {
   deleteConversation,
   getMessages,
 } from "./qa.conversation.service.js";
-import {
-  createConversationSchema,
-  renameConversationSchema,
-} from "@neurovault/shared/schemas";
+import { createConversationSchema, renameConversationSchema } from "@neurovault/shared/schemas";
 import { apiSuccess, apiCreated, apiNoContent, apiPaginated } from "../../utils/api-response.js";
 import { parsePagination } from "../../utils/pagination.js";
 
@@ -27,10 +24,7 @@ export const handleCreateConversation = async (req: Request, res: Response) => {
   return apiCreated(res, conversation);
 };
 
-export const handleGetMessages = async (
-  req: Request<{ id: string }>,
-  res: Response,
-) => {
+export const handleGetMessages = async (req: Request<{ id: string }>, res: Response) => {
   const { id } = req.params;
   await getConversationOrThrow(id);
   const { page, limit, skip } = parsePagination(req);
@@ -38,19 +32,13 @@ export const handleGetMessages = async (
   return apiPaginated(res, messages, page, limit, total);
 };
 
-export const handleRenameConversation = async (
-  req: Request<{ id: string }>,
-  res: Response,
-) => {
+export const handleRenameConversation = async (req: Request<{ id: string }>, res: Response) => {
   const { title } = renameConversationSchema.parse(req.body);
   const conversation = await renameConversation(req.params.id, title);
   return apiSuccess(res, conversation);
 };
 
-export const handleDeleteConversation = async (
-  req: Request<{ id: string }>,
-  res: Response,
-) => {
+export const handleDeleteConversation = async (req: Request<{ id: string }>, res: Response) => {
   await deleteConversation(req.params.id);
   return apiNoContent(res);
 };

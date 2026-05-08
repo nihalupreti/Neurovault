@@ -114,6 +114,8 @@ export async function processContent(
   await client.delete(COLLECTION_NAME, {
     wait: true,
     filter: { must: [{ key: "fileId", match: { value: fileId } }] },
+  }).catch(() => {
+    // collection may not exist yet on first run — upsert will create it
   });
 
   for (let i = 0; i < allPoints.length; i += QDRANT_BATCH_SIZE) {

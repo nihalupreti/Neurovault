@@ -11,7 +11,7 @@ export async function getFileHistory(req: Request, res: Response) {
   const vault = await Vault.findById(req.params.vaultId);
   if (!vault) throw new VaultNotFoundError(req.params.vaultId);
 
-  const filePath = req.params[0];
+  const filePath = req.params.filePath;
   if (!filePath) throw new InvalidSyncPayloadError("filePath required");
 
   const versions = await FileVersion.find({
@@ -29,7 +29,7 @@ export async function getFileAtVersion(req: Request, res: Response) {
   if (!vault) throw new VaultNotFoundError(req.params.vaultId);
 
   const { commitSha } = req.params;
-  const filePath = req.params[0];
+  const filePath = req.params.filePath;
   if (!commitSha || !filePath) {
     throw new InvalidSyncPayloadError("commitSha and filePath required");
   }

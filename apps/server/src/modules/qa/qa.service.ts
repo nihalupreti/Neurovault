@@ -73,7 +73,7 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
           must: [{ key: "fileId", match: { value: item.fileId } }],
         },
         with_payload: true,
-      })
+      }),
     );
 
     const fileResults = await Promise.all(fileQueries);
@@ -169,7 +169,7 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
 
   for (const chunk of chunks) {
     const sId = filteredPoints.find(
-      (p: QdrantScoredPoint) => String(p.payload?.text) === chunk.text
+      (p: QdrantScoredPoint) => String(p.payload?.text) === chunk.text,
     )?.payload?.sectionId;
     if (!sId) continue;
     const section = await SectionContent.findOne({ sectionId: String(sId) }).lean();
