@@ -49,8 +49,7 @@ export function useDeleteConversation(contextType: string, contextId: string) {
 export function useRenameConversation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, title }: { id: string; title: string }) =>
-      renameConversation(id, title),
+    mutationFn: ({ id, title }: { id: string; title: string }) => renameConversation(id, title),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["conversations"] });
     },

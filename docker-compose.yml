@@ -27,12 +27,26 @@ services:
       - neurovault_network
 
   qdrant:
-    image: qdrant/qdrant:v1.12.0
+    image: qdrant/qdrant:v1.14.0
     container_name: neurovault_qdrant
     ports:
       - "6333:6333"
     volumes:
       - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+    networks:
+      - neurovault_network
+
+  neo4j:
+    image: neo4j:5
+    container_name: neurovault_neo4j
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/68013f12feffae32916cd0f30fcbcac4
+    volumes:
+      - neo4j_data:/data
     restart: unless-stopped
     networks:
       - neurovault_network
@@ -58,6 +72,7 @@ services:
 volumes:
   mongo_data:
   qdrant_data:
+  neo4j_data:
 
 networks:
   neurovault_network:

@@ -26,7 +26,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) setSecret(stored);
+    if (stored) {
+      setAuthToken(stored);
+      setSecret(stored);
+    }
   }, []);
 
   useEffect(() => {
@@ -36,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (value: string): Promise<boolean> => {
     try {
       const { data } = await api.post(ENDPOINTS.auth.login, { secret: value });
-      if (data.authenticated) {
+      if (data.data?.authenticated) {
         localStorage.setItem(STORAGE_KEY, value);
         setSecret(value);
         return true;

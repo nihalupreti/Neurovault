@@ -59,11 +59,7 @@ export function ChatComposer({ onSend, onStop, isStreaming, disabled }: ChatComp
       <div className="nv-chat-composer-row">
         <div className="nv-chat-mode">
           {(["hybrid", "semantic", "keyword"] as const).map((m) => (
-            <button
-              key={m}
-              className={mode === m ? "is-active" : ""}
-              onClick={() => setMode(m)}
-            >
+            <button key={m} className={mode === m ? "is-active" : ""} onClick={() => setMode(m)}>
               {m}
             </button>
           ))}
@@ -73,9 +69,13 @@ export function ChatComposer({ onSend, onStop, isStreaming, disabled }: ChatComp
           onClick={isStreaming ? onStop : send}
         >
           {isStreaming ? (
-            <><Icon name="stop" size={11} /> stop</>
+            <>
+              <Icon name="stop" size={11} /> stop
+            </>
           ) : (
-            <><Icon name="send" size={11} /> send</>
+            <>
+              <Icon name="send" size={11} /> send
+            </>
           )}
         </button>
       </div>

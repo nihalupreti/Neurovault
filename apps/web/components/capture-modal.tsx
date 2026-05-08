@@ -88,11 +88,25 @@ export function CaptureModal({ open, onClose }: CaptureModalProps) {
           />
         </div>
         <div className="nv-modal-chrome-footer">
-          <span style={{ flex: 1, fontFamily: "var(--mono)", fontSize: "10px", color: "var(--accent)", letterSpacing: "0.04em" }}>
+          <span
+            style={{
+              flex: 1,
+              fontFamily: "var(--mono)",
+              fontSize: "10px",
+              color: "var(--accent)",
+              letterSpacing: "0.04em",
+            }}
+          >
             {/^https?:\/\//i.test(content.trim()) ? "link detected" : ""}
           </span>
-          <button type="button" className="nv-btn-secondary" onClick={handleClose}>Cancel</button>
-          <button type="submit" className="nv-btn-primary" disabled={mutation.isPending || !content.trim()}>
+          <button type="button" className="nv-btn-secondary" onClick={handleClose}>
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="nv-btn-primary"
+            disabled={mutation.isPending || !content.trim()}
+          >
             {mutation.isPending ? "Saving…" : "Capture"}
           </button>
         </div>

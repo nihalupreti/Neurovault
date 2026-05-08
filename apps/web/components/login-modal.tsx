@@ -78,7 +78,11 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
             onChange={(e) => setValue(e.target.value)}
             autoFocus
           />
-          {error && <span className="nv-login-error" style={{ display: "block", marginTop: "8px" }}>Invalid secret</span>}
+          {error && (
+            <span className="nv-login-error" style={{ display: "block", marginTop: "8px" }}>
+              Invalid secret
+            </span>
+          )}
         </div>
         <div className="nv-modal-chrome-footer">
           <button type="submit" className="nv-btn-primary" disabled={loading || !value.trim()}>

@@ -43,6 +43,7 @@ interface RightDrawerProps {
   onModeChange: (mode: RailMode) => void;
   fileId: string | null;
   fileContent: string | undefined;
+  onSelectFile?: (id: string) => void;
 }
 
 export function RightDrawer({
@@ -52,6 +53,7 @@ export function RightDrawer({
   onModeChange,
   fileId,
   fileContent,
+  onSelectFile,
 }: RightDrawerProps) {
   if (!open) return null;
   return (
@@ -63,6 +65,7 @@ export function RightDrawer({
           onModeChange={onModeChange}
           fileId={fileId}
           fileContent={fileContent}
+          onSelectFile={onSelectFile}
           onClose={onClose}
           mobile
         />

@@ -10,9 +10,7 @@ export const ENDPOINTS = {
     uploadFolder: `${BASE}/api/file/upload/folder`,
     get: (id: string) => `${BASE}/api/file?id=${id}`,
     folderTree: (parentId?: string) =>
-      parentId
-        ? `${BASE}/api/file/folder?parentId=${parentId}`
-        : `${BASE}/api/file/folder`,
+      parentId ? `${BASE}/api/file/folder?parentId=${parentId}` : `${BASE}/api/file/folder`,
     visibility: (id: string) => `${BASE}/api/file/${id}/visibility`,
   },
   search: {
@@ -26,10 +24,8 @@ export const ENDPOINTS = {
   },
   graph: {
     root: `${BASE}/api/graph`,
-    neighbors: (fileId: string) =>
-      `${BASE}/api/graph/file/${fileId}/neighbors`,
-    cluster: (fileId: string) =>
-      `${BASE}/api/graph/file/${fileId}/cluster`,
+    neighbors: (fileId: string) => `${BASE}/api/graph/file/${fileId}/neighbors`,
+    cluster: (fileId: string) => `${BASE}/api/graph/file/${fileId}/cluster`,
     clusters: `${BASE}/api/graph/clusters`,
     stats: `${BASE}/api/graph/stats`,
     rebuild: `${BASE}/api/graph/rebuild`,

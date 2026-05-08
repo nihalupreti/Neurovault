@@ -3088,7 +3088,9 @@ kbd {
   background: transparent;
   color: var(--ink-mid);
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .nv-selection-toolbar button:hover:not(:disabled) {
@@ -3174,7 +3176,9 @@ kbd {
   background: transparent;
   color: var(--ink-faint);
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
 }
 
 .nv-context-add-btn:hover:not(:disabled) {

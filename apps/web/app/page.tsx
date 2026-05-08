@@ -97,6 +97,7 @@ function HomeContent() {
             onModeChange={setRightMode}
             fileId={activeFileId}
             fileContent={fileContent}
+            onSelectFile={handleSelectFile}
           />
         )}
       </div>
@@ -117,6 +118,7 @@ function HomeContent() {
         onModeChange={setRightMode}
         fileId={activeFileId}
         fileContent={fileContent}
+        onSelectFile={handleSelectFile}
       />
 
       <CommandPalette

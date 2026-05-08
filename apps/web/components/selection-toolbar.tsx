@@ -24,12 +24,7 @@ export function SelectionToolbar({ fileId, fileName, containerRef, onAsk }: Sele
 
   const updatePosition = useCallback(() => {
     const selection = window.getSelection();
-    if (
-      !selection ||
-      selection.isCollapsed ||
-      !selection.rangeCount ||
-      !containerRef.current
-    ) {
+    if (!selection || selection.isCollapsed || !selection.rangeCount || !containerRef.current) {
       setPosition(null);
       setSelectedText("");
       return;

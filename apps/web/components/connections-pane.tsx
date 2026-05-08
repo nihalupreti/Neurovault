@@ -37,7 +37,8 @@ export function ConnectionsPane({ fileId }: ConnectionsPaneProps) {
           </div>
           <h3>No connections yet</h3>
           <p style={{ marginBottom: 0 }}>
-            This note hasn&apos;t been indexed in the knowledge graph. Connections will appear after processing.
+            This note hasn&apos;t been indexed in the knowledge graph. Connections will appear after
+            processing.
           </p>
         </div>
       </div>
@@ -68,16 +69,15 @@ export function ConnectionsPane({ fileId }: ConnectionsPaneProps) {
             <div className="nv-cite-head">
               <span className="nv-cite-file">{n.fileName}</span>
               <span className="nv-cite-score">
-                {(n.score * 100).toFixed(0)}<small>%</small>
+                {(n.score * 100).toFixed(0)}
+                <small>%</small>
               </span>
             </div>
             <p className="nv-cite-excerpt">{n.path}</p>
           </li>
         ))}
         {(!neighbors?.implicit || neighbors.implicit.length === 0) && (
-          <li style={{ color: "var(--ink-faint)", fontSize: "12px" }}>
-            No similar chunks found
-          </li>
+          <li style={{ color: "var(--ink-faint)", fontSize: "12px" }}>No similar chunks found</li>
         )}
       </ul>
     </div>
@@ -85,7 +85,9 @@ export function ConnectionsPane({ fileId }: ConnectionsPaneProps) {
 }
 
 function Constellation({ nodes }: { nodes: Array<{ fileName: string; type: string }> }) {
-  const cx = 130, cy = 110, r = 11;
+  const cx = 130,
+    cy = 110,
+    r = 11;
   const positions = [
     { x: 40, y: 50, r: 6 },
     { x: 220, y: 60, r: 6 },
@@ -111,24 +113,42 @@ function Constellation({ nodes }: { nodes: Array<{ fileName: string; type: strin
           return (
             <g key={i}>
               <line
-                x1={cx} y1={cy} x2={pos.x} y2={pos.y}
-                stroke="var(--ink-faint)" strokeWidth="0.6"
+                x1={cx}
+                y1={cy}
+                x2={pos.x}
+                y2={pos.y}
+                stroke="var(--ink-faint)"
+                strokeWidth="0.6"
                 strokeDasharray={n.type === "implicit" ? "2 3" : "0"}
               />
               <circle
-                cx={pos.x} cy={pos.y} r={pos.r}
-                fill="var(--bg-1)" stroke="var(--ink-soft)" strokeWidth="1"
+                cx={pos.x}
+                cy={pos.y}
+                r={pos.r}
+                fill="var(--bg-1)"
+                stroke="var(--ink-soft)"
+                strokeWidth="1"
               />
               <text
-                x={pos.x} y={pos.y + pos.r + 11}
-                textAnchor="middle" className="nv-constell-label"
+                x={pos.x}
+                y={pos.y + pos.r + 11}
+                textAnchor="middle"
+                className="nv-constell-label"
               >
                 {n.fileName.replace(/\.md$/, "").slice(0, 12)}
               </text>
             </g>
           );
         })}
-        <circle cx={cx} cy={cy} r={r + 4} fill="none" stroke="var(--accent)" strokeWidth="0.8" strokeDasharray="2 3" />
+        <circle
+          cx={cx}
+          cy={cy}
+          r={r + 4}
+          fill="none"
+          stroke="var(--accent)"
+          strokeWidth="0.8"
+          strokeDasharray="2 3"
+        />
         <circle cx={cx} cy={cy} r={r} fill="var(--accent)" stroke="var(--accent)" />
         <text x={cx} y={cy + r + 13} textAnchor="middle" className="nv-constell-label is-active">
           current

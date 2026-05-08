@@ -21,11 +21,26 @@ import type {
   Message,
 } from "@neurovault/shared/types";
 
-export type { FolderNode, FolderTreeResponse, SearchResult, SearchResponse, GraphStats, NeighborNode, NeighborsResponse, ClusterResponse, BookSummary, BookChapter, ReadingProgress, BookAnnotation, RelatedContent, PaginatedResponse, Conversation, Message };
+export type {
+  FolderNode,
+  FolderTreeResponse,
+  SearchResult,
+  SearchResponse,
+  GraphStats,
+  NeighborNode,
+  NeighborsResponse,
+  ClusterResponse,
+  BookSummary,
+  BookChapter,
+  ReadingProgress,
+  BookAnnotation,
+  RelatedContent,
+  PaginatedResponse,
+  Conversation,
+  Message,
+};
 
-export async function getFolderTree(
-  parentId?: string
-): Promise<FolderTreeResponse> {
+export async function getFolderTree(parentId?: string): Promise<FolderTreeResponse> {
   const { data } = await api.get(ENDPOINTS.file.folderTree(parentId));
   return data.data;
 }
@@ -45,16 +60,12 @@ export async function getGraphStats(): Promise<GraphStats> {
   return data.data;
 }
 
-export async function getNeighbors(
-  fileId: string
-): Promise<NeighborsResponse> {
+export async function getNeighbors(fileId: string): Promise<NeighborsResponse> {
   const { data } = await api.get(ENDPOINTS.graph.neighbors(fileId));
   return data.data;
 }
 
-export async function getFileCluster(
-  fileId: string
-): Promise<ClusterResponse> {
+export async function getFileCluster(fileId: string): Promise<ClusterResponse> {
   const { data } = await api.get(ENDPOINTS.graph.cluster(fileId));
   return data.data;
 }
@@ -74,7 +85,9 @@ export async function getChapter(bookId: string, num: number): Promise<BookChapt
   return data.data;
 }
 
-export async function importBook(file: File): Promise<{ bookId: string; title: string; totalChapters: number }> {
+export async function importBook(
+  file: File,
+): Promise<{ bookId: string; title: string; totalChapters: number }> {
   const formData = new FormData();
   formData.append("book", file);
   const { data } = await api.post(ENDPOINTS.books.import, formData, {
@@ -94,7 +107,7 @@ export async function getProgress(bookId: string): Promise<ReadingProgress> {
 
 export async function updateProgress(
   bookId: string,
-  partial: Partial<ReadingProgress>
+  partial: Partial<ReadingProgress>,
 ): Promise<ReadingProgress> {
   const { data } = await api.put(ENDPOINTS.reader.progress(bookId), partial);
   return data.data;
@@ -116,7 +129,7 @@ export async function listAnnotations(
 
 export async function createAnnotation(
   bookId: string,
-  body: Omit<BookAnnotation, "_id" | "bookId" | "createdAt">
+  body: Omit<BookAnnotation, "_id" | "bookId" | "createdAt">,
 ): Promise<BookAnnotation> {
   const { data } = await api.post(ENDPOINTS.reader.annotations(bookId), body);
   return data.data;
@@ -125,7 +138,7 @@ export async function createAnnotation(
 export async function updateAnnotation(
   bookId: string,
   annotationId: string,
-  updates: Partial<BookAnnotation>
+  updates: Partial<BookAnnotation>,
 ): Promise<BookAnnotation> {
   const { data } = await api.put(ENDPOINTS.reader.annotation(bookId, annotationId), updates);
   return data.data;
@@ -138,7 +151,7 @@ export async function deleteAnnotation(bookId: string, annotationId: string): Pr
 export async function getRelatedContent(
   bookId: string,
   sectionAnchor: string,
-  limit?: number
+  limit?: number,
 ): Promise<{ results: RelatedContent[] }> {
   const params: Record<string, string> = {};
   if (limit !== undefined) params.limit = String(limit);
@@ -149,21 +162,17 @@ export async function getRelatedContent(
 export async function uploadFiles(
   endpoint: string,
   formData: FormData,
-  onProgress?: (percent: number) => void
+  onProgress?: (percent: number) => void,
 ): Promise<unknown> {
-  const { data } = await api.post(
-    endpoint,
-    formData,
-    {
-      headers: { "Content-Type": "multipart/form-data" },
-      withCredentials: true,
-      onUploadProgress: (e) => {
-        if (e.total && onProgress) {
-          onProgress(Math.round((e.loaded * 100) / e.total));
-        }
-      },
-    }
-  );
+  const { data } = await api.post(endpoint, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    withCredentials: true,
+    onUploadProgress: (e) => {
+      if (e.total && onProgress) {
+        onProgress(Math.round((e.loaded * 100) / e.total));
+      }
+    },
+  });
   return data;
 }
 
@@ -193,10 +202,9 @@ export async function getConversationMessages(
   page = 1,
   limit = 100,
 ): Promise<PaginatedResponse<Message>> {
-  const { data } = await api.get(
-    ENDPOINTS.qa.conversationMessages(conversationId),
-    { params: { page, limit } },
-  );
+  const { data } = await api.get(ENDPOINTS.qa.conversationMessages(conversationId), {
+    params: { page, limit },
+  });
   return data;
 }
 
@@ -204,10 +212,7 @@ export async function deleteConversation(id: string): Promise<void> {
   await api.delete(ENDPOINTS.qa.conversation(id));
 }
 
-export async function renameConversation(
-  id: string,
-  title: string,
-): Promise<Conversation> {
+export async function renameConversation(id: string, title: string): Promise<Conversation> {
   const { data } = await api.patch(ENDPOINTS.qa.conversation(id), { title });
   return data.data;
 }

@@ -12,6 +12,7 @@ interface RightRailProps {
   onModeChange: (mode: RailMode) => void;
   fileId: string | null;
   fileContent: string | undefined;
+  onSelectFile?: (id: string) => void;
   onClose?: () => void;
   mobile?: boolean;
 }
@@ -21,6 +22,7 @@ export function RightRail({
   onModeChange,
   fileId,
   fileContent,
+  onSelectFile,
   onClose,
   mobile,
 }: RightRailProps) {
@@ -68,7 +70,7 @@ export function RightRail({
       <div className="nv-rail-pane">
         {mode === "outline" && <OutlinePane content={fileContent} />}
         {mode === "connections" && <ConnectionsPane fileId={fileId} />}
-        {mode === "chat" && <ChatPane />}
+        {mode === "chat" && <ChatPane onSelectFile={onSelectFile} />}
       </div>
     </aside>
   );

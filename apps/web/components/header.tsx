@@ -18,13 +18,7 @@ interface HeaderProps {
   mobile: boolean;
 }
 
-export function Header({
-  onSearchOpen,
-  onChatToggle,
-  chatOpen,
-  onMenu,
-  mobile,
-}: HeaderProps) {
+export function Header({ onSearchOpen, onChatToggle, chatOpen, onMenu, mobile }: HeaderProps) {
   const { data: stats } = useQuery({
     queryKey: ["graphStats"],
     queryFn: getGraphStats,
@@ -56,7 +50,8 @@ export function Header({
               Search vault, ask, or jump to file&hellip;
             </span>
             <span className="nv-kbd-group">
-              <kbd>⌘</kbd><kbd>K</kbd>
+              <kbd>⌘</kbd>
+              <kbd>K</kbd>
             </span>
           </button>
 
@@ -89,7 +84,7 @@ export function Header({
             <div className="nv-auth-area">
               <button
                 className={`nv-icon-btn ${isAdmin ? "is-active" : ""}`}
-                onClick={() => isAdmin ? setDropdownOpen(!dropdownOpen) : setLoginOpen(true)}
+                onClick={() => (isAdmin ? setDropdownOpen(!dropdownOpen) : setLoginOpen(true))}
                 aria-label={isAdmin ? "Admin menu" : "Login"}
                 title={isAdmin ? "Admin" : "Login"}
               >

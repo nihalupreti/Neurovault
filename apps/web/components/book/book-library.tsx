@@ -21,7 +21,15 @@ export function BookLibrary({ onSelectBook, onImport, initialData }: BookLibrary
   const { data, isLoading, error } = useQuery({
     queryKey: ["books"],
     queryFn: () => listBooks(),
-    initialData: initialData ? { success: true, data: initialData, meta: { page: 1, limit: 20, total: initialData.length, totalPages: 1 }, message: "ok", timestamp: new Date().toISOString() } : undefined,
+    initialData: initialData
+      ? {
+          success: true,
+          data: initialData,
+          meta: { page: 1, limit: 20, total: initialData.length, totalPages: 1 },
+          message: "ok",
+          timestamp: new Date().toISOString(),
+        }
+      : undefined,
   });
 
   const books = data?.data ?? [];
@@ -29,7 +37,7 @@ export function BookLibrary({ onSelectBook, onImport, initialData }: BookLibrary
     ? books.filter(
         (b) =>
           b.title.toLowerCase().includes(filter.toLowerCase()) ||
-          b.topic.toLowerCase().includes(filter.toLowerCase())
+          b.topic.toLowerCase().includes(filter.toLowerCase()),
       )
     : books;
 
@@ -121,19 +129,14 @@ export function BookLibrary({ onSelectBook, onImport, initialData }: BookLibrary
               className={`nv-lib-row ${progress >= 1 ? "is-done" : ""}`}
               onClick={() => onSelectBook(book._id)}
             >
-              <span
-                className="nv-lib-cover"
-                style={{ "--hue": hue } as React.CSSProperties}
-              >
+              <span className="nv-lib-cover" style={{ "--hue": hue } as React.CSSProperties}>
                 {glyph}
               </span>
               <span className="nv-lib-meta">
                 <span className="nv-lib-title">{book.title}</span>
                 <span className="nv-lib-author">{book.topic}</span>
                 <span className="nv-lib-progress">
-                  <i
-                    style={{ width: `${Math.round(progress * 100)}%` }}
-                  />
+                  <i style={{ width: `${Math.round(progress * 100)}%` }} />
                 </span>
                 <span className="nv-lib-foot">
                   <b>

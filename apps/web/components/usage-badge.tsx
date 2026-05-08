@@ -12,7 +12,7 @@ export function UsageBadge() {
     queryKey: ["usage"],
     queryFn: async () => {
       const { data } = await api.get(ENDPOINTS.auth.usage);
-      return data as { today: { guest: number; global: number }; limits: { globalDaily: number } };
+      return data.data as { today: { guest: number; global: number }; limits: { globalDaily: number } };
     },
     enabled: isAdmin,
     refetchInterval: 30_000,

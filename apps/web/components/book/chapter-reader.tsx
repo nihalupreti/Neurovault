@@ -42,7 +42,7 @@ export function ChapterReader({
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         if (visible[0]) onSectionEnter(visible[0].target.id);
       },
-      { rootMargin: "-100px 0px -60% 0px" }
+      { rootMargin: "-100px 0px -60% 0px" },
     );
 
     const targets = el.querySelectorAll("[id]");
@@ -53,11 +53,7 @@ export function ChapterReader({
 
   return (
     <div className="nv-reader">
-      <article
-        className="nv-reader-main nv-chapter"
-        role="article"
-        ref={mainRef}
-      >
+      <article className="nv-reader-main nv-chapter" role="article" ref={mainRef}>
         <div className="nv-book-breadcrumb">
           <span>library</span>
           <span className="nv-bc-sep">/</span>
@@ -66,18 +62,12 @@ export function ChapterReader({
           <span>chapter {String(chapter.number).padStart(2, "0")}</span>
         </div>
 
-        <div
-          dangerouslySetInnerHTML={{ __html: chapter.htmlContent }}
-        />
+        <div dangerouslySetInnerHTML={{ __html: chapter.htmlContent }} />
 
         <div className="nv-reader-foot">
           {onPrevChapter ? (
             <button className="nv-pager-btn" onClick={onPrevChapter} aria-label="Previous chapter">
-              <Icon
-                name="chevron"
-                size={12}
-                className="rotate-180"
-              />
+              <Icon name="chevron" size={12} className="rotate-180" />
               <span>prev</span>
               {prevTitle && <em>{prevTitle}</em>}
             </button>
@@ -97,14 +87,9 @@ export function ChapterReader({
             <span />
           )}
         </div>
-
       </article>
 
-      <SelectionToolbar
-        fileId={chapter.bookId}
-        fileName={chapter.title}
-        containerRef={mainRef}
-      />
+      <SelectionToolbar fileId={chapter.bookId} fileName={chapter.title} containerRef={mainRef} />
 
       <MarginGutter annotations={annotations} />
     </div>
