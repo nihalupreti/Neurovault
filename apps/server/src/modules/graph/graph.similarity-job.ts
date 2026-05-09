@@ -89,19 +89,22 @@ export async function runSimilarityJob(_options?: {
 
     const rawMatches: RawChunkMatch[] = [];
 
-    for (const chunk of chunks) {
-      const vector = chunk.vector as number[];
+    const queryResults = await Promise.all(
+      chunks.map((chunk) =>
+        client.query(COLLECTION, {
+          query: chunk.vector as number[],
+          limit: chunkNeighbors,
+          filter: { must_not: [{ key: "fileId", match: { value: fileId } }] },
+          with_payload: true,
+        }),
+      ),
+    );
+
+    for (let idx = 0; idx < chunks.length; idx++) {
+      const chunk = chunks[idx]!;
       const payload = chunk.payload as Record<string, unknown> | undefined;
       const sourceIdx = typeof payload?.chunk_index === "number" ? payload.chunk_index : 0;
-
-      const similar = await client.query(COLLECTION, {
-        query: vector,
-        limit: chunkNeighbors,
-        filter: {
-          must_not: [{ key: "fileId", match: { value: fileId } }],
-        },
-        with_payload: true,
-      });
+      const similar = queryResults[idx]!;
 
       for (const point of similar.points || []) {
         const pointPayload = point.payload as Record<string, unknown> | undefined;

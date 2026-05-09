@@ -55,9 +55,15 @@ export async function processContent(
     { sectionId: string; headingPath: string[]; content: string; fileId: string }
   >();
 
-  for (const batch of batches) {
-    const texts = batch.chunks.map((c) => c.text);
-    const vectors = await getEmbeddingsBatch(texts, "document", true);
+  const batchVectors = await Promise.all(
+    batches.map((batch) =>
+      getEmbeddingsBatch(batch.chunks.map((c) => c.text), "document", true),
+    ),
+  );
+
+  for (let bi = 0; bi < batches.length; bi++) {
+    const batch = batches[bi]!;
+    const vectors = batchVectors[bi]!;
 
     for (let i = 0; i < batch.chunks.length; i++) {
       const chunk = batch.chunks[i]!;

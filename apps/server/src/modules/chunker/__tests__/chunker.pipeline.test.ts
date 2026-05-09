@@ -57,6 +57,8 @@ describe("processContent", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockGetEmbeddingsBatch.mockResolvedValue([new Array(1024).fill(0.1)]);
+    mockDelete.mockResolvedValue({});
+    mockUpsert.mockResolvedValue({});
     mockGetQdrantClient.mockReturnValue({
       upsert: mockUpsert,
       delete: mockDelete,
