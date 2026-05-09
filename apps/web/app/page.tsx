@@ -15,7 +15,23 @@ import { getFile } from "@/api/client";
 
 export default function Home() {
   return (
-    <Suspense fallback={<div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "var(--ink-faint)", fontFamily: "var(--mono)", fontSize: 12 }}>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "100vh",
+            color: "var(--ink-faint)",
+            fontFamily: "var(--mono)",
+            fontSize: 12,
+          }}
+        >
+          Loading...
+        </div>
+      }
+    >
       <HomeContent />
     </Suspense>
   );
@@ -50,11 +66,14 @@ function HomeContent() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  const handleSelectFile = useCallback((id: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("file", id);
-    router.replace(`?${params.toString()}`, { scroll: false });
-  }, [searchParams, router]);
+  const handleSelectFile = useCallback(
+    (id: string) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("file", id);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, router],
+  );
 
   const handleChatToggle = useCallback(() => {
     if (mobile) {
@@ -81,9 +100,7 @@ function HomeContent() {
       />
 
       <div className="nv-shell">
-        {!mobile && (
-          <VaultRail activeId={activeFileId} onSelectFile={handleSelectFile} />
-        )}
+        {!mobile && <VaultRail activeId={activeFileId} onSelectFile={handleSelectFile} />}
 
         <ReadingView
           fileId={activeFileId}

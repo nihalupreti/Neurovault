@@ -35,13 +35,16 @@ router.post("/:vaultId/conflicts/:id/resolve", asHandler(resolveConflict));
 
 router.get("/:vaultId/status", asHandler(getVaultStatus));
 
-router.post("/:vaultId/reconcile", asHandler(async (req, res) => {
-  const vaultId = req.params.vaultId as string;
-  const { Vault } = await import("./sync.models.js");
-  const vault = await Vault.findById(vaultId);
-  if (!vault) throw new NotFoundError("Vault", vaultId);
-  const result = await reconcileVault(vaultId);
-  apiSuccess(res, result);
-}));
+router.post(
+  "/:vaultId/reconcile",
+  asHandler(async (req, res) => {
+    const vaultId = req.params.vaultId as string;
+    const { Vault } = await import("./sync.models.js");
+    const vault = await Vault.findById(vaultId);
+    if (!vault) throw new NotFoundError("Vault", vaultId);
+    const result = await reconcileVault(vaultId);
+    apiSuccess(res, result);
+  }),
+);
 
 export default router;

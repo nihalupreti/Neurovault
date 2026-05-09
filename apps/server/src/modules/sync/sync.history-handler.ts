@@ -4,7 +4,11 @@ import { readFileAtCommit, getHeadSha, writeAndCommit } from "./sync.git-storage
 import { runIndexPipeline } from "./sync.index-pipeline.js";
 import { apiSuccess } from "../../utils/api-response.js";
 import { NotFoundError } from "../../errors/app-error.js";
-import { VaultNotFoundError, ConflictNotFoundError, InvalidSyncPayloadError } from "./sync.errors.js";
+import {
+  VaultNotFoundError,
+  ConflictNotFoundError,
+  InvalidSyncPayloadError,
+} from "./sync.errors.js";
 import { resolveConflictSchema } from "@neurovault/shared/schemas";
 
 export async function getFileHistory(req: Request, res: Response) {
@@ -84,7 +88,7 @@ export async function resolveConflict(req: Request, res: Response) {
     vault.gitPath,
     [{ path: conflict.filePath, content: resolvedContent }],
     [],
-    `sync: resolve conflict in ${conflict.filePath}`
+    `sync: resolve conflict in ${conflict.filePath}`,
   );
 
   conflict.resolution = resolutionMap[resolution];
@@ -98,7 +102,7 @@ export async function resolveConflict(req: Request, res: Response) {
     prevHead,
     commitSha,
     vault.syncConfig?.include ?? ["**/*.md"],
-    vault.syncConfig?.exclude ?? [".obsidian/**"]
+    vault.syncConfig?.exclude ?? [".obsidian/**"],
   ).catch((err) => console.error("Index pipeline error:", err));
 
   apiSuccess(res, { success: true, commitSha });
