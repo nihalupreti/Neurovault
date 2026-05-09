@@ -55,7 +55,12 @@ describe("importBook", () => {
   });
 
   it("skips re-import when htmlHash matches", async () => {
-    mockBookFindOne.mockResolvedValue({ _id: "existing", htmlHash: "abc", title: "Old", totalChapters: 3 });
+    mockBookFindOne.mockResolvedValue({
+      _id: "existing",
+      htmlHash: "abc",
+      title: "Old",
+      totalChapters: 3,
+    });
 
     const result = await importBook("<html>...</html>");
 

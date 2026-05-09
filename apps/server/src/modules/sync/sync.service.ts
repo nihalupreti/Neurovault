@@ -7,7 +7,7 @@ import {
   readFileAtHead,
   type FileWrite,
 } from "./sync.git-storage.js";
-import { runIndexPipeline } from "./sync.index-pipeline.js";
+import { getSyncIndexQueue } from "../worker/worker.queues.js";
 import { notifyVaultChanged } from "./sync.ws-manager.js";
 import { ConflictRecord } from "./sync.models.js";
 import type { VaultDoc } from "./sync.models.js";
@@ -15,13 +15,12 @@ import type { SyncChange, PushResult, PullChange, PullResult } from "@neurovault
 
 const vaultLocks = new Map<string, Promise<void>>();
 
-async function withVaultLock<T>(
-  vaultId: string,
-  fn: () => Promise<T>
-): Promise<T> {
+async function withVaultLock<T>(vaultId: string, fn: () => Promise<T>): Promise<T> {
   const prev = vaultLocks.get(vaultId) ?? Promise.resolve();
   let release: () => void;
-  const next = new Promise<void>((r) => { release = r; });
+  const next = new Promise<void>((r) => {
+    release = r;
+  });
   vaultLocks.set(vaultId, next);
 
   await prev;
@@ -38,7 +37,7 @@ async function withVaultLock<T>(
 export async function pushChanges(
   vault: VaultDoc & { _id: Types.ObjectId },
   changes: SyncChange[],
-  baseCommit: string
+  baseCommit: string,
 ): Promise<PushResult> {
   return withVaultLock(vault._id.toString(), async () => {
     const dir = vault.gitPath;
@@ -60,11 +59,15 @@ export async function pushChanges(
 
           try {
             serverVersion = await readFileAtHead(dir, filepath);
-          } catch { /* deleted on server */ }
+          } catch {
+            /* deleted on server */
+          }
 
           try {
             baseVersion = await readFileAtCommit(dir, baseCommit, filepath);
-          } catch { /* didn't exist at base */ }
+          } catch {
+            /* didn't exist at base */
+          }
 
           const clientVersion = clientChange.content
             ? Buffer.from(clientChange.content, "base64").toString("utf-8")
@@ -89,9 +92,7 @@ export async function pushChanges(
           });
         }
 
-        const nonConflicting = changes.filter(
-          (c) => !overlapping.includes(c.path)
-        );
+        const nonConflicting = changes.filter((c) => !overlapping.includes(c.path));
 
         let commitSha = head;
         if (nonConflicting.length > 0) {
@@ -108,24 +109,21 @@ export async function pushChanges(
     const fromSha = baseCommit || head;
     const include = vault.syncConfig?.include ?? ["**/*.md"];
     const exclude = vault.syncConfig?.exclude ?? [".obsidian/**"];
-    runIndexPipeline(
-      vault._id.toString(),
-      dir,
+    await getSyncIndexQueue().add("sync-index", {
+      vaultId: vault._id.toString(),
+      gitPath: dir,
       fromSha,
-      commitSha,
+      toSha: commitSha,
       include,
-      exclude
-    ).catch((err) => console.error("Index pipeline error:", err));
+      exclude,
+    });
 
     notifyVaultChanged(vault._id.toString(), commitSha);
     return { commitSha };
   });
 }
 
-async function applyChanges(
-  dir: string,
-  changes: SyncChange[]
-): Promise<string> {
+async function applyChanges(dir: string, changes: SyncChange[]): Promise<string> {
   const writes: FileWrite[] = [];
   const deletes: string[] = [];
 
@@ -140,10 +138,7 @@ async function applyChanges(
     }
   }
 
-  const paths = [
-    ...writes.map((w) => w.path),
-    ...deletes.map((d) => `delete ${d}`),
-  ];
+  const paths = [...writes.map((w) => w.path), ...deletes.map((d) => `delete ${d}`)];
   const message = `sync: ${paths.join(", ")}`;
 
   return writeAndCommit(dir, writes, deletes, message);
@@ -151,7 +146,7 @@ async function applyChanges(
 
 export async function pullChanges(
   vault: VaultDoc & { _id: Types.ObjectId },
-  sinceSha: string
+  sinceSha: string,
 ): Promise<PullResult> {
   const dir = vault.gitPath;
   const head = await getHeadSha(dir);

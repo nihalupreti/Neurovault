@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Vault, FileVersion, ConflictRecord } from "./sync.models.js";
 import { readFileAtCommit, getHeadSha, writeAndCommit } from "./sync.git-storage.js";
-import { runIndexPipeline } from "./sync.index-pipeline.js";
+import { getSyncIndexQueue } from "../worker/worker.queues.js";
 import { apiSuccess } from "../../utils/api-response.js";
 import { NotFoundError } from "../../errors/app-error.js";
 import {
@@ -96,14 +96,14 @@ export async function resolveConflict(req: Request, res: Response) {
   conflict.clientCommit = commitSha;
   await conflict.save();
 
-  runIndexPipeline(
-    vault._id.toString(),
-    vault.gitPath,
-    prevHead,
-    commitSha,
-    vault.syncConfig?.include ?? ["**/*.md"],
-    vault.syncConfig?.exclude ?? [".obsidian/**"],
-  ).catch((err) => console.error("Index pipeline error:", err));
+  await getSyncIndexQueue().add("sync-index", {
+    vaultId: vault._id.toString(),
+    gitPath: vault.gitPath,
+    fromSha: prevHead,
+    toSha: commitSha,
+    include: vault.syncConfig?.include ?? ["**/*.md"],
+    exclude: vault.syncConfig?.exclude ?? [".obsidian/**"],
+  });
 
   apiSuccess(res, { success: true, commitSha });
 }

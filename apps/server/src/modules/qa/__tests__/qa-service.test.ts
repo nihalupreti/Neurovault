@@ -89,7 +89,7 @@ describe("askQuestion", () => {
     const { getQdrantClient } = await import("@neurovault/config");
     vi.mocked(getQdrantClient).mockReturnValueOnce({
       query: vi.fn().mockResolvedValue({ points: [] }),
-    } as ReturnType<typeof getQdrantClient>);
+    } as unknown as ReturnType<typeof getQdrantClient>);
 
     const result = await askQuestion({ question: "Unknown topic" });
 

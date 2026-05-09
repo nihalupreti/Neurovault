@@ -92,8 +92,8 @@ describe("POST /api/capture/email", () => {
         body: "This is a note I want to save.",
       });
     expect(res.status).toBe(201);
-    expect(res.body.fileId).toBe("email-note-123");
-    expect(res.body.attachmentIds).toEqual([]);
+    expect(res.body.data.fileId).toBe("email-note-123");
+    expect(res.body.data.attachmentIds).toEqual([]);
   });
 
   it("allows sender comparison case-insensitive", async () => {

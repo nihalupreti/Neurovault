@@ -1,11 +1,13 @@
 import { Worker } from "bullmq";
 import { getRedisConnection } from "./worker.connection.js";
-import type { ChunkFileJob, ChunkBookJob } from "./worker.queues.js";
+import type { ChunkFileJob, ChunkBookJob, CaptureUrlJob, SyncIndexJob } from "./worker.queues.js";
 import { handleFileUpload } from "../chunker/chunker.dispatcher.js";
 import { onFileIndexed } from "../files/files.graph-hook.js";
 import { chunkAndEmbedBook } from "../books/books.chunker.js";
 import { createBookGraphNodes, runBookSimilarityJob } from "../books/books.graph.js";
 import { Book, BookChapter } from "../books/book.model.js";
+import { processUrlInBackground } from "../capture/capture.service.js";
+import { runIndexPipeline } from "../sync/sync.index-pipeline.js";
 
 export function startWorkers(): void {
   const fileWorker = new Worker<ChunkFileJob>(
@@ -69,5 +71,33 @@ export function startWorkers(): void {
     }
   });
 
-  console.log("Workers started: chunk-file (concurrency 2), chunk-book (concurrency 1)");
+  const captureWorker = new Worker<CaptureUrlJob>(
+    "capture-url",
+    async (job) => {
+      const { url, fileId, serverPath, note } = job.data;
+      await processUrlInBackground(url, fileId, serverPath, note);
+    },
+    { connection: getRedisConnection(), concurrency: 3 },
+  );
+
+  captureWorker.on("failed", (job, err) => {
+    console.error(`capture-url job failed for ${job?.data.url}:`, err);
+  });
+
+  const syncIndexWorker = new Worker<SyncIndexJob>(
+    "sync-index",
+    async (job) => {
+      const { vaultId, gitPath, fromSha, toSha, include, exclude } = job.data;
+      await runIndexPipeline(vaultId, gitPath, fromSha, toSha, include, exclude);
+    },
+    { connection: getRedisConnection(), concurrency: 2 },
+  );
+
+  syncIndexWorker.on("failed", (job, err) => {
+    console.error(`sync-index job failed for vault ${job?.data.vaultId}:`, err);
+  });
+
+  console.log(
+    "Workers started: chunk-file (concurrency 2), chunk-book (concurrency 1), capture-url (concurrency 3), sync-index (concurrency 2)",
+  );
 }

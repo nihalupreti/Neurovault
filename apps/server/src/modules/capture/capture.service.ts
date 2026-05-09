@@ -14,6 +14,7 @@ import {
   generateFilename,
 } from "./capture.note-formatter.js";
 
+import { getCaptureQueue } from "../worker/worker.queues.js";
 import type { CaptureInput, CaptureResult } from "@neurovault/shared/types";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || "uploads";
@@ -51,7 +52,7 @@ async function handleTextCapture(input: CaptureInput): Promise<CaptureResult> {
   });
 
   emitFileUploaded(doc.serverPath, doc._id).catch((err) =>
-    console.error("Capture index error:", err)
+    console.error("Capture index error:", err),
   );
 
   return { fileId: doc._id.toString(), status: "complete" };
@@ -72,18 +73,21 @@ async function handleUrlCapture(input: CaptureInput): Promise<CaptureResult> {
     parentId: input.folderId || null,
   });
 
-  processUrlInBackground(url, doc._id.toString(), serverPath, input.note).catch(
-    (err) => console.error("URL capture background error:", err)
-  );
+  await getCaptureQueue().add("capture-url", {
+    url,
+    fileId: doc._id.toString(),
+    serverPath,
+    note: input.note,
+  });
 
   return { fileId: doc._id.toString(), status: "processing" };
 }
 
-async function processUrlInBackground(
+export async function processUrlInBackground(
   url: string,
   fileId: string,
   serverPath: string,
-  note?: string
+  note?: string,
 ): Promise<void> {
   const validation = validateUrl(url);
   if (!validation.valid) {

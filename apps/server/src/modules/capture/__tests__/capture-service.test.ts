@@ -1,9 +1,10 @@
 // apps/server/src/modules/capture/__tests__/capture-service.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const { mockCreate, mockFindByIdAndUpdate } = vi.hoisted(() => ({
+const { mockCreate, mockFindByIdAndUpdate, mockQueueAdd } = vi.hoisted(() => ({
   mockCreate: vi.fn(),
   mockFindByIdAndUpdate: vi.fn(),
+  mockQueueAdd: vi.fn().mockResolvedValue({ id: "job-1" }),
 }));
 
 vi.mock("../../files/files.model.js", () => ({
@@ -14,7 +15,11 @@ vi.mock("../../files/files.model.js", () => ({
 }));
 
 vi.mock("../../files/files.events.js", () => ({
-  emitFileUploaded: vi.fn(),
+  emitFileUploaded: vi.fn().mockResolvedValue(undefined),
+}));
+
+vi.mock("../../worker/worker.queues.js", () => ({
+  getCaptureQueue: () => ({ add: mockQueueAdd }),
 }));
 
 vi.mock("fs/promises", () => ({
@@ -30,6 +35,7 @@ describe("captureContent", () => {
     mockCreate.mockReset();
     mockFindByIdAndUpdate.mockReset();
     vi.mocked(emitFileUploaded).mockReset();
+    vi.mocked(emitFileUploaded).mockResolvedValue(undefined);
   });
 
   it("stores raw text immediately and emits fileUploaded", async () => {
@@ -49,7 +55,7 @@ describe("captureContent", () => {
       expect.objectContaining({
         name: expect.stringContaining(".md"),
         type: "file",
-      })
+      }),
     );
   });
 
@@ -101,7 +107,7 @@ describe("captureContent", () => {
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         parentId: "folder123",
-      })
+      }),
     );
   });
 });
