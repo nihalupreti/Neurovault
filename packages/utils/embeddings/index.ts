@@ -2,7 +2,7 @@ import { JinaProvider } from "./jina.provider.js";
 import type { EmbeddingTask } from "./types.js";
 
 export type { EmbeddingTask };
-export type { EmbeddingProvider } from "./types.js";
+export type { EmbeddingProvider, RerankResult } from "./types.js";
 
 export const embeddingProvider = new JinaProvider();
 
@@ -16,4 +16,12 @@ export function getEmbeddingsBatch(
   lateChunking = false,
 ): Promise<number[][]> {
   return embeddingProvider.embedBatch(texts, task, lateChunking);
+}
+
+export function rerankDocuments(
+  query: string,
+  documents: string[],
+  topN: number,
+) {
+  return embeddingProvider.rerank(query, documents, topN);
 }

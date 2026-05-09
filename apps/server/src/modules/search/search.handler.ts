@@ -79,7 +79,10 @@ export const handleSearch = async (req: Request, res: Response) => {
       },
     }));
   } else if (parsed.keyword) {
-    const keywordResults = await searchKeyword(parsed.keyword, fileIds);
+    const keywordResults = await searchKeyword(
+      parsed.keyword,
+      fileIds ? { fileId: { $in: fileIds } } : undefined,
+    );
     results = keywordResults.map((r) => ({
       id: r.id,
       score: 1.0,

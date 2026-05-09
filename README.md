@@ -141,6 +141,7 @@ The Chrome/Firefox extension lets you capture web content without leaving the br
 **Setup:** Click the extension icon → open options → enter your Neurovault server URL and admin secret.
 
 **Usage:**
+
 - Click the toolbar icon to save the current page URL
 - Right-click any page → **Save page to Neurovault** to capture the full article
 - Select text on any page → right-click → **Save selection to Neurovault** to capture a snippet
@@ -157,6 +158,7 @@ The Obsidian plugin keeps your vault in sync with Neurovault in real time.
 **Setup:** Go to Settings → Neurovault → enter your server URL and vault ID.
 
 **What it does:**
+
 - Watches for file changes and pushes them to Neurovault automatically
 - Pulls remote changes when notified via WebSocket (falls back to polling)
 - Queues offline changes and drains them on reconnect
@@ -164,6 +166,7 @@ The Obsidian plugin keeps your vault in sync with Neurovault in real time.
 - Opens a conflict resolution modal when a 3-way merge fails — choose local, remote, or manual resolution
 
 **Commands** (accessible via `Ctrl+P`):
+
 - `Neurovault: Force sync now` — manually push and pull immediately
 - `Neurovault: View sync status` — show file count, pending embeddings, and unresolved conflicts
 - `Neurovault: View conflicts` — list any unresolved merge conflicts

@@ -1,7 +1,9 @@
-import type { EmbeddingProvider, EmbeddingTask } from "./types.js";
+import type { EmbeddingProvider, EmbeddingTask, RerankResult } from "./types.js";
 
 const JINA_API_URL = "https://api.jina.ai/v1/embeddings";
+const JINA_RERANK_URL = "https://api.jina.ai/v1/rerank";
 const MODEL = "jina-embeddings-v3";
+const RERANK_MODEL = "jina-reranker-v3";
 
 const TASK_MAP: Record<EmbeddingTask, string> = {
   query: "retrieval.query",
@@ -39,6 +41,31 @@ export class JinaProvider implements EmbeddingProvider {
     }
 
     return embedding;
+  }
+
+  async rerank(query: string, documents: string[], topN: number): Promise<RerankResult[]> {
+    const response = await fetch(JINA_RERANK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.JINA_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: RERANK_MODEL,
+        query,
+        top_n: topN,
+        documents,
+        return_documents: false,
+      }),
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`Jina rerank API error ${response.status}: ${body}`);
+    }
+
+    const json = (await response.json()) as { results: RerankResult[] };
+    return json.results;
   }
 
   async embedBatch(

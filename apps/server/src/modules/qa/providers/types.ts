@@ -18,6 +18,7 @@ export interface RetrievedChunk {
   chunkIndex: number;
   score: number;
   headingPath?: string[];
+  sectionId?: string;
 }
 
 export interface Citation {

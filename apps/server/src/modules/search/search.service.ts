@@ -16,9 +16,11 @@ export const searchSemantic = async (query: string, fileIds?: string[]) => {
   return searchResult(queryEmbeddings);
 };
 
-export const searchKeyword = async (query: string, fileIds?: string[]) => {
-  const filter: Record<string, unknown> = { $text: { $search: query } };
-  if (fileIds) filter.fileId = { $in: fileIds };
+export const searchKeyword = async (
+  query: string,
+  mongoFilter?: Record<string, unknown>,
+) => {
+  const filter: Record<string, unknown> = { $text: { $search: query }, ...mongoFilter };
 
   const docs = await ChunkText.find(filter, { score: { $meta: "textScore" } })
     .sort({ score: { $meta: "textScore" } })
@@ -32,6 +34,8 @@ export const searchKeyword = async (query: string, fileIds?: string[]) => {
       fileId: doc.fileId,
       fileName: "",
       chunk_index: doc.chunkIndex,
+      sectionId: doc.sectionId ?? "",
+      headingPath: doc.headingPath ?? [],
     },
   }));
 };
@@ -40,8 +44,10 @@ export const searchHybrid = async (query: string, fileIds?: string[]) => {
   let textResults: { id: string; payload: Record<string, unknown> }[] = [];
   let vectorResults: { id: string; payload: Record<string, unknown> }[] = [];
 
+  const mongoFilter = fileIds ? { fileId: { $in: fileIds } } : undefined;
+
   const [textRes, vectorRes] = await Promise.allSettled([
-    searchKeyword(query, fileIds),
+    searchKeyword(query, mongoFilter),
     searchSemantic(query, fileIds),
   ]);
 
