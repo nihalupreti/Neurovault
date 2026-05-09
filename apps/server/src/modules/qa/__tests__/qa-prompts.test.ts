@@ -19,13 +19,13 @@ describe("buildSystemPrompt", () => {
 
   it("includes system instructions", () => {
     const prompt = buildSystemPrompt([]);
-    expect(prompt).toContain("Answer based solely on the provided context");
+    expect(prompt).toContain("ONLY answer questions that can be addressed using the provided context");
     expect(prompt).toContain("[Source N]");
   });
 
   it("handles empty chunks", () => {
     const prompt = buildSystemPrompt([]);
-    expect(prompt).toContain("Context:");
+    expect(prompt).toContain("Context from the user's notes:");
     expect(prompt).not.toContain("[Source 1]");
   });
 });

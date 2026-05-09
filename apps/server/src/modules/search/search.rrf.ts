@@ -11,7 +11,8 @@ export interface FusedResult {
 
 export function reciprocalRankFusion(
   resultSets: RRFItem[][],
-  k: number = 60
+  k: number = 60,
+  limit: number = 20,
 ): FusedResult[] {
   const scores = new Map<string, { score: number; payload: Record<string, unknown> }>();
 
@@ -32,5 +33,5 @@ export function reciprocalRankFusion(
   return Array.from(scores.entries())
     .map(([id, { score, payload }]) => ({ id, score, payload }))
     .sort((a, b) => b.score - a.score)
-    .slice(0, 10);
+    .slice(0, limit);
 }

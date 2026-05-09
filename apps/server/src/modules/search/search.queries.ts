@@ -2,10 +2,10 @@ import { getQdrantClient } from "@neurovault/config";
 
 const client = getQdrantClient();
 
-export const searchResult = async (embeddings: number[]) => {
+export const searchResult = async (embeddings: number[], limit = 10) => {
   const result = await client.query("neurovault", {
     query: embeddings,
-    limit: 10,
+    limit,
     with_payload: true,
   });
   return result;
@@ -13,11 +13,12 @@ export const searchResult = async (embeddings: number[]) => {
 
 export const searchResultFiltered = async (
   embeddings: number[],
-  fileIds: string[]
+  fileIds: string[],
+  limit = 10,
 ) => {
   const result = await client.query("neurovault", {
     query: embeddings,
-    limit: 10,
+    limit,
     filter: {
       must: [{ key: "fileId", match: { any: fileIds } }],
     },

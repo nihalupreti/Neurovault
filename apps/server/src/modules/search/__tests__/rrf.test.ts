@@ -62,12 +62,21 @@ describe("reciprocalRankFusion", () => {
     expect(fused[0]!.score).toBeCloseTo(1 / (10 + 1), 5);
   });
 
-  it("limits to 10 results", () => {
-    const bigSet: RRFItem[] = Array.from({ length: 20 }, (_, i) => ({
+  it("limits to default 20 results", () => {
+    const bigSet: RRFItem[] = Array.from({ length: 30 }, (_, i) => ({
       id: `item:${i}`,
       payload: { text: `text ${i}` },
     }));
     const fused = reciprocalRankFusion([bigSet]);
+    expect(fused).toHaveLength(20);
+  });
+
+  it("respects explicit limit parameter", () => {
+    const bigSet: RRFItem[] = Array.from({ length: 30 }, (_, i) => ({
+      id: `item:${i}`,
+      payload: { text: `text ${i}` },
+    }));
+    const fused = reciprocalRankFusion([bigSet], 60, 10);
     expect(fused).toHaveLength(10);
   });
 });

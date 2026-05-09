@@ -8,7 +8,6 @@ import ChunkText from "../search/search.chunk-text.model.js";
 import { reciprocalRankFusion } from "../search/search.rrf.js";
 import type { ChatMessage, Citation, RetrievedChunk } from "./providers/types.js";
 
-
 let _provider: ReturnType<typeof createProvider> | null = null;
 function getProvider() {
   if (!_provider) _provider = createProvider();
@@ -35,9 +34,9 @@ interface AskResult {
   citations: Citation[];
 }
 
-const RERANK_POOL = 20;   // how many RRF results to collect
-const MMR_POOL = 12;      // diverse subset to send to reranker
-const RERANK_TOP = 6;     // final chunks sent to LLM
+const RERANK_POOL = 20; // how many RRF results to collect
+const MMR_POOL = 12; // diverse subset to send to reranker
+const RERANK_TOP = 6; // final chunks sent to LLM
 const RELEVANCE_THRESHOLD = 0.1;
 
 const NO_RESULTS_MSG =
@@ -104,7 +103,7 @@ async function hybridRetrieve(
 
   if (textResults.length === 0 && vectorResults.length === 0) return [];
 
-  const fused = reciprocalRankFusion([textResults, vectorResults]);
+  const fused = reciprocalRankFusion([textResults, vectorResults], 60, RERANK_POOL);
   const pool = fused.slice(0, RERANK_POOL);
   if (pool.length === 0) return [];
 
@@ -122,9 +121,7 @@ async function hybridRetrieve(
       sectionId: String(item.payload.sectionId ?? ""),
     },
     relevance: item.score,
-    vector: Array.isArray(item.payload._vector)
-      ? (item.payload._vector as number[])
-      : undefined,
+    vector: Array.isArray(item.payload._vector) ? (item.payload._vector as number[]) : undefined,
   }));
 
   const mmrPool = mmrSelect(mmrCandidates, Math.min(MMR_POOL, pool.length));
@@ -135,9 +132,7 @@ async function hybridRetrieve(
   try {
     reranked = await rerankDocuments(question, documents, Math.min(limit, mmrPool.length));
   } catch {
-    reranked = mmrPool
-      .slice(0, limit)
-      .map((_, i) => ({ index: i, relevance_score: 1 }));
+    reranked = mmrPool.slice(0, limit).map((_, i) => ({ index: i, relevance_score: 1 }));
   }
 
   return reranked
@@ -250,9 +245,7 @@ export async function askQuestion(params: AskParams): Promise<AskResult> {
   }
 
   // batch section inflation — single MongoDB query
-  const sectionIds = chunks
-    .map((c) => c.sectionId)
-    .filter((id): id is string => Boolean(id));
+  const sectionIds = chunks.map((c) => c.sectionId).filter((id): id is string => Boolean(id));
 
   if (sectionIds.length > 0) {
     const sections = await SectionContent.find({ sectionId: { $in: sectionIds } }).lean();
@@ -302,14 +295,14 @@ export async function generateTitle(question: string): Promise<string> {
     },
   ];
 
-  let title = "";
+  const tokens: string[] = [];
   for await (const token of provider.chatStream({
     messages,
     maxTokens: 30,
     temperature: 0.5,
   })) {
-    title += token;
+    tokens.push(token);
   }
 
-  return title.trim() || question.slice(0, 50);
+  return tokens.join("").trim() || question.slice(0, 50);
 }
