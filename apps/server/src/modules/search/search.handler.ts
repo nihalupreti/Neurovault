@@ -1,11 +1,6 @@
 import { Request, Response } from "express";
 import { parseSearchQuery } from "./search.query-parser.js";
-import {
-  searchSemantic,
-  searchByFileName,
-  searchHybrid,
-  searchKeyword,
-} from "./search.service.js";
+import { searchSemantic, searchByFileName, searchHybrid, searchKeyword } from "./search.service.js";
 import { apiSuccess } from "../../utils/api-response.js";
 import { InvalidSearchQueryError } from "./search.errors.js";
 import { searchQuerySchema } from "@neurovault/shared/schemas";
@@ -96,17 +91,23 @@ export const handleSearch = async (req: Request, res: Response) => {
     }));
   } else if (parsed.semantic) {
     const similarities = await searchSemantic(parsed.semantic, fileIds);
-    results = (similarities.points || []).map((point: { id: string | number; score: number; payload?: Record<string, unknown> | null }) => ({
-      id: String(point.id),
-      score: point.score,
-      type: "semantic" as const,
-      payload: {
-        text: String(point.payload?.text ?? ""),
-        fileId: String(point.payload?.fileId ?? ""),
-        fileName: String(point.payload?.fileName ?? ""),
-        chunk_index: Number(point.payload?.chunk_index ?? 0),
-      },
-    }));
+    results = (similarities.points || []).map(
+      (point: {
+        id: string | number;
+        score: number;
+        payload?: Record<string, unknown> | null;
+      }) => ({
+        id: String(point.id),
+        score: point.score,
+        type: "semantic" as const,
+        payload: {
+          text: String(point.payload?.text ?? ""),
+          fileId: String(point.payload?.fileId ?? ""),
+          fileName: String(point.payload?.fileName ?? ""),
+          chunk_index: Number(point.payload?.chunk_index ?? 0),
+        },
+      }),
+    );
   }
 
   apiSuccess(res, {

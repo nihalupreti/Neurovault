@@ -1,15 +1,15 @@
 import crypto from "node:crypto";
 import { Book, BookChapter } from "./book.model.js";
 import { parseBookHtml } from "./books.parser.js";
-import { chunkAndEmbedBook } from "./books.chunker.js";
-import { createBookGraphNodes, deleteBookGraphNodes, runBookSimilarityJob } from "./books.graph.js";
+import { deleteBookGraphNodes } from "./books.graph.js";
+import { getBookQueue } from "../worker/worker.queues.js";
 
 export interface ImportResult {
   bookId: string;
   title: string;
   totalChapters: number;
-  chunksCreated: number;
-  edgesCreated: number;
+  jobId?: string;
+  status: "processing" | "skipped";
   skipped: boolean;
 }
 
@@ -22,8 +22,7 @@ export async function importBook(html: string): Promise<ImportResult> {
       bookId: existing._id.toString(),
       title: existing.title,
       totalChapters: existing.totalChapters,
-      chunksCreated: 0,
-      edgesCreated: 0,
+      status: "skipped" as const,
       skipped: true,
     };
   }
@@ -50,34 +49,21 @@ export async function importBook(html: string): Promise<ImportResult> {
       number: ch.number,
       title: ch.title,
       htmlContent: ch.htmlContent,
+      plainText: ch.plainText,
       sections: ch.sections,
     });
   }
 
-  const chunksCreated = await chunkAndEmbedBook({
+  const job = await getBookQueue().add("chunk-book", { bookId });
+
+  return {
     bookId,
-    bookTitle: parsed.title,
-    chapters: parsed.chapters.map((ch) => ({
-      number: ch.number,
-      plainText: ch.plainText,
-      sections: ch.sections,
-    })),
-  });
-
-  await createBookGraphNodes(
-    bookId,
-    parsed.title,
-    parsed.topic,
-    parsed.chapters.map((ch) => ({
-      number: ch.number,
-      title: ch.title,
-      sections: ch.sections,
-    })),
-  );
-
-  const edgesCreated = await runBookSimilarityJob(bookId);
-
-  return { bookId, title: parsed.title, totalChapters: parsed.chapters.length, chunksCreated, edgesCreated, skipped: false };
+    title: parsed.title,
+    totalChapters: parsed.chapters.length,
+    jobId: job.id!,
+    status: "processing" as const,
+    skipped: false,
+  };
 }
 
 export async function deleteBook(bookId: string): Promise<void> {

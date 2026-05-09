@@ -11,11 +11,7 @@ export const searchResult = async (embeddings: number[], limit = 10) => {
   return result;
 };
 
-export const searchResultFiltered = async (
-  embeddings: number[],
-  fileIds: string[],
-  limit = 10,
-) => {
+export const searchResultFiltered = async (embeddings: number[], fileIds: string[], limit = 10) => {
   const result = await client.query("neurovault", {
     query: embeddings,
     limit,

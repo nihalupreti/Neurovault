@@ -5,6 +5,7 @@ const bookChapterSchema = new Schema({
   number: { type: Number, required: true },
   title: { type: String, required: true },
   htmlContent: { type: String, required: true },
+  plainText: { type: String, default: "" },
   sections: [
     {
       anchor: { type: String, required: true },
@@ -29,6 +30,11 @@ const bookSchema = new Schema(
       },
     ],
     totalChapters: { type: Number, default: 0 },
+    indexingStatus: {
+      type: String,
+      enum: ["pending", "indexing", "ready", "failed"],
+      default: "pending",
+    },
   },
   { timestamps: true },
 );

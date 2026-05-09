@@ -5,8 +5,20 @@ import type { RetrievedChunk } from "../providers/types.js";
 describe("buildSystemPrompt", () => {
   it("includes all chunks with Source tags", () => {
     const chunks: RetrievedChunk[] = [
-      { fileId: "a1", fileName: "physics.md", text: "Force equals mass times acceleration", chunkIndex: 0, score: 0.95 },
-      { fileId: "b2", fileName: "calculus.md", text: "Derivative is rate of change", chunkIndex: 2, score: 0.82 },
+      {
+        fileId: "a1",
+        fileName: "physics.md",
+        text: "Force equals mass times acceleration",
+        chunkIndex: 0,
+        score: 0.95,
+      },
+      {
+        fileId: "b2",
+        fileName: "calculus.md",
+        text: "Derivative is rate of change",
+        chunkIndex: 2,
+        score: 0.82,
+      },
     ];
 
     const prompt = buildSystemPrompt(chunks);
@@ -19,7 +31,9 @@ describe("buildSystemPrompt", () => {
 
   it("includes system instructions", () => {
     const prompt = buildSystemPrompt([]);
-    expect(prompt).toContain("ONLY answer questions that can be addressed using the provided context");
+    expect(prompt).toContain(
+      "ONLY answer questions that can be addressed using the provided context",
+    );
     expect(prompt).toContain("[Source N]");
   });
 

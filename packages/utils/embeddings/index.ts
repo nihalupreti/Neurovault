@@ -18,10 +18,6 @@ export function getEmbeddingsBatch(
   return embeddingProvider.embedBatch(texts, task, lateChunking);
 }
 
-export function rerankDocuments(
-  query: string,
-  documents: string[],
-  topN: number,
-) {
+export function rerankDocuments(query: string, documents: string[], topN: number) {
   return embeddingProvider.rerank(query, documents, topN);
 }

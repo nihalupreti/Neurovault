@@ -16,6 +16,7 @@ import captureRoutes from "./modules/capture/capture.routes.js";
 import { createEmailWebhookRouter } from "./modules/capture/capture.email-webhook.js";
 import { initConstraints } from "./modules/graph/graph.service.js";
 import { initWebSocket } from "./modules/sync/sync.ws-manager.js";
+import { startWorkers } from "./modules/worker/worker.processor.js";
 import { identifyRole } from "./modules/auth/auth.middleware.js";
 import { apiSuccess } from "./utils/api-response.js";
 import authRoutes from "./modules/auth/auth.routes.js";
@@ -24,7 +25,7 @@ import readerRoutes from "./modules/reader/reader.routes.js";
 
 dotenv.config();
 
-const REQUIRED_ENV = ["DB_URL", "ADMIN_SECRET", "JINA_API_KEY"] as const;
+const REQUIRED_ENV = ["DB_URL", "ADMIN_SECRET", "JINA_API_KEY", "REDIS_URL"] as const;
 const missing = REQUIRED_ENV.filter((k) => !process.env[k]);
 if (missing.length > 0) {
   console.error(`FATAL: Missing required env vars: ${missing.join(", ")}`);
@@ -37,7 +38,9 @@ const app = express();
 const PORT = Number(process.env.PORT) || 3001;
 
 const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim()).filter(Boolean)
+  ? process.env.CORS_ORIGIN.split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
   : ["http://localhost:3000"];
 
 app.set("trust proxy", 1);
@@ -49,15 +52,15 @@ app.use(
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
     optionsSuccessStatus: 204,
-  })
+  }),
 );
 app.use(express.json({ limit: "1mb" }));
 app.use(
   "/api/capture/email",
   createEmailWebhookRouter(
     process.env.EMAIL_WEBHOOK_SECRET || "",
-    process.env.EMAIL_ALLOWLIST || ""
-  )
+    process.env.EMAIL_ALLOWLIST || "",
+  ),
 );
 app.use(identifyRole);
 
@@ -82,9 +85,8 @@ initWebSocket(server);
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`server is running on port ${PORT}`);
-  initConstraints().catch((err) =>
-    console.error("Neo4j constraint init failed:", err)
-  );
+  initConstraints().catch((err) => console.error("Neo4j constraint init failed:", err));
+  startWorkers();
 });
 
 function shutdown(signal: string) {

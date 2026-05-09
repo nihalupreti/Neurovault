@@ -11,6 +11,7 @@ services:
     depends_on:
       - mongo
       - qdrant
+      - redis
     restart: unless-stopped
     networks:
       - neurovault_network
@@ -33,6 +34,17 @@ services:
       - "6333:6333"
     volumes:
       - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+    networks:
+      - neurovault_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: neurovault_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
     restart: unless-stopped
     networks:
       - neurovault_network
@@ -73,6 +85,7 @@ volumes:
   mongo_data:
   qdrant_data:
   neo4j_data:
+  redis_data:
 
 networks:
   neurovault_network:

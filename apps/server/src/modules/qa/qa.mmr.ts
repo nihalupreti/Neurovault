@@ -7,7 +7,9 @@ export interface RankedCandidate {
 }
 
 function cosine(a: number[], b: number[]): number {
-  let dot = 0, normA = 0, normB = 0;
+  let dot = 0,
+    normA = 0,
+    normB = 0;
   for (let i = 0; i < a.length; i++) {
     dot += (a[i] ?? 0) * (b[i] ?? 0);
     normA += (a[i] ?? 0) ** 2;

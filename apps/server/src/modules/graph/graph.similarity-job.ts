@@ -1,10 +1,6 @@
 import { getQdrantClient } from "@neurovault/config";
 import fileModel from "../files/files.model.js";
-import {
-  upsertSimilarEdges,
-  upsertFileNode,
-  runLouvain,
-} from "./graph.service.js";
+import { upsertSimilarEdges, upsertFileNode, runLouvain } from "./graph.service.js";
 import type { SimilarEdgeInput, ChunkPair } from "@neurovault/shared/types";
 
 const COLLECTION = "neurovault";
@@ -19,7 +15,7 @@ interface RawChunkMatch {
 export function aggregateChunkSimilarities(
   raw: RawChunkMatch[],
   threshold: number,
-  maxPerFile: number
+  maxPerFile: number,
 ): SimilarEdgeInput[] {
   const grouped = new Map<string, { score: number; chunkPairs: ChunkPair[] }>();
 
@@ -56,17 +52,9 @@ export function aggregateChunkSimilarities(
 export async function runSimilarityJob(_options?: {
   full?: boolean;
 }): Promise<{ processed: number; edgesCreated: number }> {
-  const threshold = parseFloat(
-    process.env.GRAPH_SIMILARITY_THRESHOLD || "0.7"
-  );
-  const maxPerFile = parseInt(
-    process.env.GRAPH_MAX_SIMILAR_PER_FILE || "5",
-    10
-  );
-  const chunkNeighbors = parseInt(
-    process.env.GRAPH_CHUNKS_NEIGHBORS || "10",
-    10
-  );
+  const threshold = parseFloat(process.env.GRAPH_SIMILARITY_THRESHOLD || "0.7");
+  const maxPerFile = parseInt(process.env.GRAPH_MAX_SIMILAR_PER_FILE || "5", 10);
+  const chunkNeighbors = parseInt(process.env.GRAPH_CHUNKS_NEIGHBORS || "10", 10);
 
   const client = getQdrantClient();
   const files = await fileModel.find({ type: "file" });

@@ -5,9 +5,7 @@ const mockBookFindOne = vi.hoisted(() => vi.fn());
 const mockBookChapterCreate = vi.hoisted(() => vi.fn());
 const mockBookChapterDeleteMany = vi.hoisted(() => vi.fn());
 const mockParseBookHtml = vi.hoisted(() => vi.fn());
-const mockChunkAndEmbedBook = vi.hoisted(() => vi.fn());
-const mockCreateBookGraphNodes = vi.hoisted(() => vi.fn());
-const mockRunBookSimilarityJob = vi.hoisted(() => vi.fn());
+const mockQueueAdd = vi.hoisted(() => vi.fn());
 
 vi.mock("../book.model.js", () => ({
   Book: { create: mockBookCreate, findOne: mockBookFindOne },
@@ -15,10 +13,8 @@ vi.mock("../book.model.js", () => ({
 }));
 
 vi.mock("../books.parser.js", () => ({ parseBookHtml: mockParseBookHtml }));
-vi.mock("../books.chunker.js", () => ({ chunkAndEmbedBook: mockChunkAndEmbedBook }));
-vi.mock("../books.graph.js", () => ({
-  createBookGraphNodes: mockCreateBookGraphNodes,
-  runBookSimilarityJob: mockRunBookSimilarityJob,
+vi.mock("../../worker/worker.queues.js", () => ({
+  getBookQueue: () => ({ add: mockQueueAdd }),
 }));
 
 import { importBook } from "../books.service.js";
@@ -30,6 +26,7 @@ describe("importBook", () => {
     mockBookCreate.mockResolvedValue({ _id: "book123", title: "Test" });
     mockBookChapterCreate.mockResolvedValue({});
     mockBookChapterDeleteMany.mockResolvedValue({});
+    mockQueueAdd.mockResolvedValue({ id: "job-1" });
     mockParseBookHtml.mockReturnValue({
       title: "Test Book",
       topic: "Testing",
@@ -43,30 +40,28 @@ describe("importBook", () => {
         },
       ],
     });
-    mockChunkAndEmbedBook.mockResolvedValue(5);
-    mockCreateBookGraphNodes.mockResolvedValue(undefined);
-    mockRunBookSimilarityJob.mockResolvedValue(3);
   });
 
-  it("parses HTML, stores models, chunks, and builds graph", async () => {
+  it("parses HTML, stores models, and dispatches indexing job", async () => {
     const result = await importBook("<html>...</html>");
 
     expect(mockParseBookHtml).toHaveBeenCalledWith("<html>...</html>");
     expect(mockBookCreate).toHaveBeenCalled();
     expect(mockBookChapterCreate).toHaveBeenCalled();
-    expect(mockChunkAndEmbedBook).toHaveBeenCalled();
-    expect(mockCreateBookGraphNodes).toHaveBeenCalled();
-    expect(mockRunBookSimilarityJob).toHaveBeenCalled();
-    expect(result.chunksCreated).toBe(5);
-    expect(result.edgesCreated).toBe(3);
+    expect(mockQueueAdd).toHaveBeenCalledWith("chunk-book", { bookId: "book123" });
+    expect(result.status).toBe("processing");
+    expect(result.jobId).toBe("job-1");
+    expect(result.skipped).toBe(false);
   });
 
   it("skips re-import when htmlHash matches", async () => {
-    mockBookFindOne.mockResolvedValue({ _id: "existing", htmlHash: "abc" });
+    mockBookFindOne.mockResolvedValue({ _id: "existing", htmlHash: "abc", title: "Old", totalChapters: 3 });
 
     const result = await importBook("<html>...</html>");
 
     expect(result.skipped).toBe(true);
+    expect(result.status).toBe("skipped");
     expect(mockBookCreate).not.toHaveBeenCalled();
+    expect(mockQueueAdd).not.toHaveBeenCalled();
   });
 });

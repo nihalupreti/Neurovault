@@ -57,7 +57,11 @@ export async function processContent(
 
   const batchVectors = await Promise.all(
     batches.map((batch) =>
-      getEmbeddingsBatch(batch.chunks.map((c) => c.text), "document", true),
+      getEmbeddingsBatch(
+        batch.chunks.map((c) => c.text),
+        "document",
+        true,
+      ),
     ),
   );
 

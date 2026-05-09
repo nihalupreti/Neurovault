@@ -16,10 +16,7 @@ export const searchSemantic = async (query: string, fileIds?: string[]) => {
   return searchResult(queryEmbeddings);
 };
 
-export const searchKeyword = async (
-  query: string,
-  mongoFilter?: Record<string, unknown>,
-) => {
+export const searchKeyword = async (query: string, mongoFilter?: Record<string, unknown>) => {
   const filter: Record<string, unknown> = { $text: { $search: query }, ...mongoFilter };
 
   const docs = await ChunkText.find(filter, { score: { $meta: "textScore" } })
@@ -59,14 +56,16 @@ export const searchHybrid = async (query: string, fileIds?: string[]) => {
 
   if (vectorRes.status === "fulfilled") {
     const points = vectorRes.value.points || [];
-    vectorResults = points.map((p: { id: string | number; score: number; payload?: Record<string, unknown> | null }) => ({
-      id: `${p.payload?.fileId}:${p.payload?.chunk_index}`,
-      payload: {
-        text: p.payload?.text ?? "",
-        fileId: p.payload?.fileId ?? "",
-        chunk_index: p.payload?.chunk_index ?? 0,
-      },
-    }));
+    vectorResults = points.map(
+      (p: { id: string | number; score: number; payload?: Record<string, unknown> | null }) => ({
+        id: `${p.payload?.fileId}:${p.payload?.chunk_index}`,
+        payload: {
+          text: p.payload?.text ?? "",
+          fileId: p.payload?.fileId ?? "",
+          chunk_index: p.payload?.chunk_index ?? 0,
+        },
+      }),
+    );
   } else {
     console.warn("Vector search failed, degrading to text only:", vectorRes.reason);
   }
