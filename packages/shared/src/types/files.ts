@@ -3,6 +3,7 @@ export interface FileNode {
   name: string;
   type: "file" | "folder";
   children?: FileNode[];
+  childCount?: number;
 }
 
 export interface FolderTreeResponse {

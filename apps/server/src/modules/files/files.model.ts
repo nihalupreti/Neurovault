@@ -24,12 +24,22 @@ const fileMetadataSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    vaultId: {
+      type: Schema.Types.ObjectId,
+      ref: "Vault",
+      default: null,
+    },
+    vaultPath: {
+      type: String,
+      default: null,
+    },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 fileMetadataSchema.index({ parentId: 1, type: 1 });
 fileMetadataSchema.index({ parentId: 1, name: 1, type: 1 });
+fileMetadataSchema.index({ vaultId: 1, vaultPath: 1 });
 
 fileMetadataSchema.pre("save", function (next) {
   if (this.serverPath) {
