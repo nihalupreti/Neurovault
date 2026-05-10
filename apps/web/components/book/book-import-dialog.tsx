@@ -90,7 +90,7 @@ export function BookImportDialog({
       <input
         ref={fileInputRef}
         type="file"
-        accept=".html,.htm"
+        accept=".html,.htm,.epub"
         hidden
         onChange={handleFileChange}
       />

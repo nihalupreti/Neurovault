@@ -102,7 +102,7 @@ function LibraryPane({ activeBookId }: LibraryPaneProps) {
         </span>
         <span className="nv-import-card-body">
           <b>import book</b>
-          <span>epub · pdf · html</span>
+          <span>epub · html</span>
         </span>
       </button>
 
@@ -121,13 +121,27 @@ function LibraryPane({ activeBookId }: LibraryPaneProps) {
             key={b._id}
             className={`nv-lib-row${b._id === activeBookId ? " is-active" : ""}`}
           >
-            <span className="nv-lib-cover">{b.title.charAt(0)}</span>
+            {b.coverPath ? (
+              <img
+                className="nv-lib-cover-img"
+                src={`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"}/${b.coverPath}`}
+                alt={b.title}
+              />
+            ) : (
+              <span className="nv-lib-cover">{b.title.charAt(0)}</span>
+            )}
             <span className="nv-lib-meta">
               <span className="nv-lib-title">{b.title}</span>
-              <span className="nv-lib-author">{b.topic}</span>
+              <span className="nv-lib-author">{b.author || b.topic}</span>
               <span className="nv-lib-foot">
                 <b>{b.totalChapters} ch</b>
                 <span className="nv-dot" />
+                {b.format === "epub" && (
+                  <>
+                    <span className="nv-badge-epub">epub</span>
+                    <span className="nv-dot" />
+                  </>
+                )}
                 <span>
                   {new Date(b.createdAt).toLocaleDateString()}
                 </span>
