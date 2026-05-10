@@ -6,7 +6,9 @@ import type {
   CaptureUrlJob,
   SyncIndexJob,
   GraphRebuildJob,
+  BookSimilarityJob,
 } from "./worker.queues.js";
+import { getBookSimilarityQueue } from "./worker.queues.js";
 import { handleFileUpload } from "../chunker/chunker.dispatcher.js";
 import { onFileIndexed } from "../files/files.graph-hook.js";
 import { chunkAndEmbedBook } from "../books/books.chunker.js";
@@ -64,9 +66,7 @@ export function startWorkers(): void {
         })),
       );
 
-      await runBookSimilarityJob(bookId);
-
-      await Book.findByIdAndUpdate(bookId, { indexingStatus: "ready" });
+      await getBookSimilarityQueue().add("book-similarity", { bookId });
     },
     { connection: getRedisConnection(), concurrency: 1 },
   );
@@ -116,7 +116,24 @@ export function startWorkers(): void {
     console.error(`graph-rebuild job ${job?.id} failed:`, err);
   });
 
+  const bookSimilarityWorker = new Worker<BookSimilarityJob>(
+    "book-similarity",
+    async (job) => {
+      const { bookId } = job.data;
+      await runBookSimilarityJob(bookId);
+      await Book.findByIdAndUpdate(bookId, { indexingStatus: "ready" });
+    },
+    { connection: getRedisConnection(), concurrency: 1 },
+  );
+
+  bookSimilarityWorker.on("failed", async (job, err) => {
+    console.error(`book-similarity job ${job?.id} failed for ${job?.data.bookId}:`, err);
+    if (job) {
+      await Book.findByIdAndUpdate(job.data.bookId, { indexingStatus: "failed" }).catch(() => {});
+    }
+  });
+
   console.log(
-    "Workers started: chunk-file (concurrency 2), chunk-book (concurrency 1), capture-url (concurrency 3), sync-index (concurrency 2), graph-rebuild (concurrency 1)",
+    "Workers started: chunk-file (concurrency 2), chunk-book (concurrency 1), capture-url (concurrency 3), sync-index (concurrency 2), graph-rebuild (concurrency 1), book-similarity (concurrency 1)",
   );
 }
