@@ -39,27 +39,26 @@ export default class NeurovaultPlugin extends Plugin {
       return;
     }
 
+    await this.initSync();
+  }
+
+  async initSync(): Promise<void> {
+    if (this.engine) return;
+
     this.api = new ApiClient(this.settings.serverUrl, this.settings.vaultId);
     this.ws = new WsClient();
     this.queue = new LocalQueue();
-    this.engine = new SyncEngine(
-      this.app.vault,
-      this.api,
-      this.queue,
-      this.settings
-    );
-    this.watcher = new VaultWatcher(
-      this.app.vault,
-      this.settings.include,
-      this.settings.exclude
-    );
+    this.engine = new SyncEngine(this.app.vault, this.api, this.queue, this.settings);
+    this.watcher = new VaultWatcher(this.app.vault, this.settings.include, this.settings.exclude);
 
-    const data = await this.loadData() as PluginData | null;
+    const data = (await this.loadData()) as PluginData | null;
     if (data?.queue) {
       this.queue.load(data.queue);
     }
 
-    this.statusBarEl = this.addStatusBarItem();
+    if (!this.statusBarEl) {
+      this.statusBarEl = this.addStatusBarItem();
+    }
     this.updateStatusBar("idle");
 
     this.engine.setOnStateChange((state) => this.updateStatusBar(state));
@@ -105,10 +104,12 @@ export default class NeurovaultPlugin extends Plugin {
         try {
           const status = await this.api.getStatus();
           new Notice(
-            `Files: ${status.fileCount} | Pending: ${status.pendingEmbeddings} | Conflicts: ${status.unresolvedConflicts}`
+            `Files: ${status.fileCount} | Pending: ${status.pendingEmbeddings} | Conflicts: ${status.unresolvedConflicts}`,
           );
         } catch (err: unknown) {
-          new Notice(`Status check failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+          new Notice(
+            `Status check failed: ${err instanceof Error ? err.message : "Unknown error"}`,
+          );
         }
       },
     });
@@ -185,7 +186,7 @@ export default class NeurovaultPlugin extends Plugin {
       conflict,
       this.api,
       (commitSha) => this.engine.onConflictResolved(commitSha),
-      () => this.showNextConflict()
+      () => this.showNextConflict(),
     ).open();
   }
 }

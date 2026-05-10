@@ -12,25 +12,18 @@ import {
 export class ApiClient {
   constructor(
     private serverUrl: string,
-    private vaultId: string
+    private vaultId: string,
   ) {}
 
   setVaultId(id: string): void {
     this.vaultId = id;
   }
 
-  async registerVault(
-    name: string,
-    include: string[],
-    exclude: string[]
-  ): Promise<VaultResponse> {
+  async registerVault(name: string, include: string[], exclude: string[]): Promise<VaultResponse> {
     return this.post("/api/sync/vault", { name, include, exclude });
   }
 
-  async push(
-    changes: SyncChange[],
-    baseCommit: string
-  ): Promise<PushResponse> {
+  async push(changes: SyncChange[], baseCommit: string): Promise<PushResponse> {
     return this.post(`/api/sync/${this.vaultId}/push`, {
       changes,
       baseCommit,
@@ -48,7 +41,7 @@ export class ApiClient {
   async resolveConflict(
     id: string,
     resolution: string,
-    content?: string
+    content?: string,
   ): Promise<{ success: boolean; commitSha: string }> {
     return this.post(`/api/sync/${this.vaultId}/conflicts/${id}/resolve`, {
       resolution,
@@ -66,7 +59,8 @@ export class ApiClient {
         url: `${this.serverUrl}${path}`,
         method: "GET",
       });
-      return response.json as T;
+      const json = response.json;
+      return (json?.data !== undefined ? json.data : json) as T;
     } catch (err: unknown) {
       throw this.toSyncError(err);
     }
@@ -80,7 +74,8 @@ export class ApiClient {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      return response.json as T;
+      const json = response.json;
+      return (json?.data !== undefined ? json.data : json) as T;
     } catch (err: unknown) {
       throw this.toSyncError(err);
     }
@@ -88,8 +83,8 @@ export class ApiClient {
 
   private toSyncError(err: unknown): SyncError {
     const e = err as Record<string, unknown>;
-    const status = (typeof e.status === "number" ? e.status : 0);
-    const message = (typeof e.message === "string" ? e.message : "Network error");
+    const status = typeof e.status === "number" ? e.status : 0;
+    const message = typeof e.message === "string" ? e.message : "Network error";
     const retryable = status === 0 || status >= 500;
     return new SyncError(message, status, retryable);
   }

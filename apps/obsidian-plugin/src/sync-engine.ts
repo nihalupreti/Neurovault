@@ -4,12 +4,7 @@ import { LocalQueue } from "./local-queue";
 import { VaultWatcher, type WatcherChange } from "./vault-watcher";
 import { toBase64, sha256, fromBase64 } from "./utils";
 import { SyncError } from "./types";
-import type {
-  SyncChange,
-  SyncState,
-  NeurovaultSettings,
-  ConflictInfo,
-} from "./types";
+import type { SyncChange, SyncState, NeurovaultSettings, ConflictInfo } from "./types";
 
 export class SyncEngine {
   private state: SyncState = "idle";
@@ -22,7 +17,7 @@ export class SyncEngine {
     private vault: Vault,
     private api: ApiClient,
     private queue: LocalQueue,
-    private settings: NeurovaultSettings
+    private settings: NeurovaultSettings,
   ) {}
 
   setOnStateChange(cb: (state: SyncState) => void): void {
@@ -69,13 +64,66 @@ export class SyncEngine {
   }
 
   async startupSync(): Promise<void> {
-    if (!this.settings.baseCommit) return;
-    await this.executePull();
+    if (this.settings.baseCommit) {
+      await this.executePull();
+      return;
+    }
+
+    await this.initialPush();
+  }
+
+  private async initialPush(): Promise<void> {
+    this.setState("pushing");
+
+    const allFiles = this.vault.getFiles();
+    const { matchesGlobs } = await import("./utils");
+    const matchingFiles = allFiles.filter((f) =>
+      matchesGlobs(f.path, this.settings.include, this.settings.exclude),
+    );
+
+    const BATCH_SIZE = 50;
+    let lastCommitSha = "";
+
+    for (let i = 0; i < matchingFiles.length; i += BATCH_SIZE) {
+      const batch = matchingFiles.slice(i, i + BATCH_SIZE);
+      const changes: SyncChange[] = [];
+
+      for (const file of batch) {
+        try {
+          const content = await this.vault.adapter.read(file.path);
+          const hash = await sha256(content);
+          changes.push({
+            path: file.path,
+            action: "upsert",
+            content: toBase64(content),
+            clientHash: hash,
+          });
+        } catch {
+          // skip unreadable files
+        }
+      }
+
+      if (changes.length === 0) continue;
+
+      try {
+        const result = await this.api.push(changes, lastCommitSha);
+        lastCommitSha = result.commitSha;
+      } catch {
+        this.setState("idle");
+        return;
+      }
+    }
+
+    if (lastCommitSha) {
+      this.settings.baseCommit = lastCommitSha;
+    }
+
+    this.setState("idle");
   }
 
   async drainQueue(
     watcher: VaultWatcher,
-    readFile: (path: string) => Promise<string | null>
+    readFile: (path: string) => Promise<string | null>,
   ): Promise<void> {
     if (this.queue.isEmpty()) return;
 
@@ -145,7 +193,7 @@ export class SyncEngine {
           await this.queue.add(
             change.path,
             change.action,
-            change.content ? fromBase64(change.content) : undefined
+            change.content ? fromBase64(change.content) : undefined,
           );
         }
       }
