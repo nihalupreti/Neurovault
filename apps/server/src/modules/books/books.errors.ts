@@ -9,5 +9,11 @@ export class ChapterNotFoundError extends NotFoundError {
 }
 
 export class NoFileUploadedError extends BadRequestError {
-  constructor() { super("No HTML file uploaded"); }
+  constructor() { super("No file uploaded"); }
+}
+
+export class InvalidEpubError extends BadRequestError {
+  constructor(reason: string) {
+    super(`Invalid EPUB file: ${reason}`);
+  }
 }
