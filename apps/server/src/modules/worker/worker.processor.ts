@@ -7,8 +7,9 @@ import type {
   SyncIndexJob,
   GraphRebuildJob,
   BookSimilarityJob,
+  GraphIndexJob,
 } from "./worker.queues.js";
-import { getBookSimilarityQueue } from "./worker.queues.js";
+import { getBookSimilarityQueue, getGraphIndexQueue } from "./worker.queues.js";
 import { handleFileUpload } from "../chunker/chunker.dispatcher.js";
 import { onFileIndexed } from "../files/files.graph-hook.js";
 import { chunkAndEmbedBook } from "../books/books.chunker.js";
@@ -24,7 +25,7 @@ export function startWorkers(): void {
     async (job) => {
       const { filePath, fileId } = job.data;
       await handleFileUpload(filePath, fileId);
-      await onFileIndexed(filePath, fileId);
+      await getGraphIndexQueue().add("graph-index", { filePath, fileId });
     },
     { connection: getRedisConnection(), concurrency: 2 },
   );
@@ -133,7 +134,20 @@ export function startWorkers(): void {
     }
   });
 
+  const graphIndexWorker = new Worker<GraphIndexJob>(
+    "graph-index",
+    async (job) => {
+      const { filePath, fileId } = job.data;
+      await onFileIndexed(filePath, fileId);
+    },
+    { connection: getRedisConnection(), concurrency: 2 },
+  );
+
+  graphIndexWorker.on("failed", (job, err) => {
+    console.error(`graph-index job ${job?.id} failed for ${job?.data.fileId}:`, err);
+  });
+
   console.log(
-    "Workers started: chunk-file (concurrency 2), chunk-book (concurrency 1), capture-url (concurrency 3), sync-index (concurrency 2), graph-rebuild (concurrency 1), book-similarity (concurrency 1)",
+    "Workers started: chunk-file (2), chunk-book (1), capture-url (3), sync-index (2), graph-rebuild (1), book-similarity (1), graph-index (2)",
   );
 }
