@@ -7,7 +7,7 @@ import {
   getShortestPath,
   getStats,
 } from "./graph.service.js";
-import { runSimilarityJob } from "./graph.similarity-job.js";
+import { getGraphRebuildQueue } from "../worker/worker.queues.js";
 import { apiSuccess } from "../../utils/api-response.js";
 import { GraphUnavailableError, FileNotInGraphError } from "./graph.errors.js";
 
@@ -79,8 +79,6 @@ export const handleGetStats = async (_req: Request, res: Response) => {
 };
 
 export const handleRebuild = async (_req: Request, res: Response) => {
-  apiSuccess(res, { status: "started" }, "Rebuild started", 202);
-  runSimilarityJob({ full: true }).catch((err) =>
-    console.error("Rebuild error:", err)
-  );
+  await getGraphRebuildQueue().add("graph-rebuild", { full: true });
+  apiSuccess(res, { status: "queued" }, "Rebuild queued", 202);
 };

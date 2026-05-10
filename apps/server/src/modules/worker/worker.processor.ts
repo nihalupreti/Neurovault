@@ -1,6 +1,12 @@
 import { Worker } from "bullmq";
 import { getRedisConnection } from "./worker.connection.js";
-import type { ChunkFileJob, ChunkBookJob, CaptureUrlJob, SyncIndexJob } from "./worker.queues.js";
+import type {
+  ChunkFileJob,
+  ChunkBookJob,
+  CaptureUrlJob,
+  SyncIndexJob,
+  GraphRebuildJob,
+} from "./worker.queues.js";
 import { handleFileUpload } from "../chunker/chunker.dispatcher.js";
 import { onFileIndexed } from "../files/files.graph-hook.js";
 import { chunkAndEmbedBook } from "../books/books.chunker.js";
@@ -8,6 +14,7 @@ import { createBookGraphNodes, runBookSimilarityJob } from "../books/books.graph
 import { Book, BookChapter } from "../books/book.model.js";
 import { processUrlInBackground } from "../capture/capture.service.js";
 import { runIndexPipeline } from "../sync/sync.index-pipeline.js";
+import { runSimilarityJob } from "../graph/graph.similarity-job.js";
 
 export function startWorkers(): void {
   const fileWorker = new Worker<ChunkFileJob>(
@@ -97,7 +104,19 @@ export function startWorkers(): void {
     console.error(`sync-index job failed for vault ${job?.data.vaultId}:`, err);
   });
 
+  const graphRebuildWorker = new Worker<GraphRebuildJob>(
+    "graph-rebuild",
+    async (job) => {
+      await runSimilarityJob({ full: job.data.full });
+    },
+    { connection: getRedisConnection(), concurrency: 1 },
+  );
+
+  graphRebuildWorker.on("failed", (job, err) => {
+    console.error(`graph-rebuild job ${job?.id} failed:`, err);
+  });
+
   console.log(
-    "Workers started: chunk-file (concurrency 2), chunk-book (concurrency 1), capture-url (concurrency 3), sync-index (concurrency 2)",
+    "Workers started: chunk-file (concurrency 2), chunk-book (concurrency 1), capture-url (concurrency 3), sync-index (concurrency 2), graph-rebuild (concurrency 1)",
   );
 }
