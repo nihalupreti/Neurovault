@@ -5,31 +5,37 @@ export interface GraphNode {
   clusterId?: number;
 }
 
+export interface FolderNode {
+  folderId: string;
+  name: string;
+  path: string;
+}
+
 export interface ChunkPair {
   sourceIdx: number;
   targetIdx: number;
   score: number;
 }
 
-export interface ExplicitEdge {
+export interface LinksToEdge {
   source: string;
   target: string;
   type: "LINKS_TO";
   anchor: string;
 }
 
-export interface ImplicitEdge {
+export interface ChildOfEdge {
   source: string;
   target: string;
-  type: "SIMILAR";
-  score: number;
-  chunkPairs: ChunkPair[];
+  type: "CHILD_OF";
+  sourceLabel: "File" | "Folder";
 }
 
-export type GraphEdge = ExplicitEdge | ImplicitEdge;
+export type GraphEdge = LinksToEdge | ChildOfEdge;
 
 export interface GraphStats {
   nodeCount: number;
+  folderCount: number;
   edgeCount: number;
   avgDegree: number;
   topConnected: Array<GraphNode & { degree: number }>;
@@ -41,8 +47,12 @@ export interface Cluster {
 }
 
 export interface NeighborsResponse {
-  explicit: Array<GraphNode & { anchor: string }>;
-  implicit: Array<GraphNode & { score: number }>;
+  outgoing: Array<GraphNode & { anchor: string }>;
+  backlinks: Array<GraphNode & { anchor: string }>;
+  hierarchy: {
+    parent: FolderNode | null;
+    siblings: GraphNode[];
+  };
 }
 
 export interface ClusterResponse {
@@ -59,10 +69,4 @@ export interface WikiLink {
 export interface ResolvedLink {
   targetFileId: string;
   anchor: string;
-}
-
-export interface SimilarEdgeInput {
-  targetFileId: string;
-  score: number;
-  chunkPairs: ChunkPair[];
 }

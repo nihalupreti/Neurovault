@@ -26,10 +26,6 @@ export interface SyncIndexJob {
   exclude: string[];
 }
 
-export interface GraphRebuildJob {
-  full?: boolean;
-}
-
 export interface BookSimilarityJob {
   bookId: string;
 }
@@ -48,7 +44,6 @@ let _fileQueue: Queue<ChunkFileJob> | null = null;
 let _bookQueue: Queue<ChunkBookJob> | null = null;
 let _captureQueue: Queue<CaptureUrlJob> | null = null;
 let _syncIndexQueue: Queue<SyncIndexJob> | null = null;
-let _graphRebuildQueue: Queue<GraphRebuildJob> | null = null;
 let _bookSimilarityQueue: Queue<BookSimilarityJob> | null = null;
 let _graphIndexQueue: Queue<GraphIndexJob> | null = null;
 
@@ -90,16 +85,6 @@ export function getSyncIndexQueue(): Queue<SyncIndexJob> {
     });
   }
   return _syncIndexQueue;
-}
-
-export function getGraphRebuildQueue(): Queue<GraphRebuildJob> {
-  if (!_graphRebuildQueue) {
-    _graphRebuildQueue = new Queue<GraphRebuildJob>("graph-rebuild", {
-      connection: getRedisConnection(),
-      defaultJobOptions: JOB_OPTIONS,
-    });
-  }
-  return _graphRebuildQueue;
 }
 
 export function getBookSimilarityQueue(): Queue<BookSimilarityJob> {

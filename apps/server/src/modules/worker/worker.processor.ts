@@ -5,7 +5,6 @@ import type {
   ChunkBookJob,
   CaptureUrlJob,
   SyncIndexJob,
-  GraphRebuildJob,
   BookSimilarityJob,
   GraphIndexJob,
 } from "./worker.queues.js";
@@ -17,7 +16,6 @@ import { createBookGraphNodes, runBookSimilarityJob } from "../books/books.graph
 import { Book, BookChapter } from "../books/book.model.js";
 import { processUrlInBackground } from "../capture/capture.service.js";
 import { runIndexPipeline } from "../sync/sync.index-pipeline.js";
-import { runSimilarityJob } from "../graph/graph.similarity-job.js";
 
 export function startWorkers(): void {
   const fileWorker = new Worker<ChunkFileJob>(
@@ -105,18 +103,6 @@ export function startWorkers(): void {
     console.error(`sync-index job failed for vault ${job?.data.vaultId}:`, err);
   });
 
-  const graphRebuildWorker = new Worker<GraphRebuildJob>(
-    "graph-rebuild",
-    async (job) => {
-      await runSimilarityJob({ full: job.data.full });
-    },
-    { connection: getRedisConnection(), concurrency: 1 },
-  );
-
-  graphRebuildWorker.on("failed", (job, err) => {
-    console.error(`graph-rebuild job ${job?.id} failed:`, err);
-  });
-
   const bookSimilarityWorker = new Worker<BookSimilarityJob>(
     "book-similarity",
     async (job) => {
@@ -148,6 +134,6 @@ export function startWorkers(): void {
   });
 
   console.log(
-    "Workers started: chunk-file (2), chunk-book (1), capture-url (3), sync-index (2), graph-rebuild (1), book-similarity (1), graph-index (2)",
+    "Workers started: chunk-file (2), chunk-book (1), capture-url (3), sync-index (2), book-similarity (1), graph-index (2)",
   );
 }

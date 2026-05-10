@@ -21,7 +21,8 @@ import {
   upsertFileNode,
   removeFileNode,
   syncWikilinks,
-  upsertSimilarEdges,
+  upsertFolderNode,
+  syncHierarchy,
   getNeighbors,
   getFullGraph,
   getShortestPath,
@@ -64,22 +65,20 @@ describe("graph-service CRUD", () => {
     expect(createCall).toBeTruthy();
   });
 
-  it("upsertSimilarEdges replaces old SIMILAR edges", async () => {
-    await upsertSimilarEdges("f1", [
-      {
-        targetFileId: "f2",
-        score: 0.85,
-        chunkPairs: [{ sourceIdx: 0, targetIdx: 2, score: 0.85 }],
-      },
-    ]);
+  it("upsertFolderNode runs MERGE on Folder", async () => {
+    await upsertFolderNode("d1", "projects", "vault/projects");
+    expect(mockRun).toHaveBeenCalledWith(
+      expect.stringContaining("MERGE (d:Folder {folderId: $folderId})"),
+      { folderId: "d1", name: "projects", path: "vault/projects" }
+    );
+  });
+
+  it("syncHierarchy creates CHILD_OF edge for File", async () => {
+    await syncHierarchy("f1", "File", "d1");
     const calls = mockRun.mock.calls;
-    const deleteCall = calls.find(
-      (args: string[]) => args[0]?.includes("SIMILAR") && args[0]?.includes("DELETE")
-    );
+    const deleteCall = calls.find((args: string[]) => args[0]?.includes("CHILD_OF") && args[0]?.includes("DELETE"));
     expect(deleteCall).toBeTruthy();
-    const createCall = calls.find(
-      (args: string[]) => args[0]?.includes("SIMILAR") && args[0]?.includes("CREATE")
-    );
+    const createCall = calls.find((args: string[]) => args[0]?.includes("CHILD_OF") && args[0]?.includes("CREATE"));
     expect(createCall).toBeTruthy();
   });
 });
@@ -90,16 +89,14 @@ describe("graph-service queries", () => {
     mockClose.mockReset();
   });
 
-  it("getNeighbors returns explicit and implicit neighbors", async () => {
+  it("getNeighbors returns outgoing, backlinks, and hierarchy", async () => {
     mockRun
       .mockResolvedValueOnce({
         records: [
           {
             get: (key: string) => {
               if (key === "t")
-                return {
-                  properties: { fileId: "f2", fileName: "b.md", path: "b.md" },
-                };
+                return { properties: { fileId: "f2", fileName: "b.md", path: "b.md" } };
               if (key === "r")
                 return { properties: { anchor: "link text" } };
               return null;
@@ -112,53 +109,53 @@ describe("graph-service queries", () => {
           {
             get: (key: string) => {
               if (key === "t")
-                return {
-                  properties: { fileId: "f3", fileName: "c.md", path: "c.md" },
-                };
-              if (key === "r") return { properties: { score: 0.85 } };
+                return { properties: { fileId: "f3", fileName: "c.md", path: "c.md" } };
+              if (key === "r")
+                return { properties: { anchor: "backlink" } };
               return null;
             },
           },
         ],
-      });
+      })
+      .mockResolvedValueOnce({ records: [] })
+      .mockResolvedValueOnce({ records: [] });
+
     const result = await getNeighbors("f1");
-    expect(result.explicit).toHaveLength(1);
-    expect(result.explicit[0]!.fileId).toBe("f2");
-    expect(result.implicit).toHaveLength(1);
-    expect(result.implicit[0]!.fileId).toBe("f3");
+    expect(result.outgoing).toHaveLength(1);
+    expect(result.outgoing[0]!.fileId).toBe("f2");
+    expect(result.backlinks).toHaveLength(1);
+    expect(result.backlinks[0]!.fileId).toBe("f3");
+    expect(result.hierarchy.parent).toBeNull();
+    expect(result.hierarchy.siblings).toHaveLength(0);
   });
 
-  it("getFullGraph returns nodes and edges", async () => {
+  it("getFullGraph returns nodes, folders, and edges", async () => {
     mockRun
       .mockResolvedValueOnce({
         records: [
           {
             get: () => ({
-              properties: {
-                fileId: "f1",
-                fileName: "a.md",
-                path: "a.md",
-                clusterId: { low: 0 },
-              },
+              properties: { fileId: "f1", fileName: "a.md", path: "a.md", clusterId: { low: 0 } },
             }),
           },
         ],
       })
+      .mockResolvedValueOnce({ records: [] })
       .mockResolvedValueOnce({
         records: [
           {
             get: (key: string) => {
-              if (key === "type") return "LINKS_TO";
-              if (key === "srcId") return "f1";
-              if (key === "tgtId") return "f2";
-              if (key === "props") return { anchor: "link" };
-              return null;
+              const map: Record<string, string> = { srcId: "f1", tgtId: "f2", anchor: "link" };
+              return map[key];
             },
           },
         ],
-      });
+      })
+      .mockResolvedValueOnce({ records: [] });
+
     const result = await getFullGraph();
     expect(result.nodes).toHaveLength(1);
+    expect(result.folders).toHaveLength(0);
     expect(result.edges).toHaveLength(1);
   });
 
@@ -169,7 +166,7 @@ describe("graph-service queries", () => {
     expect(result.length).toBe(-1);
   });
 
-  it("getStats returns graph metrics", async () => {
+  it("getStats returns graph metrics including folderCount", async () => {
     mockRun
       .mockResolvedValueOnce({
         records: [
@@ -177,6 +174,7 @@ describe("graph-service queries", () => {
             get: (key: string) => {
               const map: Record<string, any> = {
                 nodeCount: { low: 10 },
+                folderCount: { low: 3 },
                 edgeCount: { low: 25 },
                 avgDegree: 5.0,
               };
@@ -190,13 +188,7 @@ describe("graph-service queries", () => {
           {
             get: (key: string) => {
               if (key === "f")
-                return {
-                  properties: {
-                    fileId: "f1",
-                    fileName: "a.md",
-                    path: "a.md",
-                  },
-                };
+                return { properties: { fileId: "f1", fileName: "a.md", path: "a.md" } };
               if (key === "degree") return { low: 8 };
               return null;
             },
@@ -205,6 +197,7 @@ describe("graph-service queries", () => {
       });
     const result = await getStats();
     expect(result.nodeCount).toBe(10);
+    expect(result.folderCount).toBe(3);
     expect(result.edgeCount).toBe(25);
     expect(result.topConnected).toHaveLength(1);
   });

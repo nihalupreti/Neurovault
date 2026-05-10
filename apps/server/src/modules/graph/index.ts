@@ -1,13 +1,14 @@
 export { default as graphRoutes } from "./graph.routes.js";
 export type {
   GraphNode,
+  FolderNode,
   ChunkPair,
-  ExplicitEdge,
-  ImplicitEdge,
+  LinksToEdge,
+  ChildOfEdge,
   GraphEdge,
   GraphStats,
   Cluster,
+  NeighborsResponse,
   WikiLink,
   ResolvedLink,
-  SimilarEdgeInput,
 } from "@neurovault/shared/types";

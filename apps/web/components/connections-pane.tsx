@@ -24,8 +24,8 @@ export function ConnectionsPane({ fileId }: ConnectionsPaneProps) {
   });
 
   const allNodes = [
-    ...(neighbors?.explicit ?? []).map((n) => ({ ...n, type: "explicit" as const })),
-    ...(neighbors?.implicit ?? []).map((n) => ({ ...n, type: "implicit" as const })),
+    ...(neighbors?.outgoing ?? []).map((n) => ({ ...n, type: "outgoing" as const })),
+    ...(neighbors?.backlinks ?? []).map((n) => ({ ...n, type: "backlink" as const })),
   ].slice(0, MAX_VISIBLE_NODES);
 
   if (neighborsError && clusterError) {
@@ -55,29 +55,25 @@ export function ConnectionsPane({ fileId }: ConnectionsPaneProps) {
 
       <div className="nv-conn-legend">
         <span>
-          <i style={{ background: "var(--accent)" }} /> wikilink
+          <i style={{ background: "var(--accent)" }} /> outgoing link
         </span>
         <span>
-          <i style={{ background: "var(--ink-soft)" }} /> semantic edge
+          <i style={{ background: "var(--ink-soft)" }} /> backlink
         </span>
       </div>
 
-      <div className="nv-pane-eyebrow nv-pane-eyebrow-spaced">similar chunks</div>
+      <div className="nv-pane-eyebrow nv-pane-eyebrow-spaced">backlinks</div>
       <ul className="nv-cite-list">
-        {neighbors?.implicit?.map((n) => (
+        {neighbors?.backlinks?.map((n) => (
           <li key={n.fileId}>
             <div className="nv-cite-head">
               <span className="nv-cite-file">{n.fileName}</span>
-              <span className="nv-cite-score">
-                {(n.score * 100).toFixed(0)}
-                <small>%</small>
-              </span>
             </div>
-            <p className="nv-cite-excerpt">{n.path}</p>
+            <p className="nv-cite-excerpt">{n.anchor}</p>
           </li>
         ))}
-        {(!neighbors?.implicit || neighbors.implicit.length === 0) && (
-          <li style={{ color: "var(--ink-faint)", fontSize: "12px" }}>No similar chunks found</li>
+        {(!neighbors?.backlinks || neighbors.backlinks.length === 0) && (
+          <li style={{ color: "var(--ink-faint)", fontSize: "12px" }}>No backlinks found</li>
         )}
       </ul>
     </div>
@@ -119,7 +115,7 @@ function Constellation({ nodes }: { nodes: Array<{ fileName: string; type: strin
                 y2={pos.y}
                 stroke="var(--ink-faint)"
                 strokeWidth="0.6"
-                strokeDasharray={n.type === "implicit" ? "2 3" : "0"}
+                strokeDasharray={n.type === "backlink" ? "2 3" : "0"}
               />
               <circle
                 cx={pos.x}
