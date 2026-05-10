@@ -7,7 +7,10 @@ let qdrantClient: QdrantClient | null = null;
  * @param host Qdrant host (default: localhost)
  * @param port Qdrant port (default: 6333)
  */
-export function getQdrantClient(host = "localhost", port = 6333): QdrantClient {
+export function getQdrantClient(
+  host = process.env.QDRANT_HOST ?? "localhost",
+  port = 6333,
+): QdrantClient {
   if (qdrantClient) return qdrantClient;
 
   qdrantClient = new QdrantClient({ host, port });

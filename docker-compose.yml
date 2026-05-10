@@ -8,6 +8,9 @@ services:
       - "3001:3001"
     env_file:
       - apps/server/.env
+    volumes:
+      - vault_data:/app/data/vaults
+      - upload_data:/app/uploads
     depends_on:
       - mongo
       - qdrant
@@ -86,6 +89,8 @@ volumes:
   qdrant_data:
   neo4j_data:
   redis_data:
+  vault_data:
+  upload_data:
 
 networks:
   neurovault_network:
