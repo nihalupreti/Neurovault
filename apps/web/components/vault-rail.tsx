@@ -114,6 +114,7 @@ const TreeNode = memo(function TreeNode({
 
   if (node.type === "folder") {
     const kids = children?.children ?? node.children ?? [];
+    const count = open ? kids.length : (node.childCount ?? kids.length);
     return (
       <div role="treeitem" aria-expanded={open}>
         <button
@@ -125,7 +126,7 @@ const TreeNode = memo(function TreeNode({
             <Icon name="chevron" size={10} />
           </span>
           <span className="nv-tree-label">{node.name}</span>
-          <span className="nv-tree-count">{kids.length}</span>
+          <span className="nv-tree-count">{count}</span>
         </button>
         {open &&
           kids.map((child) => (
