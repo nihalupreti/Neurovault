@@ -5,6 +5,9 @@ export interface BookSummary {
   totalChapters: number;
   chapters: BookChapterMeta[];
   createdAt: string;
+  format: "html" | "epub";
+  author?: string;
+  coverPath?: string;
 }
 
 export interface BookChapterMeta {
@@ -13,12 +16,20 @@ export interface BookChapterMeta {
   sectionAnchors: string[];
 }
 
+export interface BookMetadata {
+  publisher?: string;
+  description?: string;
+  language?: string;
+  publishedDate?: string;
+}
+
 export interface BookChapter {
   _id: string;
   bookId: string;
   number: number;
   title: string;
   htmlContent: string;
+  scopedCss?: string;
   sections: BookSection[];
 }
 

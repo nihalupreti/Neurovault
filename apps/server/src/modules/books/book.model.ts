@@ -6,6 +6,7 @@ const bookChapterSchema = new Schema({
   title: { type: String, required: true },
   htmlContent: { type: String, required: true },
   plainText: { type: String, default: "" },
+  scopedCss: { type: String },
   sections: [
     {
       anchor: { type: String, required: true },
@@ -22,6 +23,13 @@ const bookSchema = new Schema(
     title: { type: String, required: true },
     topic: { type: String, default: "" },
     htmlHash: { type: String, required: true, index: true },
+    format: { type: String, enum: ["html", "epub"], default: "html" },
+    author: { type: String },
+    publisher: { type: String },
+    description: { type: String },
+    language: { type: String },
+    publishedDate: { type: String },
+    coverPath: { type: String },
     chapters: [
       {
         number: { type: Number, required: true },
