@@ -39,6 +39,7 @@ export const ENDPOINTS = {
     chapter: (id: string, num: number) => `${BASE}/api/books/${id}/chapters/${num}`,
     import: `${BASE}/api/books/import`,
     delete: (id: string) => `${BASE}/api/books/${id}`,
+    asset: (id: string, filePath: string) => `${BASE}/api/books/${id}/assets/${filePath}`,
   },
   reader: {
     progress: (bookId: string) => `${BASE}/api/reader/${bookId}/progress`,

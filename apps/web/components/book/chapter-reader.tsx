@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
+import DOMPurify from "isomorphic-dompurify";
 import { Icon } from "@/components/icons";
 import type { BookAnnotation, BookChapter } from "@/api/client";
 import { SelectionToolbar } from "../selection-toolbar";
@@ -30,6 +31,11 @@ export function ChapterReader({
   nextTitle,
 }: ChapterReaderProps) {
   const mainRef = useRef<HTMLElement>(null);
+
+  const sanitizedHtml = useMemo(
+    () => DOMPurify.sanitize(chapter.htmlContent),
+    [chapter.htmlContent],
+  );
 
   useEffect(() => {
     const el = mainRef.current;
@@ -62,7 +68,13 @@ export function ChapterReader({
           <span>chapter {String(chapter.number).padStart(2, "0")}</span>
         </div>
 
-        <div dangerouslySetInnerHTML={{ __html: chapter.htmlContent }} />
+        {chapter.scopedCss && (
+          <style dangerouslySetInnerHTML={{ __html: chapter.scopedCss }} />
+        )}
+        <div
+          className={chapter.scopedCss ? "epub-content" : undefined}
+          dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+        />
 
         <div className="nv-reader-foot">
           {onPrevChapter ? (
