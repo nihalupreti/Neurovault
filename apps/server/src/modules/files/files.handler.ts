@@ -5,6 +5,7 @@ import {
   getFileContent,
   setVisibility,
   getFolderChildren,
+  deleteFile,
 } from "./files.service.js";
 import { apiSuccess } from "../../utils/api-response.js";
 import { UnauthorizedError, BadRequestError } from "../../errors/app-error.js";
@@ -12,14 +13,16 @@ import { FileNotFoundError, FolderNotFoundError, FileAccessDeniedError } from ".
 
 export const handleFileUploads = async (req: Request, res: Response) => {
   const files = req.files as Express.Multer.File[];
-  const docs = await createFileDocs(files);
+  const parentId = (req.body.parentId as string) || null;
+  const docs = await createFileDocs(files, parentId);
   apiSuccess(res, docs);
 };
 
 export const handleFolderUploads = async (req: Request, res: Response) => {
   const files = req.files as Express.Multer.File[];
   const relativePaths: string[] = req.body.relativePaths;
-  await createFolderStructure(files, relativePaths);
+  const parentId = (req.body.parentId as string) || null;
+  await createFolderStructure(files, relativePaths, parentId);
   apiSuccess(res, null);
 };
 
@@ -65,4 +68,16 @@ export const getFolderTree = async (req: Request, res: Response) => {
   }
 
   apiSuccess(res, result);
+};
+
+export const handleDeleteFile = async (req: Request, res: Response) => {
+  if (req.role !== "admin") {
+    throw new UnauthorizedError();
+  }
+
+  const id = req.params.id as string;
+  const result = await deleteFile(id);
+  if (!result) throw new FileNotFoundError();
+
+  apiSuccess(res, { _id: result._id, name: result.name });
 };

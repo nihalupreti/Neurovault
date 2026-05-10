@@ -12,6 +12,8 @@ import { notifyVaultChanged } from "./sync.ws-manager.js";
 import { ConflictRecord } from "./sync.models.js";
 import type { VaultDoc } from "./sync.models.js";
 import type { SyncChange, PushResult, PullChange, PullResult } from "@neurovault/shared/types";
+import { bridgeSyncChanges } from "./sync.file-bridge.js";
+import FileMetadata from "../files/files.model.js";
 
 const vaultLocks = new Map<string, Promise<void>>();
 
@@ -42,6 +44,12 @@ export async function pushChanges(
   return withVaultLock(vault._id.toString(), async () => {
     const dir = vault.gitPath;
     const head = await getHeadSha(dir);
+
+    const vaultRoot = await FileMetadata.findOne({
+      vaultId: vault._id,
+      vaultPath: "",
+      type: "folder",
+    });
 
     if (baseCommit && baseCommit !== head) {
       const serverChanges = await getChangedFiles(dir, baseCommit, head);
@@ -97,6 +105,9 @@ export async function pushChanges(
         let commitSha = head;
         if (nonConflicting.length > 0) {
           commitSha = await applyChanges(dir, nonConflicting);
+          if (vaultRoot) {
+            await bridgeSyncChanges(vault._id, vaultRoot._id as Types.ObjectId, nonConflicting);
+          }
         }
 
         notifyVaultChanged(vault._id.toString(), commitSha);
@@ -105,6 +116,10 @@ export async function pushChanges(
     }
 
     const commitSha = await applyChanges(dir, changes);
+
+    if (vaultRoot) {
+      await bridgeSyncChanges(vault._id, vaultRoot._id as Types.ObjectId, changes);
+    }
 
     const fromSha = baseCommit || head;
     const include = vault.syncConfig?.include ?? ["**/*.md"];

@@ -18,7 +18,7 @@ export async function writeAndCommit(
   dir: string,
   writes: FileWrite[],
   deletes: string[],
-  message: string
+  message: string,
 ): Promise<string> {
   for (const file of writes) {
     const fullPath = path.join(dir, file.path);
@@ -37,17 +37,23 @@ export async function writeAndCommit(
     await git.remove({ fs, dir, filepath });
   }
 
-  return git.commit({ fs, dir, message, author });
+  const head = await getHeadSha(dir);
+  const parent = head ? [head] : [];
+  return git.commit({ fs, dir, message, author, parent });
 }
 
 export async function getHeadSha(dir: string): Promise<string> {
-  return git.resolveRef({ fs, dir, ref: "HEAD" });
+  try {
+    return await git.resolveRef({ fs, dir, ref: "HEAD" });
+  } catch {
+    return "";
+  }
 }
 
 export async function getLog(
   dir: string,
   ref = "HEAD",
-  depth?: number
+  depth?: number,
 ): Promise<ReadCommitResult[]> {
   return git.log({ fs, dir, ref, depth });
 }
@@ -55,7 +61,7 @@ export async function getLog(
 export async function readFileAtCommit(
   dir: string,
   commitSha: string,
-  filepath: string
+  filepath: string,
 ): Promise<string> {
   const { blob } = await git.readBlob({
     fs,
@@ -69,7 +75,7 @@ export async function readFileAtCommit(
 export async function getChangedFiles(
   dir: string,
   fromSha: string,
-  toSha: string
+  toSha: string,
 ): Promise<{ path: string; action: "create" | "modify" | "delete" }[]> {
   const changes: { path: string; action: "create" | "modify" | "delete" }[] = [];
 

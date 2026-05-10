@@ -2,8 +2,10 @@ import { Request, Response } from "express";
 import { Vault, FileVersion, ConflictRecord, EmbeddingJob } from "./sync.models.js";
 import { initRepo } from "./sync.git-storage.js";
 import { getQdrantClient } from "@neurovault/config";
+import FileMetadata from "../files/files.model.js";
 import fs from "fs";
 import path from "path";
+import mongoose from "mongoose";
 import { apiSuccess, apiCreated } from "../../utils/api-response.js";
 import { VaultNotFoundError } from "./sync.errors.js";
 import { createVaultSchema } from "@neurovault/shared/schemas";
@@ -14,20 +16,28 @@ const COLLECTION_NAME = "neurovault";
 export async function createVault(req: Request, res: Response) {
   const { name, syncConfig } = createVaultSchema.parse(req.body);
 
+  const vaultId = new mongoose.Types.ObjectId();
+  const gitPath = path.resolve(VAULTS_BASE, vaultId.toString());
+
+  await initRepo(gitPath);
+
   const vault = await Vault.create({
+    _id: vaultId,
     name,
-    gitPath: "",
+    gitPath,
     syncConfig: {
       include: syncConfig?.include || ["**/*.md"],
       exclude: syncConfig?.exclude || [".obsidian/**"],
     },
   });
 
-  const gitPath = path.resolve(VAULTS_BASE, vault._id.toString());
-  await initRepo(gitPath);
-
-  vault.gitPath = gitPath;
-  await vault.save();
+  await FileMetadata.create({
+    name,
+    type: "folder",
+    parentId: null,
+    vaultId: vault._id,
+    vaultPath: "",
+  });
 
   apiCreated(res, vault);
 }
@@ -60,9 +70,7 @@ export async function deleteVault(req: Request, res: Response) {
   const vaultId = vault._id.toString();
 
   const versions = await FileVersion.find({ vaultId, deleted: false });
-  const pointIds = versions.flatMap((v) =>
-    v.chunks.map((c) => c.qdrantPointId)
-  );
+  const pointIds = versions.flatMap((v) => v.chunks.map((c) => c.qdrantPointId));
 
   if (pointIds.length > 0) {
     const client = getQdrantClient();
@@ -75,6 +83,7 @@ export async function deleteVault(req: Request, res: Response) {
   await FileVersion.deleteMany({ vaultId });
   await ConflictRecord.deleteMany({ vaultId });
   await EmbeddingJob.deleteMany({ vaultId });
+  await FileMetadata.deleteMany({ vaultId: vault._id });
   await Vault.findByIdAndDelete(vaultId);
 
   if (vault.gitPath) {
