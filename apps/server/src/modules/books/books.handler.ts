@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { Book, BookChapter } from "./book.model.js";
-import { importBook, deleteBook } from "./books.service.js";
+import { importBook, importEpubFile, deleteBook } from "./books.service.js";
 import { apiSuccess, apiCreated, apiPaginated } from "../../utils/api-response.js";
 import { parsePagination } from "../../utils/pagination.js";
 import { BookNotFoundError, ChapterNotFoundError, NoFileUploadedError } from "./books.errors.js";
@@ -9,16 +9,24 @@ export const handleImport = async (req: Request, res: Response) => {
   const file = req.file;
   if (!file) throw new NoFileUploadedError();
 
+  const isEpub = file.originalname.toLowerCase().endsWith(".epub") ||
+    file.mimetype === "application/epub+zip";
+
   try {
+    if (isEpub) {
+      const result = await importEpubFile(file.path);
+      if (result.skipped) {
+        return apiSuccess(res, { bookId: result.bookId, title: result.title }, "Book already imported");
+      }
+      return apiCreated(res, result);
+    }
+
     const fs = await import("node:fs/promises");
     const html = await fs.readFile(file.path, "utf-8");
     const result = await importBook(html);
 
     if (result.skipped) {
-      return apiSuccess(res, {
-        bookId: result.bookId,
-        title: result.title,
-      }, "Book already imported");
+      return apiSuccess(res, { bookId: result.bookId, title: result.title }, "Book already imported");
     }
 
     return apiCreated(res, result);
