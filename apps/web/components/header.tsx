@@ -60,6 +60,9 @@ export function Header({ onSearchOpen, onChatToggle, chatOpen, onMenu, mobile }:
               <span className="nv-pulse" /> indexed &middot; {noteCount} notes
             </span>
             {isAdmin && <UsageBadge />}
+            <Link href="/graph" className="nv-icon-btn" aria-label="Knowledge graph" title="Graph">
+              <Icon name="graph" size={16} />
+            </Link>
             <Link href="/books" className="nv-icon-btn" aria-label="Book library" title="Library">
               <Icon name="folder" size={16} />
             </Link>
