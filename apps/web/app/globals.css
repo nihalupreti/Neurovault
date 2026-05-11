@@ -115,24 +115,22 @@ kbd {
 }
 .nv-brand {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
   flex-shrink: 0;
   min-width: 180px;
 }
 .nv-brand-glyph {
-  width: 20px;
-  height: 20px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-darker));
-  border-radius: 4px;
   flex-shrink: 0;
 }
 .nv-brand-name {
-  font-family: var(--sans);
-  font-size: 14px;
-  letter-spacing: -0.01em;
+  font-family: 'Dancing Script', cursive;
+  font-size: 18px;
+  font-weight: 600;
   color: var(--ink);
-  font-weight: 500;
+}
+.nv-brand-accent {
+  color: var(--accent);
 }
 
 .nv-search-trigger {
@@ -2455,7 +2453,9 @@ kbd {
   font-family: var(--mono);
   font-size: 10px;
   cursor: pointer;
-  transition: color 0.12s, border-color 0.12s;
+  transition:
+    color 0.12s,
+    border-color 0.12s;
 }
 .nv-code-copy:hover {
   color: var(--ink-soft);
