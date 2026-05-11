@@ -60,6 +60,16 @@ export interface ClusterResponse {
   members: GraphNode[];
 }
 
+export interface FullGraphResponse {
+  nodes: GraphNode[];
+  folders: FolderNode[];
+  edges: GraphEdge[];
+}
+
+export interface ClustersResponse {
+  clusters: Cluster[];
+}
+
 export interface WikiLink {
   target: string;
   alias?: string;

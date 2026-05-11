@@ -11,6 +11,8 @@ import type {
   GraphNode as NeighborNode,
   NeighborsResponse,
   ClusterResponse,
+  FullGraphResponse,
+  ClustersResponse,
   BookSummary,
   BookChapter,
   ReadingProgress,
@@ -30,6 +32,8 @@ export type {
   NeighborNode,
   NeighborsResponse,
   ClusterResponse,
+  FullGraphResponse,
+  ClustersResponse,
   BookSummary,
   BookChapter,
   ReadingProgress,
@@ -67,6 +71,16 @@ export async function getNeighbors(fileId: string): Promise<NeighborsResponse> {
 
 export async function getFileCluster(fileId: string): Promise<ClusterResponse> {
   const { data } = await api.get(ENDPOINTS.graph.cluster(fileId));
+  return data.data;
+}
+
+export async function getFullGraph(): Promise<FullGraphResponse> {
+  const { data } = await api.get(ENDPOINTS.graph.root);
+  return data.data;
+}
+
+export async function getAllClusters(): Promise<ClustersResponse> {
+  const { data } = await api.get(ENDPOINTS.graph.clusters);
   return data.data;
 }
 
