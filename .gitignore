@@ -39,9 +39,7 @@ yarn-error.log*
 apps/obsidian-plugin/main.js
 
 # Project
-CLAUDE.md
-docs/superpowers/
+docs/
 
 # Misc
-.DS_Store
 *.pem
