@@ -40,8 +40,27 @@ export function Header({ onSearchOpen, onChatToggle, chatOpen, onMenu, mobile }:
             </button>
           )}
           <div className="nv-brand">
-            <div className="nv-brand-glyph" aria-hidden="true" />
-            <span className="nv-brand-name">neurovault</span>
+            <svg
+              className="nv-brand-glyph"
+              width={22}
+              height={22}
+              viewBox="0 0 48 48"
+              fill="none"
+              aria-hidden="true"
+            >
+              <circle cx="24" cy="24" r="6" fill="var(--accent)" />
+              <circle cx="12" cy="12" r="3.5" fill="var(--accent)" opacity="0.7" />
+              <circle cx="36" cy="12" r="3" fill="var(--accent)" opacity="0.6" />
+              <circle cx="10" cy="34" r="2.5" fill="var(--accent)" opacity="0.5" />
+              <circle cx="38" cy="32" r="3.5" fill="var(--accent)" opacity="0.7" />
+              <line x1="24" y1="24" x2="12" y2="12" stroke="var(--accent)" strokeWidth="1.2" opacity="0.4" />
+              <line x1="24" y1="24" x2="36" y2="12" stroke="var(--accent)" strokeWidth="1.2" opacity="0.4" />
+              <line x1="24" y1="24" x2="10" y2="34" stroke="var(--accent)" strokeWidth="1.2" opacity="0.4" />
+              <line x1="24" y1="24" x2="38" y2="32" stroke="var(--accent)" strokeWidth="1.2" opacity="0.4" />
+              <line x1="12" y1="12" x2="36" y2="12" stroke="var(--accent)" strokeWidth="0.8" opacity="0.2" />
+            </svg>
+            <span className="nv-brand-name">Neuro</span>
+            <span className="nv-brand-name nv-brand-accent">vault</span>
           </div>
 
           <button className="nv-search-trigger" onClick={onSearchOpen}>
