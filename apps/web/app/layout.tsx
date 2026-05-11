@@ -5,13 +5,13 @@ import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: {
-    default: "Neurovault — a second brain",
+    default: "Neurovault",
     template: "%s | Neurovault",
   },
-  description: "Personal knowledge engine with hybrid search, RAG Q&A, and knowledge graph",
+  description: "Personal knowledge engine with hybrid search, AI Q&A, and knowledge graph.",
   openGraph: {
-    title: "Neurovault — a second brain",
-    description: "Personal knowledge engine with hybrid search, RAG Q&A, and knowledge graph",
+    title: "Neurovault — your second brain",
+    description: "Personal knowledge engine with hybrid search, AI Q&A, and knowledge graph.",
     type: "website",
   },
 };
@@ -27,7 +27,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
       </head>
