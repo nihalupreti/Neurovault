@@ -127,6 +127,19 @@ export function Icon({ name, size = 14, className, style }: IconProps) {
           <path d="M12 7v5l3 2" />
         </svg>
       );
+    case "copy":
+      return (
+        <svg {...props}>
+          <rect x="9" y="9" width="11" height="11" rx="1.5" />
+          <path d="M15 9V6.5A1.5 1.5 0 0 0 13.5 5H6.5A1.5 1.5 0 0 0 5 6.5v7A1.5 1.5 0 0 0 6.5 15H9" />
+        </svg>
+      );
+    case "check":
+      return (
+        <svg {...props}>
+          <path d="M5 13l4 4L19 7" />
+        </svg>
+      );
     case "filter":
       return (
         <svg {...props}>
@@ -163,6 +176,12 @@ export function Icon({ name, size = 14, className, style }: IconProps) {
       return (
         <svg {...props}>
           <path d="M3 6h18M8 6V4h8v2M19 6v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6" />
+        </svg>
+      );
+    case "arrow-left":
+      return (
+        <svg {...props}>
+          <path d="M19 12H5M12 19l-7-7 7-7" />
         </svg>
       );
     default:
