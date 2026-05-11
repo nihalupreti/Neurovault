@@ -13,6 +13,7 @@ import { Fab } from "@/components/mobile-drawers";
 import { Icon } from "@/components/icons";
 import { useMobile } from "@/hooks/useMobile";
 import { useBookProgress } from "@/hooks/useBookProgress";
+import { useDynamicTitle } from "@/hooks/useDynamicTitle";
 import { getBook, getChapter, listAnnotations } from "@/api/client";
 import type { BookSummary, BookChapter as BookChapterType } from "@/api/client";
 
@@ -55,6 +56,8 @@ export function ReaderClient({ bookId, initialBook, initialChapter }: ReaderClie
   });
 
   const annotations = annotationsData?.data ?? [];
+
+  useDynamicTitle(book?.title);
 
   const handleChapterChange = useCallback(
     (num: number) => {

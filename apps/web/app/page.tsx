@@ -12,6 +12,7 @@ import { CommandPalette } from "@/components/command-palette";
 import { LeftDrawer, RightDrawer, Fab } from "@/components/mobile-drawers";
 import { useMobile } from "@/hooks/useMobile";
 import { getFile } from "@/api/client";
+import { useDynamicTitle } from "@/hooks/useDynamicTitle";
 
 export default function Home() {
   return (
@@ -44,7 +45,6 @@ function HomeContent() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [rightMode, setRightMode] = useState<RailMode>("outline");
   const activeFileId = searchParams.get("file");
-  const activeFileName = "Select a file";
   const activeFolderName = "";
   const [leftDrawer, setLeftDrawer] = useState(false);
   const [rightDrawer, setRightDrawer] = useState(false);
@@ -54,6 +54,14 @@ function HomeContent() {
     queryFn: () => getFile(activeFileId!),
     enabled: !!activeFileId,
   });
+
+  const activeFileLabel = (() => {
+    if (!fileContent) return null;
+    const heading = /^#\s+(.+)$/m.exec(fileContent);
+    return heading?.[1]?.trim() ?? null;
+  })();
+
+  useDynamicTitle(activeFileLabel);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -104,7 +112,7 @@ function HomeContent() {
 
         <ReadingView
           fileId={activeFileId}
-          fileName={activeFileName}
+          fileName={activeFileLabel ?? "Select a file"}
           folderName={activeFolderName}
         />
 
